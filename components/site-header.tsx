@@ -39,7 +39,7 @@ export function SiteHeader() {
   }));
 
   return (
-    <header className="sticky top-0 z-50 bg-paper/90 backdrop-blur-sm transition-colors duration-300">
+    <header className="sticky top-0 z-50 bg-paper transition-colors duration-200">
       <div className="mx-auto flex max-w-[1180px] items-center justify-between px-5 py-[18px] lg:px-14 lg:py-4">
         <Wordmark size={18} tone="on-paper" className="lg:hidden" />
         <Wordmark size={24} tone="on-paper" className="hidden lg:flex" />

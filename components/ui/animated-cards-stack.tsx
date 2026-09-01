@@ -32,7 +32,7 @@ const VARIANTES = {
 } as const;
 
 const CARTE_BASE =
-  "absolute flex size-full flex-col items-center justify-center gap-6 rounded-2xl border p-6 backdrop-blur-md will-change-transform";
+  "absolute flex size-full flex-col items-center justify-center gap-6 rounded-2xl border p-6";
 
 export type VarianteCarte = keyof typeof VARIANTES;
 

@@ -79,7 +79,7 @@ const ARROW_CLASSES =
    cellule, centrée — plutôt que par `position: absolute`. GSAP réécrit
    entièrement `transform` : un centrage fait par `translate` serait effacé. */
 const CARD_CLASSES =
-  "fan-card col-start-1 row-start-1 h-[18rem] w-[12.5rem] overflow-hidden rounded-2xl border border-line bg-paper opacity-0 shadow-[0_10px_30px_rgba(11,31,58,0.10)] will-change-transform sm:h-[22rem] sm:w-[15rem] lg:h-[24.5rem] lg:w-[17rem]";
+  "fan-card col-start-1 row-start-1 h-[18rem] w-[12.5rem] overflow-hidden rounded-2xl border border-line bg-paper opacity-0 shadow-[0_10px_30px_rgba(11,31,58,0.10)] sm:h-[22rem] sm:w-[15rem] lg:h-[24.5rem] lg:w-[17rem]";
 
 export default function CardFanCarousel({ cards, className = "" }: CardFanProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -328,8 +328,12 @@ export default function CardFanCarousel({ cards, className = "" }: CardFanProps)
     };
     container.addEventListener("mouseleave", onMouseLeave);
 
+    let resizeTimer: ReturnType<typeof setTimeout> | null = null;
     const onResize = () => {
-      if (!isAnimating.current) updateHoverLayout(activeSlot);
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        if (!isAnimating.current) updateHoverLayout(activeSlot);
+      }, 150);
     };
     window.addEventListener("resize", onResize);
 
@@ -341,6 +345,7 @@ export default function CardFanCarousel({ cards, className = "" }: CardFanProps)
       container.removeEventListener("mouseleave", onMouseLeave);
       window.removeEventListener("resize", onResize);
       if (leaveTimer) clearTimeout(leaveTimer);
+      if (resizeTimer) clearTimeout(resizeTimer);
     };
   }, [centerIndex, totalCards, getVisibleMap, needsPagination, enVue]);
 

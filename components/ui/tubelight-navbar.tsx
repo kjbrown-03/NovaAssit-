@@ -69,7 +69,7 @@ export function NavBar({
           "flex items-center gap-1 rounded-full border px-1 py-1",
           surPapier
             ? "border-line bg-stone-50"
-            : "border-gold/25 bg-white/5 backdrop-blur-lg",
+            : "border-gold/25 bg-white/15",
           floating && "shadow-lg",
         )}
       >

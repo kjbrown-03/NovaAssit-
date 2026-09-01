@@ -279,7 +279,9 @@
     opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1),
     transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
   transition-delay: var(--reveal-delay, 0ms);
-  will-change: opacity, transform;
+  /* will-change retiré : il forçait un layer GPU par section, coûteux
+     en mémoire vidéo sur mobile. Le navigateur promeut automatiquement
+     les éléments animés pendant la transition. */
 }
 
 /* Posée le temps d'un frame sur le premier écran d'une navigation interne :
@@ -291,7 +293,6 @@
 .js [data-reveal].is-visible {
   opacity: 1;
   transform: none;
-  will-change: auto;
 }
 
 /* Le mouvement n'est jamais essentiel : on le coupe sur demande. */
@@ -356,7 +357,7 @@
   --animation: gradient-angle linear infinite;
   --duration: 3s;
   --shadow-size: 2px;
-  --transition: 800ms cubic-bezier(0.25, 1, 0.5, 1);
+  --transition: 400ms cubic-bezier(0.25, 1, 0.5, 1);
 
   isolation: isolate;
   position: relative;
@@ -452,14 +453,14 @@
   border-radius: 360px;
   opacity: 0;
   transition: opacity var(--transition);
-  animation: calc(var(--duration) * 1.5) breathe linear infinite;
+  animation: calc(var(--duration) * 1.5) breathe linear infinite paused;
 }
 
 .shiny-cta,
 .shiny-cta::before,
 .shiny-cta::after {
   animation:
-    var(--animation) var(--duration),
+    var(--animation) var(--duration) paused,
     var(--animation) calc(var(--duration) / 0.4) reverse paused;
   animation-composition: add;
 }
@@ -478,6 +479,7 @@
 
 .shiny-cta:not(.shiny-cta-outline):is(:hover, :focus-visible) .shiny-text::before {
   opacity: 1;
+  animation-play-state: running;
 }
 
 @keyframes gradient-angle {
