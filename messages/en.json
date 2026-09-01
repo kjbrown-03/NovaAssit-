@@ -1,0 +1,197 @@
+{
+  "meta": {
+    "titre": "Nova Assist — Virtual assistance in Douala",
+    "description": "Nova Assist takes over your customer relations — calls, WhatsApp, emails, sales follow-up — with the responsiveness and confidentiality of a dedicated team, without the cost of hiring in-house.",
+    "ogTitre": "We answer. You grow.",
+    "ogDescription": "Outsourced virtual assistance for SMEs, schools, clinics and shops across Cameroon."
+  },
+  "commun": {
+    "allerAuContenu": "Skip to content",
+    "demanderDevis": "Request a quote",
+    "ecrireWhatsApp": "Message us on WhatsApp",
+    "seConnecter": "Sign in",
+    "messageWhatsAppDefaut": "Hello Nova Assist, I would like a quote."
+  },
+  "langue": {
+    "choisir": "Choose language",
+    "fr": "Français",
+    "en": "English",
+    "frCourt": "FR",
+    "enCourt": "EN"
+  },
+  "nav": {
+    "services": "Services",
+    "offres": "Pricing",
+    "aPropos": "About",
+    "blog": "Blog",
+    "contact": "Contact",
+    "navigationPrincipale": "Main navigation",
+    "ouvrirMenu": "Open menu",
+    "fermerMenu": "Close menu",
+    "accueil": "— home"
+  },
+  "pied": {
+    "baseline": "Outsourced virtual assistance for businesses in Cameroon and West Africa.",
+    "colonneOffre": "Offer",
+    "colonneEntreprise": "Company",
+    "colonneContact": "Contact",
+    "whatsappBusiness": "WhatsApp Business",
+    "espaceClient": "Client area",
+    "faq": "FAQ",
+    "mentions": "© 2026 Nova Assist. Legal notice · Privacy policy"
+  },
+  "accueil": {
+    "eyebrow": "Virtual assistance · Douala",
+    "titreLigne1": "We answer.",
+    "titreLigne2": "You grow.",
+    "intro": "Calls, WhatsApp, emails, sales follow-up: Nova Assist takes over your customer relations with the responsiveness and confidentiality of a dedicated team, without the cost of hiring in-house.",
+    "photoRatio": "Photo · 3:4 portrait",
+    "photoLegende": "Professional wearing a headset, bright office, looking into the lens",
+    "chiffresTitre": "Key figures",
+    "offres": {
+      "eyebrow": "Our plans",
+      "titre": "Stated prices, no surprises",
+      "intro": "Three monthly levels of support, with no long-term commitment. Volume and channels can be adjusted at any time.",
+      "lePlusChoisi": "Most chosen",
+      "tarifsIndicatifs": "Indicative prices, to be confirmed — online payment via Tara from the client area."
+    },
+    "confiance": {
+      "eyebrow": "Why Nova Assist",
+      "titre": "A local team with the rigour of an international provider",
+      "photoRatio": "Photo · 4:5",
+      "photoLegende": "Hands on a keyboard, plain close-up — or a view of a tidy desk",
+      "confidentialiteTitre": "Contractual confidentiality",
+      "confidentialiteTexte": "A non-disclosure agreement is signed before any assignment; access is limited and traceable.",
+      "reactiviteTitre": "Measured responsiveness",
+      "reactiviteTexte": "Every request is time-stamped. You get the actual response time, not a promise.",
+      "ancrageTitre": "Rooted in Cameroon",
+      "ancrageTexte": "Same time zone, same habits, WhatsApp first. Your clients talk to someone who understands them."
+    },
+    "cta": {
+      "titre": "Tell us what is eating your time.",
+      "texte": "An answer within 24 working hours, free quote, no commitment.",
+      "telechargerBrochure": "Download the brochure"
+    }
+  },
+  "chiffres": {
+    "reponse": "Average response time",
+    "reponseCourt": "Avg. response",
+    "disponibilite": "Team availability",
+    "disponibiliteCourt": "Availability",
+    "confidentialite": "Contractual confidentiality",
+    "confidentialiteCourt": "Confidentiality",
+    "formules": "Plans, no long commitment",
+    "formulesCourt": "Plans"
+  },
+  "services": {
+    "eyebrow": "What we take off your hands",
+    "titre": "Delegate what slows you down",
+    "voirTous": "See all services",
+    "voirSix": "See all 6 services",
+    "01": {
+      "titre": "Customer relations",
+      "resume": "Inbound calls, WhatsApp Business and emails handled in your name, using your standard replies.",
+      "detail": "Inbound calls, WhatsApp Business and emails handled in your name, using your standard replies and your tone.",
+      "formules": "All plans"
+    },
+    "02": {
+      "titre": "Appointment booking",
+      "resume": "Calendar kept up to date, client reminders, fewer missed appointments.",
+      "detail": "Calendar kept up to date, reminders sent the day before, a clear drop in missed appointments.",
+      "formules": "All plans"
+    },
+    "03": {
+      "titre": "Debt collection",
+      "resume": "Follow-up on unpaid invoices, due-date tracking, weekly reporting.",
+      "detail": "Follow-up on unpaid invoices on an agreed schedule, due-date tracking and reporting.",
+      "formules": "Pro · Premium"
+    },
+    "04": {
+      "titre": "Administrative tasks",
+      "resume": "Data entry, quotes, invoices, document filing and inbox management.",
+      "detail": "Data entry, quotes, invoices, document filing and day-to-day inbox management.",
+      "formules": "All plans"
+    },
+    "05": {
+      "titre": "Community management",
+      "resume": "Posts, replies to messages and comments, monitoring of your pages.",
+      "detail": "Scheduled posts, replies to messages and comments, monitoring of your pages.",
+      "formules": "Premium · add-on"
+    },
+    "06": {
+      "titre": "Sales support",
+      "resume": "Lead qualification, follow-up on quotes sent, no opportunity left behind.",
+      "detail": "Lead qualification and follow-up on quotes sent: no opportunity lost for lack of a reminder.",
+      "formules": "Pro · Premium"
+    }
+  },
+  "formules": {
+    "unite": "FCFA / month",
+    "essentiel": {
+      "nom": "Essential",
+      "pour": "Freelancers, shops, young businesses.",
+      "pourCourt": "For a freelancer or a shop.",
+      "cta": "Choose Essential",
+      "inclus": [
+        "20 hrs of assistance per month",
+        "WhatsApp and email",
+        "Appointment booking",
+        "Monthly report"
+      ]
+    },
+    "professionnel": {
+      "nom": "Professional",
+      "pour": "SMEs, schools, clinics, practices.",
+      "pourCourt": "For an SME, a school or a clinic.",
+      "cta": "Choose Professional",
+      "inclus": [
+        "60 hrs of assistance per month",
+        "Inbound calls included",
+        "Reminders and collection",
+        "Sales follow-up on quotes",
+        "Weekly report"
+      ]
+    },
+    "premium": {
+      "nom": "Premium",
+      "pour": "Multi-site groups, high volume.",
+      "pourCourt": "For a practice or a multi-site group.",
+      "cta": "Choose Premium",
+      "inclus": [
+        "Dedicated ongoing assistance",
+        "Every channel, 6 days a week",
+        "Community management",
+        "Named account manager",
+        "Tailored reporting"
+      ]
+    }
+  },
+  "temoignages": {
+    "eyebrow": "They trust us",
+    "titre": "Client testimonials",
+    "videoBadge": "Video · 1 min max",
+    "cliniqueDouala": {
+      "citation": "“Placeholder for the filmed client testimonial: the problem before, what changed, the result.”",
+      "auteur": "Name to be provided",
+      "fonction": "Director, Clinic — Douala",
+      "legendeVideo": "Testimonial filmed on a phone, vertical framing recropped"
+    },
+    "commerceYaounde": {
+      "citation": "“Placeholder for a written testimonial. Two or three sentences are enough: the problem before, what changed, the concrete result.”",
+      "auteur": "Name to be provided",
+      "fonction": "Manager, Retail — Yaoundé"
+    },
+    "ecoleDouala": {
+      "citation": "“Placeholder for a second filmed testimonial, from a different line of business.”",
+      "auteur": "Name to be provided",
+      "fonction": "Founder, School — Douala",
+      "legendeVideo": "Second filmed testimonial"
+    },
+    "quatrieme": {
+      "citation": "“Fourth slot. The cards stack as you scroll: add as many client testimonials as you need, written or filmed.”",
+      "auteur": "Name to be provided",
+      "fonction": "Role, Company — City"
+    },
+    "voirVideo": "Watch the video"
+  }
+}

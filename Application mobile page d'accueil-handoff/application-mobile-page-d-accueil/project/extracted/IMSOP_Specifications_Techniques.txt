@@ -1,0 +1,960 @@
+DOSSIER TECHNIQUE DE SPÉCIFICATIONS
+INTERNATIONAL MEDICAL SECOND OPINION PLATFORM (IMSOP)
+Documents 1 à 10 — Complément technique au Cahier des charges général (Document 0)
+Ce dossier constitue le socle de spécifications permettant de passer de la conception fonctionnelle du projet IMSOP à sa mise en œuvre concrète par les designers, les architectes logiciels et les équipes de développement.
+Les dix documents forment une chaîne cohérente : acteurs et droits d&apos;accès, workflows, écrans, données, architecture technique, permissions, cybersécurité, UX/UI, tests, et périmètre du produit minimum viable (MVP).
+SOMMAIRE
+Document 1 — Cartographie des acteurs et des droits d&apos;accès	3
+Document 2 — Cartographie des workflows	6
+Document 3 — Spécifications fonctionnelles écran par écran	9
+Document 4 — Dictionnaire des données	12
+Document 5 — Architecture technique et API	15
+Document 6 — Matrice RBAC détaillée	17
+Document 7 — Cybersécurité et protection des données	19
+Document 8 — Cahier des charges UX/UI	22
+Document 9 — Cahier de recette et de tests	24
+Document 10 — Cahier des charges du MVP	26
+Synthèse générale des 10 documents	31
+DOCUMENT 1 — Cartographie des acteurs et des droits d&apos;accès
+1. Objet
+Ce document définit l&apos;ensemble des acteurs de la plateforme, leurs responsabilités et surtout ce qu&apos;ils peuvent voir, créer, modifier, télécharger, transmettre ou supprimer.
+Le principe fondamental est :
+Un utilisateur ne doit accéder qu&apos;aux informations nécessaires à l&apos;exercice de sa fonction.
+2. Acteurs principaux
+Acteur
+Fonction principale
+Patient
+Demande et réception du deuxième avis
+Médecin local
+Prise en charge initiale et collaboration
+Hôpital / Clinique locale
+Gestion institutionnelle des patients
+Coordinateur médical
+Contrôle et orchestration des dossiers
+Spécialiste international
+Analyse et production du deuxième avis
+Hôpital international
+Gestion de ses spécialistes
+Administrateur médical
+Supervision médicale
+Administrateur système
+Administration informatique
+Responsable financier
+Paiements et facturation
+Assureur
+Prise en charge financière
+Support client
+Assistance administrative
+Super administrateur
+Gouvernance globale
+3. Niveaux d&apos;accès
+Niveau 1 — Public
+Accès sans authentification :
+présentation ;
+spécialités ;
+partenaires ;
+informations générales ;
+FAQ ;
+contact.
+Niveau 2 — Utilisateur authentifié
+Accès à son espace personnel.
+Niveau 3 — Professionnel de santé
+Accès aux dossiers autorisés.
+Niveau 4 — Coordinateur médical
+Accès aux dossiers nécessaires à la coordination.
+Niveau 5 — Administration
+Accès administratif selon les permissions.
+Niveau 6 — Super administrateur
+Accès global technique et fonctionnel.
+4. Matrice principale des permissions
+Fonction
+Patient
+Médecin
+Spéc.
+Coord.
+Finance
+Admin IT
+Créer compte
+✓
+✓
+✓
+—
+—
+✓
+Modifier profil
+✓
+✓
+✓
+✓
+✓
+✓
+Créer dossier
+✓
+✓
+—
+✓
+—
+—
+Voir dossier médical
+Propre*
+Autorisé
+Affecté
+Autorisé
+✗
+✗
+Télécharger documents
+✓
+✓
+✓
+✓
+✗
+✗
+Modifier données médicales
+Propre*
+✓
+Rapport*
+Workflow*
+✗
+✗
+Affecter spécialiste
+✗
+✗
+✗
+✓
+✗
+✗
+Produire avis
+✗
+✗
+✓
+✗
+✗
+✗
+Voir rapport
+✓
+✓
+✓
+✓
+✗
+✗
+Modifier rapport médical
+✗
+✗
+Avant val.*
+✗
+✗
+✗
+Paiement
+✓
+—
+—
+—
+✓
+✗
+Facturation
+✓
+—
+—
+—
+✓
+✗
+Gestion utilisateurs
+✗
+✗
+✗
+Limitée
+✗
+✓
+Gestion rôles
+✗
+✗
+✗
+✗
+✗
+✓
+Audit technique
+✗
+✗
+✗
+Limité
+Limité
+✓
+* Patient : accès limité à son propre dossier. Spécialiste : modification possible uniquement sur le rapport qu&apos;il rédige, avant validation finale. Coordinateur : accès conditionné à l&apos;étape du workflow en cours. Voir Document 6 — Matrice RBAC détaillée pour le détail complet des permissions.
+5. Règles critiques
+Règle 1
+L&apos;administrateur informatique ne doit pas disposer automatiquement d&apos;un accès au contenu médical.
+Règle 2
+Un spécialiste ne voit que les dossiers qui lui sont attribués.
+Règle 3
+Un assureur ne doit accéder qu&apos;aux informations nécessaires à la gestion de la prise en charge.
+Règle 4
+Le patient conserve la maîtrise des autorisations de transmission de ses données, sous réserve des obligations légales applicables.
+Règle 5
+Toute consultation d&apos;un dossier médical doit être enregistrée dans l&apos;audit trail.
+DOCUMENT 2 — Cartographie des workflows
+1. Workflow global
+Le fonctionnement général est :
+PATIENT
+Création du compte
+Demande de deuxième avis
+Consentement
+Dépôt du dossier
+Paiement / assurance
+COORDINATION MÉDICALE
+Vérification
+Dossier complet ? — Si NON : demande de compléments (voir §5, Workflow dossier incomplet). Si OUI : poursuite du parcours.
+Identification de la spécialité
+Sélection du spécialiste
+Affectation
+SPÉCIALISTE
+Acceptation
+Analyse
+Questions complémentaires éventuelles
+Deuxième avis
+Validation
+PLATEFORME
+Transmission
+PATIENT + MÉDECIN LOCAL
+Suivi
+Clôture
+2. Workflow Patient
+Étape P1
+Création du compte.
+Étape P2
+Vérification du compte.
+Étape P3
+Création d&apos;une demande.
+Étape P4
+Formulation de la question médicale.
+Étape P5
+Téléchargement des documents.
+Étape P6
+Consentement.
+Étape P7
+Paiement.
+Étape P8
+Soumission.
+Étape P9
+Suivi du dossier.
+Étape P10
+Réception du deuxième avis.
+Étape P11
+Éventuelle téléconsultation.
+Étape P12
+Évaluation du service.
+3. Workflow Coordinateur
+Nouvelle demande
+Vérification administrative
+Vérification médicale
+Dossier incomplet ? — si oui, demande de complément puis retour à la vérification
+Dossier complet
+Identification de la spécialité
+Recherche spécialiste
+Vérification disponibilité
+Affectation
+Suivi du délai
+Réception du rapport
+Contrôle procédural
+Transmission
+Clôture
+4. Workflow Spécialiste
+Notification
+Consultation du dossier
+Acceptation / refus
+Analyse
+Question complémentaire ? — si oui : demande d&apos;information, réception, puis analyse finale
+Rédaction
+Validation
+Transmission
+5. Workflow dossier incomplet
+Dossier soumis
+Contrôle
+Document manquant
+Statut : INCOMPLET
+Notification patient / médecin
+Ajout document
+Nouvelle vérification
+Statut : COMPLET
+6. Workflow urgence
+Lorsqu&apos;un dossier est classé urgent :
+Notification immédiate du coordinateur
+Vérification
+Orientation selon protocole médical
+Spécialiste prioritaire si le deuxième avis est approprié
+Suivi renforcé
+La plateforme doit clairement indiquer qu&apos;elle ne constitue pas un service d&apos;urgence.
+DOCUMENT 3 — Spécifications fonctionnelles écran par écran
+1. Page d&apos;accueil
+Éléments
+logo ;
+menu ;
+présentation ;
+bouton « Demander un deuxième avis » ;
+bouton « Se connecter » ;
+spécialités ;
+fonctionnement ;
+partenaires ;
+FAQ ;
+contact.
+CTA principal : Demander un deuxième avis
+2. Écran inscription patient
+Champs
+prénom ;
+nom ;
+date de naissance ;
+sexe ;
+téléphone ;
+email ;
+pays ;
+ville ;
+mot de passe ;
+confirmation ;
+acceptation des conditions ;
+consentement initial.
+Bouton : Créer mon compte
+3. Dashboard patient
+Afficher
+bienvenue ;
+dossier en cours ;
+statut ;
+prochaine étape ;
+notifications ;
+messages ;
+paiement ;
+rapport disponible.
+Bouton principal : Nouvelle demande de deuxième avis
+4. Création d&apos;une demande
+Étape 1 – Motif.
+Étape 2 – Spécialité.
+Étape 3 – Diagnostic initial.
+Étape 4 – Question au spécialiste.
+Étape 5 – Traitement actuel.
+Étape 6 – Documents.
+Étape 7 – Consentement.
+Étape 8 – Paiement.
+Étape 9 – Validation.
+5. Dashboard spécialiste
+Afficher
+nouvelles demandes ;
+dossiers acceptés ;
+dossiers en cours ;
+rapports en attente ;
+délais ;
+agenda ;
+messages.
+6. Écran dossier spécialiste
+Sections
+1. Identité
+2. Résumé clinique
+3. Diagnostic
+4. Examens
+5. Documents
+6. Question médicale
+7. Échanges
+8. Rédaction du rapport
+7. Écran rédaction du rapport
+Champs structurés
+synthèse ;
+diagnostic ;
+appréciation ;
+observations ;
+examens complémentaires ;
+options thérapeutiques ;
+recommandations ;
+limites de l&apos;avis.
+Boutons : Enregistrer brouillon / Soumettre
+8. Dashboard coordinateur
+Afficher
+dossiers nouveaux ;
+dossiers incomplets ;
+dossiers à affecter ;
+dossiers en cours ;
+dossiers urgents ;
+dossiers en retard ;
+rapports reçus.
+9. Dashboard administrateur
+Afficher
+utilisateurs ;
+établissements ;
+spécialistes ;
+patients ;
+activité ;
+paiements ;
+incidents ;
+statistiques.
+DOCUMENT 4 — Dictionnaire des données
+1. Données Patient
+Identification
+Patient_ID
+Nom
+Prénom
+Date_naissance
+Sexe
+Nationalité
+Pays
+Ville
+Contact
+Téléphone
+Email
+Adresse
+Sécurité
+Identifiant
+Mot de passe hashé
+MFA
+Statut compte
+2. Données médicales
+Identifiant : Medical_Record_ID
+diagnostic initial ;
+symptômes ;
+antécédents ;
+allergies ;
+traitements ;
+interventions ;
+examens ;
+résultats ;
+question médicale ;
+médecin référent.
+3. Données dossier
+Identifiant : Case_ID
+Référence : Patient_ID
+spécialité ;
+niveau urgence ;
+date création ;
+date soumission ;
+statut ;
+coordinateur ;
+spécialiste ;
+date limite ;
+date clôture.
+4. Données spécialiste
+Identifiant : Specialist_ID
+nom ;
+spécialité ;
+sous-spécialité ;
+pays ;
+établissement ;
+qualification ;
+expérience ;
+langue ;
+disponibilité ;
+tarif ;
+statut de vérification.
+5. Documents
+Identifiant : Document_ID
+Référence : Case_ID
+type ;
+nom ;
+format ;
+taille ;
+date ;
+auteur ;
+version ;
+niveau confidentialité.
+6. Paiement
+Identifiant : Payment_ID
+Référence : Case_ID
+montant ;
+devise ;
+méthode ;
+date ;
+statut ;
+facture ;
+remboursement éventuel.
+DOCUMENT 5 — Architecture technique et API
+1. Architecture générale
+Architecture recommandée :
+Frontend
+API Gateway
+Backend / Services métier
+Base de données
+Stockage sécurisé des documents
+Services externes
+Services externes
+paiement ;
+SMS ;
+email ;
+visioconférence ;
+identité ;
+éventuellement assurance.
+2. Architecture modulaire
+Identity Management
+Patient Management
+Medical Records
+Case Management
+Specialist Management
+Hospital Management
+Workflow Engine
+Messaging
+Notification
+Payment
+Billing
+Reporting
+Audit
+Consent Management
+Document Management
+3. API principales
+Authentification
+POST /auth/register
+POST /auth/login
+POST /auth/verify
+POST /auth/reset-password
+Patients
+GET /patients/{id}
+PUT /patients/{id}
+Dossiers
+POST /cases
+GET /cases/{id}
+PUT /cases/{id}
+POST /cases/{id}/submit
+POST /cases/{id}/documents
+Spécialistes
+GET /specialists
+GET /specialists/{id}
+POST /cases/{id}/assign
+Avis
+POST /cases/{id}/opinion
+GET /cases/{id}/opinion
+POST /cases/{id}/opinion/validate
+Paiement
+POST /payments
+GET /payments/{id}
+DOCUMENT 6 — Matrice RBAC détaillée
+RBAC signifie Role-Based Access Control. Le système attribue des permissions aux rôles.
+1. Permissions principales
+VIEW_PROFILE
+EDIT_PROFILE
+CREATE_CASE
+VIEW_CASE
+EDIT_CASE
+UPLOAD_DOCUMENT
+DOWNLOAD_DOCUMENT
+ASSIGN_SPECIALIST
+ACCEPT_CASE
+WRITE_OPINION
+VALIDATE_OPINION
+VIEW_PAYMENT
+CREATE_PAYMENT
+MANAGE_USERS
+MANAGE_ROLES
+VIEW_AUDIT
+EXPORT_DATA
+2. Exemple par rôle
+Patient
+VIEW_OWN_PROFILE
+EDIT_OWN_PROFILE
+CREATE_CASE
+VIEW_OWN_CASE
+UPLOAD_DOCUMENT
+VIEW_OWN_REPORT
+PAY
+MESSAGE_AUTHORIZED_USERS
+Médecin
+VIEW_AUTHORIZED_CASE
+CREATE_CASE
+UPLOAD_DOCUMENT
+MESSAGE_SPECIALIST
+VIEW_REPORT
+Spécialiste
+VIEW_ASSIGNED_CASE
+DOWNLOAD_ASSIGNED_DOCUMENT
+REQUEST_INFORMATION
+WRITE_OPINION
+SUBMIT_OPINION
+MESSAGE_COORDINATOR
+Coordinateur
+VIEW_CASE
+VERIFY_CASE
+REQUEST_DOCUMENT
+ASSIGN_SPECIALIST
+TRACK_CASE
+VIEW_REPORT
+TRANSMIT_REPORT
+Finance
+VIEW_PAYMENT
+CREATE_INVOICE
+CONFIRM_PAYMENT
+PROCESS_REFUND
+FINANCIAL_REPORTING
+Administrateur IT
+MANAGE_USERS
+MANAGE_ROLES
+SYSTEM_CONFIGURATION
+TECHNICAL_AUDIT
+Pas d&apos;accès médical par défaut.
+DOCUMENT 7 — Cybersécurité et protection des données
+1. Objectif
+La sécurité doit être considérée comme une fonction critique du projet. Les données médicales étant particulièrement sensibles, le système devra appliquer :
+Privacy by Design et Security by Design.
+2. Authentification
+MFA ;
+OTP ;
+gestion des sessions ;
+politique de mot de passe ;
+détection des connexions inhabituelles ;
+verrouillage après tentatives excessives.
+3. Chiffrement
+chiffrement TLS pour les communications ;
+chiffrement des données sensibles ;
+chiffrement du stockage documentaire ;
+gestion sécurisée des clés.
+4. Contrôle d&apos;accès
+Application du principe :
+Least Privilege — chaque utilisateur reçoit uniquement les droits nécessaires.
+5. Audit
+Enregistrer :
+connexion ;
+consultation ;
+téléchargement ;
+modification ;
+transmission ;
+suppression ;
+validation.
+6. Protection documentaire
+Chaque fichier doit être :
+contrôlé ;
+analysé antivirus ;
+stocké de manière sécurisée ;
+associé à un dossier ;
+soumis aux droits d&apos;accès.
+7. Sauvegardes
+sauvegardes automatiques ;
+stockage redondant ;
+sauvegarde hors environnement principal ;
+tests de restauration.
+8. Plan de reprise
+Définir :
+RPO ;
+RTO ;
+procédure de restauration ;
+responsables ;
+procédure de communication de crise.
+9. Tests
+Avant mise en production :
+penetration testing ;
+vulnerability scanning ;
+code review ;
+tests d&apos;authentification ;
+tests d&apos;accès ;
+tests d&apos;intrusion ;
+tests de restauration.
+10. Gouvernance des données
+Il faudra juridiquement définir :
+responsable du traitement ;
+sous-traitants ;
+hébergeur ;
+localisation des données ;
+transfert international ;
+durée de conservation ;
+droit d&apos;accès ;
+droit de rectification ;
+droit à l&apos;effacement lorsque applicable ;
+procédure de violation de données.
+DOCUMENT 8 — Cahier des charges UX/UI
+1. Objectif
+Créer une plateforme :
+simple ;
+rassurante ;
+professionnelle ;
+intuitive ;
+accessible ;
+adaptée au mobile.
+2. Principe UX principal
+Le patient ne doit jamais se demander :
+« Que dois-je faire maintenant ? »
+Chaque écran doit afficher clairement :
+Où suis-je ?
+Quelle est l&apos;étape actuelle ?
+Quelle est la prochaine étape ?
+3. Parcours patient
+Le parcours idéal :
+Accueil
+Créer compte
+Demander avis
+Décrire problème
+Documents
+Consentement
+Paiement
+Confirmation
+Suivi
+Rapport
+4. Design mobile
+La conception doit être Mobile First, car une partie importante des utilisateurs africains accédera probablement à la plateforme principalement par smartphone.
+5. Design system
+Les designers devront définir :
+typographie ;
+couleurs ;
+boutons ;
+formulaires ;
+cartes ;
+menus ;
+notifications ;
+tableaux ;
+badges de statut ;
+icônes ;
+composants médicaux.
+6. Statuts visuels
+Les statuts doivent être facilement compréhensibles :
+Brouillon
+En vérification
+Incomplet
+En attente
+En analyse
+Rapport disponible
+Clôturé
+7. Accessibilité
+taille de texte adaptée ;
+contraste ;
+navigation simple ;
+langage clair ;
+compatibilité mobile ;
+messages d&apos;erreur explicites.
+DOCUMENT 9 — Cahier de recette et de tests
+1. Objectif
+Vérifier que la plateforme répond effectivement au cahier des charges avant son lancement.
+2. Tests fonctionnels
+Tester :
+inscription ;
+connexion ;
+création dossier ;
+upload ;
+consentement ;
+paiement ;
+affectation ;
+analyse ;
+rapport ;
+notification ;
+clôture.
+3. Test de parcours complet
+Créer un patient fictif :
+Patient : TEST 001
+Puis réaliser réellement :
+inscription
+création dossier
+upload
+paiement fictif
+validation
+affectation spécialiste
+analyse
+rapport
+transmission
+clôture
+4. Tests de sécurité
+accès non autorisé ;
+changement d&apos;URL ;
+accès à un autre dossier ;
+téléchargement interdit ;
+tentative de modification ;
+session expirée ;
+mot de passe ;
+MFA.
+5. Tests de performance
+Mesurer :
+temps de réponse ;
+capacité simultanée ;
+upload ;
+téléchargement ;
+charge serveur.
+6. Tests mobiles
+Tester au minimum :
+Android ;
+iOS ;
+Chrome ;
+Safari ;
+connexions lentes.
+7. Tests de paiement
+paiement réussi ;
+paiement refusé ;
+paiement interrompu ;
+remboursement ;
+double paiement ;
+confirmation.
+8. Tests de notifications
+email ;
+SMS ;
+notification interne.
+9. Critère de réussite
+Un module est accepté uniquement si :
+fonctionnalité correcte + sécurité correcte + expérience utilisateur acceptable + traçabilité correcte.
+DOCUMENT 10 — Cahier des charges du MVP
+1. Objectif
+Le MVP signifie Minimum Viable Product. Il ne s&apos;agit pas de construire immédiatement toute la plateforme panafricaine. Il faut construire une première version permettant de vérifier que le modèle fonctionne réellement.
+2. Périmètre MVP
+Patient
+inscription ;
+profil ;
+demande ;
+dossier ;
+documents ;
+consentement ;
+paiement ;
+suivi ;
+rapport.
+Médecin
+inscription ;
+profil ;
+création dossier ;
+transmission ;
+consultation rapport.
+Spécialiste
+profil ;
+vérification ;
+réception dossier ;
+analyse ;
+demande d&apos;information ;
+rapport.
+Coordinateur
+vérification ;
+affectation ;
+suivi ;
+validation procédurale ;
+transmission.
+Administration
+utilisateurs ;
+spécialistes ;
+établissements ;
+dossiers ;
+statistiques ;
+paiements.
+3. Fonctionnalités exclues du MVP
+Pour éviter de faire exploser le budget initial, on peut reporter :
+application mobile native ;
+IA avancée ;
+interopérabilité hospitalière complexe ;
+marketplace médicale ;
+avis multidisciplinaire automatisé ;
+DICOM avancé ;
+intégrations multiples d&apos;assurances ;
+déploiement panafricain ;
+traduction automatique avancée.
+4. MVP — parcours minimum
+Patient
+Création compte
+Demande
+Documents
+Consentement
+Paiement
+Coordinateur
+Validation
+Spécialiste
+Analyse
+Rapport
+Patient
+5. Population pilote
+Pilote recommandé :
+20 à 50 patients ;
+5 à 10 médecins locaux ;
+5 à 10 spécialistes internationaux ;
+2 à 3 établissements locaux ;
+2 à 3 établissements internationaux.
+6. Spécialités du MVP
+Ne pas commencer avec 15 spécialités. Sélectionner idéalement, pour la phase pilote :
+oncologie ;
+cardiologie ;
+neurologie ;
+orthopédie ;
+radiologie / anatomopathologie.
+Cette sélection devra cependant être confirmée par l&apos;étude de marché et le comité médical.
+7. Objectifs du pilote
+Hypothèse 1
+Les patients sont prêts à payer pour un deuxième avis.
+Hypothèse 2
+Les médecins locaux acceptent le principe.
+Hypothèse 3
+Les spécialistes internationaux acceptent de participer.
+Hypothèse 4
+Les dossiers peuvent être transmis efficacement.
+Hypothèse 5
+Les délais sont acceptables.
+Hypothèse 6
+Le modèle économique peut devenir rentable.
+8. KPI du MVP
+nombre de demandes ;
+nombre de dossiers complets ;
+taux de conversion ;
+délai moyen ;
+coût moyen ;
+revenu moyen ;
+satisfaction patient ;
+satisfaction médecin ;
+taux d&apos;acceptation des spécialistes ;
+taux de dossiers nécessitant des informations supplémentaires.
+9. Critères de passage à la Phase 2
+le parcours fonctionne sans incident critique ;
+les utilisateurs sont satisfaits ;
+les spécialistes répondent dans les délais ;
+la sécurité est validée ;
+le modèle économique est confirmé ;
+les procédures médicales sont stabilisées.
+10. Feuille de route indicative
+Phase 0 — Conception
+Durée indicative : 4 à 6 semaines.
+spécifications ;
+architecture ;
+UX ;
+sécurité ;
+modèle de données.
+Phase 1 — Développement MVP
+Durée indicative : 3 à 5 mois.
+frontend ;
+backend ;
+base de données ;
+portail patient ;
+portail spécialiste ;
+portail coordinateur ;
+paiement ;
+administration.
+Phase 2 — Tests
+Durée indicative : 4 à 6 semaines.
+recette ;
+sécurité ;
+tests utilisateurs.
+Phase 3 — Pilote
+Durée indicative : 3 à 6 mois.
+lancement contrôlé ;
+collecte des données ;
+amélioration.
+Phase 4 — Industrialisation
+application mobile ;
+assurance ;
+visioconférence ;
+interopérabilité ;
+nouveaux pays ;
+nouvelles spécialités.
+Synthèse générale des 10 documents
+Les dix documents forment une chaîne logique, chacun s&apos;appuyant sur le précédent :
+Document 1 — Acteurs et droits
+Document 2 — Workflows
+Document 3 — Écrans et fonctionnalités
+Document 4 — Données
+Document 5 — Architecture / API
+Document 6 — Permissions (RBAC)
+Document 7 — Cybersécurité
+Document 8 — UX/UI
+Document 9 — Tests et recette
+Document 10 — MVP
+Ce que cela donne concrètement pour vos équipes
+Aux designers UX/UI
+Documents : 1 + 2 + 3 + 8
+Ils sauront qui utilise la plateforme, quel parcours il suit et quels écrans ils doivent concevoir.
+Aux architectes et développeurs
+Documents : 1 + 2 + 4 + 5 + 6 + 7
+Ils sauront quelles données gérer, quelles fonctionnalités développer, comment organiser les accès et quelles exigences de sécurité respecter.
+Aux testeurs / QA
+Documents : 2 + 3 + 6 + 9
+Ils sauront ce qui doit fonctionner et comment vérifier la conformité.
+À la direction du projet
+Documents : 1 à 10 + cahier des charges général (Document 0)
+Ils disposeront de la vision complète du produit et pourront arbitrer ce qui appartient au MVP et ce qui doit être développé ultérieurement.
+Point particulièrement important pour ce projet
+Il est recommandé de ne pas encore lancer directement le développement. Il reste une étape essentielle : transformer ces documents en un Product Requirements Document (PRD) extrêmement détaillé, précisant notamment :
+chaque écran ;
+chaque champ ;
+chaque bouton ;
+chaque règle de validation ;
+chaque statut ;
+chaque notification ;
+chaque transition ;
+chaque rôle ;
+chaque API ;
+chaque scénario d&apos;erreur ;
+chaque règle métier.

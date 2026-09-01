@@ -1,0 +1,23 @@
+node_modules
+
+# Secrets — clés Supabase, Tara, transport email. JAMAIS versionnés.
+# `.env.example` est la seule exception : il ne contient que des noms de
+# variables, avec des valeurs factices.
+.env
+.env.*
+!.env.example
+
+# Build Next.js — artefacts de machine, jamais versionnes
+.next
+next-env.d.ts
+
+# Artefacts HawkScan
+hawk.log
+hawkscan-*.log
+*.hawk.json
+
+# Données de travail des témoignages (dépôt fichier, voir lib/temoignages/depot.ts)
+.data/
+
+# Build de verification (voir NOVA_DIST_DIR dans next.config.mjs)
+.next-verif

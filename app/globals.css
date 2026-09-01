@@ -1,0 +1,828 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   Nova Assist — jetons de la charte (maquette « Nova Assist - Site »)
+   Bleu nuit réservé aux chiffres et aux témoignages ; la navigation est claire.
+   ------------------------------------------------------------------ */
+@theme {
+  /* Bleu nuit */
+  --color-navy: #0b1f3a;
+  --color-navy-700: #12294a;
+
+  /* Or */
+  --color-gold: #c9a227;
+  --color-gold-ink: #9a7f1c;
+  --color-gold-soft: #fdfbf4;
+  --color-gold-line: #d8c88a;
+
+  /* Fonds sable */
+  --color-canvas: #e7e4dd;
+  --color-paper: #ffffff;
+  --color-stone-50: #f7f5f0;
+  --color-stone-100: #f1eee7;
+  --color-stone-200: #ede9e0;
+
+  /* Filets */
+  --color-line: #e2ddd1;
+  --color-line-soft: #ede8dc;
+  --color-line-mid: #c9bfad;
+  --color-line-check: #c4beb0;
+
+  /* Texte */
+  --color-ink: #1f2937;
+  --color-ink-700: #374151;
+  --color-slate-deep: #3a4658;
+  --color-slate-mid: #56606e;
+  --color-gray-mid: #6b7280;
+  --color-muted: #8a8474;
+  --color-muted-light: #9ca3af;
+  --color-disabled: #b0ab9e;
+
+  /* Divers */
+  --color-whatsapp: #25d366;
+
+  /* Typographie */
+  --font-serif: Georgia, "Times New Roman", serif;
+  --font-sans: "Source Sans 3", Calibri, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+@layer base {
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Les titres de la maquette sont en serif, graisse normale. */
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    text-wrap: pretty;
+  }
+}
+
+@layer components {
+  /* Libellé monospace en capitales espacées — récurrent dans la maquette. */
+  .na-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-gold-ink);
+  }
+
+  /* Carrousel de témoignages : barre de défilement dorée. */
+  .na-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-gold) rgba(255, 255, 255, 0.12);
+  }
+  .na-scroll::-webkit-scrollbar {
+    height: 6px;
+  }
+  .na-scroll::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.12);
+  }
+  .na-scroll::-webkit-scrollbar-thumb {
+    background: var(--color-gold);
+  }
+
+  /* ----------------------------------------------------------------
+     Bascule connexion / inscription (composant AuthSwitch).
+     Un disque doré, bien plus grand que la fenêtre, balaie la page d'un
+     bord à l'autre : il recouvre tout à mi-parcours, puis se range du
+     côté opposé et découvre l'autre formulaire. Les transitions sont
+     portées par `data-mode` / `data-actif`, jamais par des styles en
+     ligne : `prefers-reduced-motion` suffit alors à tout couper.
+     ---------------------------------------------------------------- */
+  .na-auth {
+    --na-disque: 2000px;
+    --na-bande: 190px;
+    position: relative;
+    min-height: 100svh;
+    overflow: hidden;
+    background: var(--color-navy);
+  }
+
+  .na-auth-disque {
+    position: absolute;
+    top: -10%;
+    right: 50%;
+    z-index: 6;
+    height: var(--na-disque);
+    width: var(--na-disque);
+    border-radius: 50%;
+    background: linear-gradient(-45deg, var(--color-gold-ink), var(--color-gold));
+    transform: translateY(-50%);
+    transition: transform 1.4s ease-in-out;
+  }
+  .na-auth[data-mode="inscription"] .na-auth-disque {
+    transform: translate(100%, -50%);
+  }
+
+  /* Les deux formulaires occupent la même cellule de grille : ils se
+     superposent, un seul est visible et focusable. La pile glisse d'une
+     moitié d'écran à l'autre, à contretemps du disque. */
+  .na-auth-pile {
+    position: relative;
+    z-index: 5;
+    display: grid;
+    /* Le bloc reste centré tant qu'il tient dans la fenêtre. Au-delà, `safe`
+       interdit le débord par le haut — sinon le lien « Retour » et la marque
+       partent au-dessus du bord, hors d'atteinte du défilement, puisque le
+       conteneur est en `overflow: hidden` pour rogner le disque doré. */
+    align-content: safe center;
+    min-height: 100svh;
+    width: 50%;
+    margin-left: 50%;
+    justify-items: center;
+    padding: 48px 24px;
+    transition: transform 1.4s ease-in-out;
+  }
+  .na-auth[data-mode="inscription"] .na-auth-pile {
+    transform: translateX(-100%);
+  }
+
+  .na-auth-form {
+    grid-area: 1 / 1 / 2 / 2;
+    width: 100%;
+    max-width: 400px;
+    transition:
+      opacity 0.4s ease-in-out,
+      transform 0.6s ease-in-out;
+  }
+  .na-auth-form[data-actif="false"] {
+    opacity: 0;
+    transform: translateY(18px);
+    pointer-events: none;
+  }
+  /* L'entrée attend que le disque soit passé, sinon le formulaire
+     réapparaît derrière l'or. */
+  .na-auth-form[data-actif="true"] {
+    opacity: 1;
+    transform: none;
+    transition-delay: 0.75s;
+  }
+
+  .na-auth-panneaux {
+    position: absolute;
+    inset: 0;
+    z-index: 7;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    pointer-events: none;
+  }
+
+  .na-auth-panneau {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    padding: 48px 9%;
+    text-align: center;
+    transition:
+      transform 1.1s ease-in-out,
+      opacity 0.6s ease-in-out;
+  }
+  .na-auth-panneau[data-actif="true"] {
+    transform: none;
+    opacity: 1;
+    pointer-events: auto;
+    transition-delay: 0.55s;
+  }
+  .na-auth-panneau[data-actif="false"] {
+    opacity: 0;
+  }
+  .na-auth-panneau--gauche[data-actif="false"] {
+    transform: translateX(-800px);
+  }
+  .na-auth-panneau--droite[data-actif="false"] {
+    transform: translateX(800px);
+  }
+
+  /* Sous 1024px la page s'empile : le disque balaie du haut vers le bas
+     et laisse une bande dorée d'un côté ou de l'autre du formulaire. */
+  @media (max-width: 1023px) {
+    .na-auth {
+      --na-disque: 1400px;
+      --na-bande: 160px;
+      /* Le formulaire d'inscription doit tenir entre les deux bandes dorées,
+         quitte à ce que la page défile un peu sur les petits écrans. Hauteur
+         fixée dans une variable : le disque s'en sert pour viser le bas exact
+         du bloc, que ce soit la fenêtre ou ce plancher qui l'emporte. */
+      --na-hauteur: max(100svh, 880px);
+      min-height: var(--na-hauteur);
+    }
+
+    .na-auth-disque {
+      top: 0;
+      right: auto;
+      left: 50%;
+      transform: translate(-50%, calc(var(--na-bande) - var(--na-disque)));
+    }
+    .na-auth[data-mode="inscription"] .na-auth-disque {
+      transform: translate(-50%, calc(var(--na-hauteur) - var(--na-bande)));
+    }
+
+    .na-auth-pile,
+    .na-auth[data-mode="inscription"] .na-auth-pile {
+      width: 100%;
+      margin-left: 0;
+      transform: none;
+      min-height: var(--na-hauteur);
+      /* Le formulaire commence sous la bande dorée haute et s'arrête avant
+         la bande basse, au lieu de glisser dessous quand il est long. */
+      padding: calc(var(--na-bande) + 20px) 24px;
+    }
+
+    .na-auth-panneaux {
+      grid-template-columns: 1fr;
+      grid-template-rows: var(--na-bande) 1fr var(--na-bande);
+    }
+    .na-auth-panneau {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 8px 20px;
+      padding: 16px 24px;
+    }
+    .na-auth-panneau--gauche {
+      grid-row: 1 / 2;
+    }
+    .na-auth-panneau--droite {
+      grid-row: 3 / 4;
+    }
+    .na-auth-panneau--gauche[data-actif="false"] {
+      transform: translateY(-400px);
+    }
+    .na-auth-panneau--droite[data-actif="false"] {
+      transform: translateY(400px);
+    }
+  }
+}
+
+/* ------------------------------------------------------------------
+   Apparition au défilement.
+   L'état masqué est conditionné à `html.js`, posée par un script en tête de
+   page : sans JavaScript, le contenu reste visible plutôt que de disparaître.
+   ------------------------------------------------------------------ */
+.js [data-reveal] {
+  opacity: 0;
+  /* Décalage franc : en dessous de ~30px le mouvement passe inaperçu. */
+  transform: translateY(38px);
+  /* 0,45 s : assez pour que le mouvement se lise, assez court pour qu'un
+     changement d'onglet ne donne pas l'impression d'attendre la page. */
+  transition:
+    opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+/* Posée le temps d'un frame sur le premier écran d'une navigation interne :
+   le contenu est déjà « arrivé », il se montre sans rejouer son entrée. */
+.js [data-reveal].sans-transition {
+  transition: none;
+}
+
+.js [data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+  will-change: auto;
+}
+
+/* Le mouvement n'est jamais essentiel : on le coupe sur demande. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Sans cette règle, couper la transition figerait les éléments à opacity: 0. */
+  .js [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Bouton « shiny » — anneau conique animé au survol.
+
+   Ces règles vivaient dans un bloc `<style jsx global>` de
+   `components/ui/shiny-button.tsx`. styled-jsx ne compilait pas ce bloc :
+   la classe `.shiny-cta` arrivait bien sur les éléments, mais aucune balise
+   `<style>` n'était émise et tous les boutons principaux du site
+   s'affichaient en texte nu. Déplacées ici, en CSS ordinaire, elles
+   s'appliquent sans dépendre de styled-jsx.
+
+   `@import` de la police Inter retiré au passage : `--font-sans` est toujours
+   défini par la charte (Source Sans 3), Inter n'était jamais utilisée.
+   ------------------------------------------------------------------ */
+
+@property --gradient-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+@property --gradient-angle-offset {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+@property --gradient-percent {
+  syntax: "<percentage>";
+  initial-value: 5%;
+  inherits: false;
+}
+@property --gradient-shine {
+  syntax: "<color>";
+  initial-value: white;
+  inherits: false;
+}
+
+.shiny-cta {
+  --shiny-cta-bg: var(--color-navy, #0b1f3a);
+  --shiny-cta-bg-subtle: var(--color-navy-700, #12294a);
+  --shiny-cta-fg: #ffffff;
+  --shiny-cta-highlight: #3b82f6;
+  --shiny-cta-highlight-subtle: #60a5fa;
+  --animation: gradient-angle linear infinite;
+  --duration: 3s;
+  --shadow-size: 2px;
+  --transition: 800ms cubic-bezier(0.25, 1, 0.5, 1);
+
+  isolation: isolate;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  outline-offset: 4px;
+  padding: 1.25rem 2.5rem;
+  font-family: var(--font-sans, sans-serif);
+  font-size: 1.125rem;
+  line-height: 1.2;
+  font-weight: 500;
+  border: 1px solid transparent;
+  border-radius: 360px;
+  color: var(--shiny-cta-fg);
+  background:
+    linear-gradient(var(--shiny-cta-bg), var(--shiny-cta-bg)) padding-box,
+    conic-gradient(
+        from calc(var(--gradient-angle) - var(--gradient-angle-offset)),
+        transparent,
+        var(--shiny-cta-highlight) var(--gradient-percent),
+        var(--gradient-shine) calc(var(--gradient-percent) * 2),
+        var(--shiny-cta-highlight) calc(var(--gradient-percent) * 3),
+        transparent calc(var(--gradient-percent) * 4)
+      )
+      border-box;
+  box-shadow: inset 0 0 0 1px var(--shiny-cta-bg-subtle);
+  transition: var(--transition);
+  transition-property: --gradient-angle-offset, --gradient-percent, --gradient-shine;
+}
+
+.shiny-cta-outline {
+  --shiny-cta-bg: var(--color-paper, #ffffff);
+  --shiny-cta-bg-subtle: var(--color-line-soft, #ede8dc);
+  --shiny-cta-fg: var(--color-navy, #0b1f3a);
+}
+
+.shiny-cta::before,
+.shiny-cta::after,
+.shiny-cta .shiny-text::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset-inline-start: 50%;
+  inset-block-start: 50%;
+  translate: -50% -50%;
+  z-index: -1;
+}
+
+.shiny-cta:active {
+  translate: 0 1px;
+}
+
+/* Trame de points. */
+.shiny-cta::before {
+  --size: calc(100% - var(--shadow-size) * 3);
+  --position: 2px;
+  --space: calc(var(--position) * 2);
+  width: var(--size);
+  height: var(--size);
+  background: radial-gradient(
+      circle at var(--position) var(--position),
+      white calc(var(--position) / 4),
+      transparent 0
+    )
+    padding-box;
+  background-size: var(--space) var(--space);
+  background-repeat: space;
+  mask-image: conic-gradient(from calc(var(--gradient-angle) + 45deg), black, transparent 10% 90%, black);
+  border-radius: inherit;
+  opacity: 0.4;
+  z-index: -1;
+}
+
+/* Miroitement intérieur. */
+.shiny-cta::after {
+  --animation: shimmer linear infinite;
+  width: 100%;
+  aspect-ratio: 1;
+  background: linear-gradient(-50deg, transparent, var(--shiny-cta-highlight), transparent);
+  mask-image: radial-gradient(circle at bottom, transparent 40%, black);
+  opacity: 0.6;
+}
+
+.shiny-cta .shiny-text {
+  z-index: 1;
+}
+
+.shiny-cta:not(.shiny-cta-outline) .shiny-text::before {
+  --size: calc(100% + 1rem);
+  width: var(--size);
+  height: var(--size);
+  box-shadow: inset 0 -1ex 2rem 4px var(--shiny-cta-highlight);
+  border-radius: 360px;
+  opacity: 0;
+  transition: opacity var(--transition);
+  animation: calc(var(--duration) * 1.5) breathe linear infinite;
+}
+
+.shiny-cta,
+.shiny-cta::before,
+.shiny-cta::after {
+  animation:
+    var(--animation) var(--duration),
+    var(--animation) calc(var(--duration) / 0.4) reverse paused;
+  animation-composition: add;
+}
+
+.shiny-cta:is(:hover, :focus-visible) {
+  --gradient-percent: 20%;
+  --gradient-angle-offset: 95deg;
+  --gradient-shine: var(--shiny-cta-highlight-subtle);
+}
+
+.shiny-cta:is(:hover, :focus-visible),
+.shiny-cta:is(:hover, :focus-visible)::before,
+.shiny-cta:is(:hover, :focus-visible)::after {
+  animation-play-state: running;
+}
+
+.shiny-cta:not(.shiny-cta-outline):is(:hover, :focus-visible) .shiny-text::before {
+  opacity: 1;
+}
+
+@keyframes gradient-angle {
+  to {
+    --gradient-angle: 360deg;
+  }
+}
+
+@keyframes shimmer {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@keyframes breathe {
+  from,
+  to {
+    scale: 1;
+  }
+  50% {
+    scale: 1.2;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Orbite des formules — page Offres.
+
+   Portage de l'effet d'orbite du portfolio dans la charte Nova Assist :
+   bleu nuit et or à la place du bleu électrique. Le bleu nuit en fond suit
+   la règle de la charte, qui le réserve aux respirations sombres.
+
+   La logique (balancement, glissé) vit dans components/formules-orbite.tsx ;
+   ce fichier ne porte que l'apparence et la géométrie 3D.
+   ------------------------------------------------------------------ */
+@layer components {
+  .na-orbite {
+    --na-orbite-rayon: clamp(150px, 30vw, 248px);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+    background: radial-gradient(
+      120% 90% at 50% 6%,
+      var(--color-navy-700) 0%,
+      var(--color-navy) 60%
+    );
+    user-select: none;
+    /* Le glissé horizontal pilote l'anneau, le vertical défile la page. */
+    touch-action: pan-y;
+  }
+
+  .na-orbite-scene {
+    position: relative;
+    width: 100%;
+    height: clamp(252px, 34vw, 296px);
+    perspective: 1100px;
+    cursor: grab;
+  }
+  .na-orbite-scene:active {
+    cursor: grabbing;
+  }
+
+  .na-orbite-anneau {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+
+  .na-orbite-face {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: flex;
+    width: clamp(152px, 21vw, 180px);
+    height: clamp(198px, 26vw, 226px);
+    flex-direction: column;
+    gap: 7px;
+    border: 1px solid color-mix(in oklab, var(--color-gold-line) 32%, transparent);
+    border-radius: 10px;
+    background: linear-gradient(
+      165deg,
+      color-mix(in oklab, white 9%, transparent),
+      color-mix(in oklab, white 2%, transparent)
+    );
+    padding: 15px 15px 17px;
+    text-align: left;
+    transform: translate(-50%, -50%) rotateY(var(--na-orbite-angle))
+      translateZ(var(--na-orbite-rayon));
+    transition:
+      border-color 0.3s ease,
+      box-shadow 0.3s ease;
+  }
+
+  /* La formule mise en avant porte le même filet d'or plein que sa carte du
+     tableau plus bas : c'est le même repère, à deux endroits de la page. */
+  .na-orbite-face[data-avant="true"] {
+    border-color: var(--color-gold);
+    box-shadow: 0 0 26px -6px color-mix(in oklab, var(--color-gold) 45%, transparent);
+  }
+
+  .na-orbite-face:hover,
+  .na-orbite-face:focus-visible {
+    border-color: var(--color-gold);
+    box-shadow:
+      0 0 0 1px color-mix(in oklab, var(--color-gold) 38%, transparent),
+      0 20px 46px -14px color-mix(in oklab, var(--color-gold) 55%, transparent);
+    outline: none;
+  }
+
+  /* --------------------------------------------- l'émetteur sous l'anneau */
+  .na-orbite-emetteur {
+    position: relative;
+    width: min(430px, 84%);
+    height: clamp(96px, 14vw, 124px);
+    /* Marge négative : le socle se glisse SOUS les cartes au lieu de s'empiler
+       en dessous. C'est ce décalage qui les fait flotter. */
+    margin-top: clamp(-62px, -8vw, -44px);
+    pointer-events: none;
+  }
+  .na-orbite-emetteur > * {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .na-orbite-faisceau {
+    bottom: 44%;
+    width: 84%;
+    height: clamp(170px, 26vw, 220px);
+    background: linear-gradient(
+      to top,
+      color-mix(in oklab, var(--color-gold) 50%, transparent),
+      color-mix(in oklab, var(--color-gold) 16%, transparent) 46%,
+      transparent 90%
+    );
+    clip-path: polygon(37% 100%, 63% 100%, 100% 0, 0 0);
+    filter: blur(13px);
+    mix-blend-mode: screen;
+    animation: na-orbite-faisceau 4.4s ease-in-out infinite;
+  }
+
+  .na-orbite-halo {
+    bottom: 10%;
+    width: 130%;
+    height: 96px;
+    background: radial-gradient(
+      ellipse at center,
+      color-mix(in oklab, var(--color-gold) 40%, transparent),
+      transparent 68%
+    );
+    filter: blur(16px);
+    mix-blend-mode: screen;
+  }
+
+  .na-orbite-socle {
+    bottom: 6%;
+    width: 100%;
+    height: 46px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #16233a, #070d18);
+    box-shadow: 0 16px 34px rgb(0 0 0 / 0.55);
+  }
+
+  .na-orbite-collier {
+    bottom: 20%;
+    width: 76%;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, var(--color-navy-700), #0c1424);
+  }
+
+  .na-orbite-anneau-lumineux {
+    bottom: 30%;
+    width: 62%;
+    height: 26px;
+    border: 1px solid color-mix(in oklab, var(--color-gold-line) 58%, transparent);
+    border-radius: 50%;
+    box-shadow: 0 0 18px color-mix(in oklab, var(--color-gold) 40%, transparent);
+  }
+
+  .na-orbite-vasque {
+    bottom: 33%;
+    width: 46%;
+    height: 20px;
+    overflow: hidden;
+    border-radius: 50%;
+    background: radial-gradient(
+      ellipse at center,
+      var(--color-gold-soft),
+      var(--color-gold) 52%,
+      color-mix(in oklab, var(--color-gold-ink) 30%, transparent) 100%
+    );
+    box-shadow: 0 0 26px color-mix(in oklab, var(--color-gold) 70%, transparent);
+  }
+  .na-orbite-vasque i {
+    position: absolute;
+    inset: 0;
+    display: block;
+    border-radius: 50%;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.85), transparent);
+    animation: na-orbite-balayage 3.2s linear infinite;
+  }
+
+  .na-orbite-indice {
+    position: absolute;
+    right: 0;
+    bottom: 16px;
+    left: 0;
+    margin: 0;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgb(255 255 255 / 0.42);
+  }
+}
+
+@keyframes na-orbite-faisceau {
+  0%,
+  100% {
+    opacity: 0.72;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes na-orbite-balayage {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* ===========================================================================
+   Console — habillage des tableaux de bord (espace client, back-office)
+
+   Direction reprise du portfolio : une surface sombre continue, des panneaux
+   de verre à liseré fin, et la *lueur* comme signal de profondeur plutôt que
+   des ombres portées. Transposée à la charte Nova : le quasi-noir devient
+   bleu nuit profond, le néon bleu devient or.
+
+   Réservé aux espaces privés. Les pages vitrine gardent le papier clair :
+   c'est justement le contraste qui fait qu'on sait qu'on est « entré ».
+   =========================================================================== */
+
+.na-console {
+  --console-fond: #061223;
+  --console-verre: rgba(255, 255, 255, 0.045);
+  --console-liseré: rgba(201, 162, 39, 0.18);
+
+  position: relative;
+  background: var(--console-fond);
+  color: var(--color-white, #fff);
+  isolation: isolate;
+}
+
+/* Halo doré diffus, ancré en haut à gauche : il donne un point d'origine à la
+   lumière et évite la platitude d'un aplat sombre. */
+.na-console::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(70rem 40rem at 12% -10%, rgba(201, 162, 39, 0.14), transparent 62%),
+    radial-gradient(50rem 34rem at 92% 8%, rgba(18, 41, 74, 0.85), transparent 60%);
+}
+
+/* Panneau de verre. `backdrop-filter` est décoratif : sur un navigateur qui ne
+   le gère pas, le fond translucide suffit à détacher le panneau. */
+.na-verre {
+  position: relative;
+  border: 1px solid var(--console-liseré);
+  border-radius: 16px;
+  background: var(--console-verre);
+  backdrop-filter: blur(14px);
+}
+
+/* Panneau mis en avant — celui que l'œil doit trouver en premier. */
+.na-verre-fort {
+  border-color: rgba(201, 162, 39, 0.42);
+  background: linear-gradient(
+    160deg,
+    rgba(201, 162, 39, 0.13),
+    rgba(255, 255, 255, 0.03) 46%
+  );
+  box-shadow:
+    0 0 0 1px rgba(201, 162, 39, 0.08),
+    0 24px 60px -28px rgba(201, 162, 39, 0.55);
+}
+
+/* Réaction au survol : la carte monte à peine et son liseré s'allume. */
+.na-verre-actif {
+  transition:
+    transform 0.35s cubic-bezier(0.22, 0.61, 0.16, 1),
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
+}
+.na-verre-actif:hover {
+  transform: translateY(-2px);
+  border-color: rgba(201, 162, 39, 0.45);
+  box-shadow: 0 20px 44px -26px rgba(201, 162, 39, 0.6);
+}
+
+/* Socle lumineux, écho du podium holographique du portfolio : une ellipse
+   dorée posée sous l'indicateur principal. */
+.na-socle::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  bottom: -14px;
+  width: 68%;
+  height: 42px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(201, 162, 39, 0.42), transparent 78%);
+  filter: blur(14px);
+}
+
+/* Jauge : la part consommée en or, le reste en creux. */
+.na-jauge {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+.na-jauge > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--color-gold, #c9a227), #e6c869);
+  box-shadow: 0 0 14px rgba(201, 162, 39, 0.55);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .na-verre-actif:hover {
+    transform: none;
+  }
+}

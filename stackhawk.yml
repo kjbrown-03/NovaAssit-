@@ -1,0 +1,68 @@
+# HawkScan (StackHawk) — scan DAST de Nova Assist en fonctionnement.
+#
+# Prérequis : une application créée sur app.stackhawk.com pour récupérer
+# l'applicationId, et une clé d'API.
+#
+# Les valeurs ${...} sont injectées par l'environnement — voir
+# `security/scan-local.ps1` (local) et `.github/workflows/stackhawk.yml` (CI).
+# Rien de secret ne doit être écrit en dur dans ce fichier, il est versionné.
+
+app:
+  applicationId: ${HAWK_APP_ID}
+  env: ${HAWK_ENV}
+  host: ${HAWK_HOST}
+
+  # Le crawler ne devine pas les routes POST : on les lui déclare.
+  # Toute nouvelle route `app/api/**/route.ts` doit être ajoutée au spec.
+  openApiConf:
+    path: security/openapi-nova-assist.yaml
+
+  # Assets statiques et fichiers générés : rien à tester, et les scanner
+  # allonge inutilement le run.
+  excludePaths:
+    - "^/_next/static/.*$"
+    - "^/_next/image.*$"
+    - "^/favicon\.ico$"
+    - "^/robots\.txt$"
+    - "^/sitemap\.xml$"
+
+  # Adapte la politique de scan et les vecteurs d'entrée à ce qui est
+  # réellement découvert (stack JS/Next, pas de SQL côté serveur pour l'instant).
+  autoPolicy: true
+  autoInputVectors: true
+
+  # ── À activer quand l'espace client aura une authentification réelle ──
+  # Aujourd'hui `/connexion` est une maquette : le formulaire n'appelle aucune
+  # route serveur, il n'y a donc pas de session à rejouer. Dès que la connexion
+  # sera branchée, décommenter et compléter — sinon /espace-client est scanné
+  # en anonyme et la moitié de la surface reste invisible.
+  #
+  # authentication:
+  #   loggedInIndicator: "Se déconnecter"
+  #   loggedOutIndicator: "\Q/connexion\E"
+  #   usernamePassword:
+  #     type: FORM
+  #     loginPath: /connexion
+  #     usernameField: email
+  #     passwordField: motDePasse
+  #     scanUsername: ${HAWK_SCAN_USER}
+  #     scanPassword: ${HAWK_SCAN_PASSWORD}
+  #   testPath:
+  #     path: /espace-client
+  #     success: .*200.*
+
+hawk:
+  spider:
+    base: true
+    # Next.js rend beaucoup côté client : le spider AJAX est nécessaire pour
+    # atteindre les écrans derrière une interaction (bascule connexion, devis).
+    ajax: true
+    maxDurationMinutes: 5
+  startupTimeoutMinutes: 3
+  # Fait échouer le scan (exit code non nul) à partir d'une alerte « high ».
+  # Passer à `medium` une fois les findings actuels traités.
+  failureThreshold: high
+
+tags:
+  - name: stack
+    value: nextjs-15

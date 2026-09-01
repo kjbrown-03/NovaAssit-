@@ -1,0 +1,87 @@
+# Spécification des routes API de Nova Assist, à l'usage de HawkScan.
+#
+# Le spider ne découvre que ce qui est atteignable par lien ou par XHR observée.
+# Les endpoints décrits ici sont attaqués directement, avec un corps valide comme
+# point de départ des mutations.
+#
+# À tenir à jour : une route ajoutée dans `app/api/**/route.ts` et absente d'ici
+# n'est pas testée.
+openapi: 3.0.3
+info:
+  title: Nova Assist — API interne
+  version: "1.0.0"
+servers:
+  - url: /
+paths:
+  /api/devis:
+    post:
+      summary: Réception d'une demande de devis
+      operationId: creerDemandeDevis
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DemandeDevis"
+      responses:
+        "201":
+          description: Demande enregistrée
+        "400":
+          description: Corps de requête illisible
+        "422":
+          description: Demande incomplète
+components:
+  schemas:
+    DemandeDevis:
+      type: object
+      required:
+        - entreprise
+        - contactNom
+        - email
+        - domaines
+        - consentement
+      properties:
+        entreprise:
+          type: string
+          example: "Cabinet Dupont"
+        secteur:
+          type: string
+          example: "Santé"
+        effectif:
+          type: string
+          example: "2 à 5"
+        domaines:
+          type: array
+          items:
+            type: string
+          example: ["Gestion des rendez-vous"]
+        canaux:
+          type: array
+          items:
+            type: string
+          example: ["WhatsApp"]
+        precision:
+          type: string
+          example: "Relances des impayés en fin de mois."
+        messagesParJour:
+          type: string
+          example: "10 à 30"
+        plage:
+          type: string
+          example: "9h - 18h"
+        contactNom:
+          type: string
+          example: "Marie Dupont"
+        email:
+          type: string
+          format: email
+          example: "contact@example.com"
+        telephone:
+          type: string
+          example: "+33600000000"
+        consentement:
+          type: boolean
+          example: true
+        formuleSuggeree:
+          type: string
+          example: "Essentiel"

@@ -1,0 +1,197 @@
+{
+  "meta": {
+    "titre": "Nova Assist — Assistance virtuelle à Douala",
+    "description": "Nova Assist prend en charge votre relation client — appels, WhatsApp, emails, suivi commercial — avec la réactivité et la confidentialité d'une équipe dédiée, sans les coûts d'un recrutement interne.",
+    "ogTitre": "Nous répondons. Vous grandissez.",
+    "ogDescription": "Assistance virtuelle externalisée pour les PME, écoles, cliniques et commerces du Cameroun."
+  },
+  "commun": {
+    "allerAuContenu": "Aller au contenu",
+    "demanderDevis": "Demander un devis",
+    "ecrireWhatsApp": "Écrire sur WhatsApp",
+    "seConnecter": "Se connecter",
+    "messageWhatsAppDefaut": "Bonjour Nova Assist, je souhaite un devis."
+  },
+  "langue": {
+    "choisir": "Choisir la langue",
+    "fr": "Français",
+    "en": "English",
+    "frCourt": "FR",
+    "enCourt": "EN"
+  },
+  "nav": {
+    "services": "Nos services",
+    "offres": "Nos offres",
+    "aPropos": "À propos",
+    "blog": "Blog",
+    "contact": "Contact",
+    "navigationPrincipale": "Navigation principale",
+    "ouvrirMenu": "Ouvrir le menu",
+    "fermerMenu": "Fermer le menu",
+    "accueil": "— accueil"
+  },
+  "pied": {
+    "baseline": "Assistance virtuelle externalisée pour les entreprises du Cameroun et d'Afrique de l'Ouest.",
+    "colonneOffre": "Offre",
+    "colonneEntreprise": "Entreprise",
+    "colonneContact": "Contact",
+    "whatsappBusiness": "WhatsApp Business",
+    "espaceClient": "Espace client",
+    "faq": "FAQ",
+    "mentions": "© 2026 Nova Assist. Mentions légales · Politique de confidentialité"
+  },
+  "accueil": {
+    "eyebrow": "Assistance virtuelle · Douala",
+    "titreLigne1": "Nous répondons.",
+    "titreLigne2": "Vous grandissez.",
+    "intro": "Appels, WhatsApp, emails, suivi commercial : Nova Assist prend en charge votre relation client avec la réactivité et la confidentialité d'une équipe dédiée, sans les coûts d'un recrutement interne.",
+    "photoRatio": "Photo · 3:4 vertical",
+    "photoLegende": "Portrait professionnel au casque, bureau clair, regard vers l'objectif",
+    "chiffresTitre": "Nos chiffres clés",
+    "offres": {
+      "eyebrow": "Nos formules",
+      "titre": "Des tarifs annoncés, sans surprise",
+      "intro": "Trois niveaux d'accompagnement mensuels, sans engagement de longue durée. Volume et canaux ajustables à tout moment.",
+      "lePlusChoisi": "Le plus choisi",
+      "tarifsIndicatifs": "Tarifs indicatifs à valider — paiement en ligne par Tara depuis l'espace client."
+    },
+    "confiance": {
+      "eyebrow": "Pourquoi Nova Assist",
+      "titre": "Une équipe locale, la rigueur d'un prestataire international",
+      "photoRatio": "Photo · 4:5",
+      "photoLegende": "Mains sur un clavier, plan rapproché sobre — ou vue d'un bureau rangé",
+      "confidentialiteTitre": "Confidentialité contractuelle",
+      "confidentialiteTexte": "Accord de non-divulgation signé avant toute mission, accès limités et traçables.",
+      "reactiviteTitre": "Réactivité mesurée",
+      "reactiviteTexte": "Chaque demande est horodatée. Vous recevez le délai de réponse réel, pas une promesse.",
+      "ancrageTitre": "Ancrage camerounais",
+      "ancrageTexte": "Même fuseau, mêmes usages, WhatsApp d'abord. Vos clients parlent à quelqu'un qui les comprend."
+    },
+    "cta": {
+      "titre": "Dites-nous ce qui vous prend du temps.",
+      "texte": "Réponse sous 24 h ouvrées, devis gratuit et sans engagement.",
+      "telechargerBrochure": "Télécharger la brochure"
+    }
+  },
+  "chiffres": {
+    "reponse": "Temps de réponse moyen",
+    "reponseCourt": "Réponse moyenne",
+    "disponibilite": "Disponibilité de l'équipe",
+    "disponibiliteCourt": "Disponibilité",
+    "confidentialite": "Confidentialité contractuelle",
+    "confidentialiteCourt": "Confidentialité",
+    "formules": "Formules, sans engagement long",
+    "formulesCourt": "Formules"
+  },
+  "services": {
+    "eyebrow": "Ce que nous prenons en charge",
+    "titre": "Déléguez ce qui vous ralentit",
+    "voirTous": "Voir tous les services",
+    "voirSix": "Voir les 6 services",
+    "01": {
+      "titre": "Relation client",
+      "resume": "Appels entrants, WhatsApp Business et emails traités en votre nom, avec vos réponses types.",
+      "detail": "Appels entrants, WhatsApp Business et emails traités en votre nom, avec vos réponses types et votre ton.",
+      "formules": "Toutes formules"
+    },
+    "02": {
+      "titre": "Prise de rendez-vous",
+      "resume": "Agenda tenu à jour, rappels aux clients, réduction des rendez-vous manqués.",
+      "detail": "Agenda tenu à jour, rappels envoyés la veille, réduction nette des rendez-vous manqués.",
+      "formules": "Toutes formules"
+    },
+    "03": {
+      "titre": "Recouvrement",
+      "resume": "Relances de factures impayées, suivi des échéances, reporting hebdomadaire.",
+      "detail": "Relances de factures impayées selon un calendrier convenu, suivi des échéances et reporting.",
+      "formules": "Pro · Premium"
+    },
+    "04": {
+      "titre": "Tâches administratives",
+      "resume": "Saisie, devis, factures, classement de documents et gestion de boîte mail.",
+      "detail": "Saisie, devis, factures, classement de documents et gestion quotidienne de la boîte mail.",
+      "formules": "Toutes formules"
+    },
+    "05": {
+      "titre": "Community management",
+      "resume": "Publications, réponses aux messages et commentaires, veille sur vos pages.",
+      "detail": "Publications programmées, réponses aux messages et commentaires, veille sur vos pages.",
+      "formules": "Premium · option"
+    },
+    "06": {
+      "titre": "Support commercial",
+      "resume": "Qualification des prospects, suivi des devis envoyés, plus aucune piste oubliée.",
+      "detail": "Qualification des prospects, suivi des devis envoyés : plus aucune piste oubliée faute de relance.",
+      "formules": "Pro · Premium"
+    }
+  },
+  "formules": {
+    "unite": "FCFA / mois",
+    "essentiel": {
+      "nom": "Essentiel",
+      "pour": "Indépendant, commerce, jeune structure.",
+      "pourCourt": "Pour un indépendant ou un commerce.",
+      "cta": "Choisir Essentiel",
+      "inclus": [
+        "20 h d'assistance par mois",
+        "WhatsApp et emails",
+        "Prise de rendez-vous",
+        "Rapport mensuel"
+      ]
+    },
+    "professionnel": {
+      "nom": "Professionnel",
+      "pour": "PME, école, clinique, cabinet.",
+      "pourCourt": "Pour une PME, une école, une clinique.",
+      "cta": "Choisir Professionnel",
+      "inclus": [
+        "60 h d'assistance par mois",
+        "Appels entrants inclus",
+        "Relance et recouvrement",
+        "Suivi commercial des devis",
+        "Rapport hebdomadaire"
+      ]
+    },
+    "premium": {
+      "nom": "Premium",
+      "pour": "Groupe multi-sites, forte volumétrie.",
+      "pourCourt": "Pour un cabinet ou un groupe multi-sites.",
+      "cta": "Choisir Premium",
+      "inclus": [
+        "Assistance dédiée en continu",
+        "Tous les canaux, 6j / 7",
+        "Community management",
+        "Interlocutrice attitrée",
+        "Reporting sur mesure"
+      ]
+    }
+  },
+  "temoignages": {
+    "eyebrow": "Ils nous font confiance",
+    "titre": "Témoignages clients",
+    "videoBadge": "Vidéo · 1 min max",
+    "cliniqueDouala": {
+      "citation": "« Emplacement pour le retour client filmé : le problème avant, ce qui a changé, le résultat. »",
+      "auteur": "Nom à compléter",
+      "fonction": "Directrice, Clinique — Douala",
+      "legendeVideo": "Témoignage filmé au téléphone, cadrage vertical recadré"
+    },
+    "commerceYaounde": {
+      "citation": "« Emplacement pour un témoignage écrit. Deux à trois phrases suffisent : le problème avant, ce qui a changé, le résultat concret obtenu. »",
+      "auteur": "Nom à compléter",
+      "fonction": "Gérant, Commerce — Yaoundé"
+    },
+    "ecoleDouala": {
+      "citation": "« Emplacement pour un second retour filmé, sur un métier différent du premier. »",
+      "auteur": "Nom à compléter",
+      "fonction": "Fondateur, École — Douala",
+      "legendeVideo": "Deuxième témoignage filmé"
+    },
+    "quatrieme": {
+      "citation": "« Quatrième emplacement. Les cartes s'empilent au défilement : ajoutez autant de retours clients que nécessaire, écrits ou filmés. »",
+      "auteur": "Nom à compléter",
+      "fonction": "Fonction, Entreprise — Ville"
+    },
+    "voirVideo": "Voir la vidéo"
+  }
+}

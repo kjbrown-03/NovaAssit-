@@ -1,0 +1,46 @@
+# Scan DAST StackHawk sur chaque pull request et sur main.
+#
+# Secret à créer dans Settings > Secrets and variables > Actions :
+#   HAWK_API_KEY   clé d'API StackHawk
+# Variable (Variables > Actions), non secrète :
+#   HAWK_APP_ID    applicationId de l'application StackHawk
+name: StackHawk
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  dast:
+    name: HawkScan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build
+
+      # HawkScan a besoin de l'application en marche : on la démarre en tâche
+      # de fond et on attend qu'elle réponde avant de scanner.
+      - name: Démarrer le site
+        run: |
+          npm run start &
+          npx --yes wait-on http://localhost:3000 --timeout 120000
+
+      - name: HawkScan
+        uses: stackhawk/hawkscan-action@v2
+        env:
+          HAWK_APP_ID: ${{ vars.HAWK_APP_ID }}
+          HAWK_ENV: CI
+          HAWK_HOST: http://localhost:3000
+        with:
+          apiKey: ${{ secrets.HAWK_API_KEY }}
+          configurationFiles: stackhawk.yml
