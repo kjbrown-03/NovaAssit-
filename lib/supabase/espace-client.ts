@@ -100,10 +100,13 @@ const LIBELLE_STATUT: Record<StatutDemande, string> = {
 
 export const libelleStatut = (s: StatutDemande) => LIBELLE_STATUT[s];
 
+/* Pastilles de statut : fond très pâle, texte foncé de la même famille et
+   anneau fin — les classes vivent dans `app/globals.css`. La couleur ne porte
+   jamais seule le sens : chaque statut est aussi accompagné d'une icône. */
 export const STYLE_STATUT: Record<StatutDemande, string> = {
-  en_cours: "bg-gold text-navy",
-  attente_retour: "border border-gold-line text-gold-ink",
-  terminee: "border border-line text-gray-mid",
+  en_cours: "na-statut na-statut-cours",
+  attente_retour: "na-statut na-statut-attente",
+  terminee: "na-statut na-statut-succes",
 };
 
 const LIBELLE_FORMULE: Record<Formule, string> = {

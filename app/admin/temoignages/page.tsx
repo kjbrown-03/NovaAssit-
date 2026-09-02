@@ -1,5 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  AlertTriangle,
+  ArrowRight,
+  CheckCircle,
+  Clock,
+  Inbox,
+  ShieldAlert,
+  Star,
+  Video,
+} from "lucide-react";
 
 import { Wordmark } from "@/components/wordmark";
 import {
@@ -42,20 +52,23 @@ export default async function ModerationTemoignages({
    * est ouverte, et le bandeau ci-dessous le dit sans détour.
    *
    * ⚠️ Ce n'est pas de la sécurité : une clé en clair dans l'URL fuit par
-   * l'historique et les journaux. À remplacer par la session admin dès que la
-   * connexion sera branchée.
+   * l'historique et les journaux. À remplacer par la session admin.
    */
   const cleAttendue = process.env.NOVA_ADMIN_CLE;
   const { cle } = await searchParams;
 
   if (cleAttendue && cle !== cleAttendue) {
     return (
-      <main id="contenu" className="mx-auto max-w-[640px] px-5 py-20">
-        <h1 className="mb-3 text-[28px] text-navy">Accès réservé</h1>
-        <p className="text-[15px] text-slate-mid">
-          Cette page demande la clé d&apos;administration. Ajoutez-la à l&apos;adresse :
-          <code className="ml-1 font-mono text-[14px] text-gold-ink">?cle=…</code>
-        </p>
+      <main id="contenu" className="na-console min-h-svh px-5 py-20">
+        <div className="mx-auto max-w-[560px]">
+          <div className="na-carte na-monte rounded-3xl p-8 shadow-sm">
+            <h1 className="mb-3 text-[26px] text-navy">Accès réservé</h1>
+            <p className="text-[15px] leading-[1.6] text-slate-mid">
+              Cette page demande la clé d&apos;administration. Ajoutez-la à l&apos;adresse :
+              <code className="ml-1 font-mono text-[14px] text-gold-ink">?cle=…</code>
+            </p>
+          </div>
+        </div>
       </main>
     );
   }
@@ -71,70 +84,88 @@ export default async function ModerationTemoignages({
   const nonLues = notifications.filter((n) => !n.lueLe);
   const enTrop = Math.max(0, valides - MAX_ACCUEIL);
 
+  const compteurs = [
+    { libelle: "En attente", valeur: enAttente.length, Icone: Clock, ton: "attente" },
+    { libelle: `À l'accueil · max ${MAX_ACCUEIL}`, valeur: aLAccueil.length, Icone: Star, ton: "succes" },
+    { libelle: "En file d'attente", valeur: enTrop, Icone: Inbox, ton: "cours" },
+    { libelle: "Notifications", valeur: nonLues.length, Icone: AlertTriangle, ton: "neutre" },
+  ] as const;
+
   return (
-    <main id="contenu" className="mx-auto flex max-w-[900px] flex-col gap-8 px-5 py-10 lg:py-14">
-      <header className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <Wordmark size={20} tone="on-paper" />
-          <Link href="/" className="text-[14px] text-gold-ink hover:underline">
-            Retour au site
-          </Link>
-        </div>
-        <h1 className="text-[30px] text-navy lg:text-[38px]">Modération des témoignages</h1>
-      </header>
-
-      {!cleAttendue && (
-        <p
-          role="alert"
-          className="border-l-[3px] border-[#b0203a] bg-stone-50 px-4 py-3 text-[14px] leading-[1.55] text-slate-deep"
-        >
-          <b>Cette page n&apos;est pas protégée.</b> N&apos;importe qui connaissant son adresse peut
-          publier un témoignage sur la page d&apos;accueil. Définissez{" "}
-          <code className="font-mono text-[13px] text-gold-ink">NOVA_ADMIN_CLE</code> dans{" "}
-          <code className="font-mono text-[13px] text-gold-ink">.env.local</code> en attendant la
-          vraie authentification.
-        </p>
-      )}
-
-      {/* ------------------------------------------------------------ compteurs */}
-      <dl className="grid grid-cols-2 gap-px border border-line bg-line lg:grid-cols-4">
-        {[
-          { libelle: "En attente", valeur: enAttente.length },
-          { libelle: `À l'accueil (max ${MAX_ACCUEIL})`, valeur: aLAccueil.length },
-          { libelle: "En file d'attente", valeur: enTrop },
-          { libelle: "Notifications", valeur: nonLues.length },
-        ].map((carte) => (
-          <div key={carte.libelle} className="flex flex-col gap-1 bg-paper px-5 py-4">
-            <dd className="font-serif text-[30px] text-navy">{carte.valeur}</dd>
-            <dt className="font-mono text-[10px] tracking-[0.14em] text-gold-ink uppercase">
-              {carte.libelle}
-            </dt>
+    <main id="contenu" className="na-console min-h-svh px-5 py-10 lg:py-14">
+      <div className="mx-auto flex max-w-[940px] flex-col gap-8">
+        <header className="na-monte flex flex-col gap-5">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <Wordmark size={20} tone="on-paper" />
+            <Link
+              href="/"
+              className="group flex items-center gap-1.5 text-[14px] text-gold-ink hover:underline"
+            >
+              Retour au site
+              <ArrowRight className="na-fleche h-4 w-4" aria-hidden />
+            </Link>
           </div>
-        ))}
-      </dl>
+          <div className="flex flex-col gap-2">
+            <span className="na-eyebrow">Back-office</span>
+            <h1 className="text-[30px] text-navy lg:text-[38px]">Modération des témoignages</h1>
+          </div>
+        </header>
 
-      {enTrop > 0 && (
-        <p className="text-[14px] text-slate-mid italic">
-          {enTrop} témoignage{enTrop > 1 ? "s" : ""} validé{enTrop > 1 ? "s" : ""} au-delà des{" "}
-          {MAX_ACCUEIL} places. Dépubliez-en un pour lui laisser la place.
-        </p>
-      )}
+        {!cleAttendue && (
+          <div
+            role="alert"
+            className="na-alerte na-carte na-monte border-[#f0c2cb] bg-[#fdeef0]/80 shadow-sm"
+          >
+            <span className="na-alerte-icone bg-[#f8d6dc]">
+              <ShieldAlert className="h-5 w-5 text-[#8f1b30]" aria-hidden />
+            </span>
+            <div className="flex flex-col gap-1">
+              <h2 className="text-[15px] font-bold text-[#7a1729]">Page non protégée</h2>
+              <p className="text-[14px] leading-[1.55] text-[#8f1b30]/90">
+                N&apos;importe qui connaissant son adresse peut publier un témoignage sur la page
+                d&apos;accueil. Définissez{" "}
+                <code className="font-mono text-[13px]">NOVA_ADMIN_CLE</code> dans{" "}
+                <code className="font-mono text-[13px]">.env.local</code> en attendant la vraie
+                authentification.
+              </p>
+            </div>
+          </div>
+        )}
 
-      {/* ------------------------------------------------------------- à valider */}
-      <section className="flex flex-col gap-4">
-        <h2 className="text-[22px] text-navy">À valider</h2>
-        {enAttente.length === 0 ? (
-          <p className="border border-line px-5 py-6 text-[15px] text-gray-mid">
-            Rien en attente.
+        {/* ---------------------------------------------------------- compteurs */}
+        <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {compteurs.map(({ libelle, valeur, Icone, ton }, i) => (
+            <div
+              key={libelle}
+              style={{ "--na-delai": `${i * 70}ms` } as React.CSSProperties}
+              className="na-carte na-carte-actif na-monte flex flex-col gap-3 rounded-3xl p-5 shadow-sm"
+            >
+              <span className={`na-statut na-statut-${ton} self-start`}>
+                <Icone className="h-[14px] w-[14px]" aria-hidden />
+                {libelle}
+              </span>
+              <dd className="font-serif text-[34px] leading-none text-navy">{valeur}</dd>
+              <dt className="sr-only">{libelle}</dt>
+            </div>
+          ))}
+        </dl>
+
+        {enTrop > 0 && (
+          <p className="text-[14px] text-slate-mid italic">
+            {enTrop} témoignage{enTrop > 1 ? "s" : ""} validé{enTrop > 1 ? "s" : ""} au-delà des{" "}
+            {MAX_ACCUEIL} places. Dépubliez-en un pour lui laisser la place.
           </p>
-        ) : (
-          enAttente.map((temoignage) => (
-            <Carte key={temoignage.id} temoignage={temoignage}>
-              <form action={validerTemoignage} className="contents">
+        )}
+
+        {/* ------------------------------------------------------------- à valider */}
+        <Bloc titre="À valider" vide="Rien en attente." elements={enAttente}>
+          {(temoignage) => (
+            <>
+              <form action={validerTemoignage}>
                 <input type="hidden" name="id" value={temoignage.id} />
                 <button
                   type="submit"
-                  className="bg-navy px-5 py-[10px] text-[14px] font-semibold text-white transition-opacity hover:opacity-90"
+                  className="na-presse rounded-full bg-navy px-5 py-[10px] text-[14px] font-semibold text-white transition-opacity hover:opacity-90"
                 >
                   Publier à l&apos;accueil
                 </button>
@@ -144,92 +175,119 @@ export default async function ModerationTemoignages({
                 <input
                   name="motif"
                   placeholder="Motif du refus (facultatif)"
-                  className="min-w-[180px] flex-1 border border-line px-3 py-[9px] text-[14px] outline-none focus:border-gold"
+                  className="min-w-[180px] flex-1 rounded-full border border-line bg-paper px-4 py-[9px] text-[14px] outline-none focus:border-gold"
                 />
                 <button
                   type="submit"
-                  className="border border-line px-5 py-[9px] text-[14px] text-slate-deep transition-colors hover:border-[#b0203a] hover:text-[#b0203a]"
+                  className="na-presse rounded-full border border-line px-5 py-[9px] text-[14px] text-slate-deep transition-colors hover:border-[#8f1b30] hover:text-[#8f1b30]"
                 >
                   Refuser
                 </button>
               </form>
-            </Carte>
-          ))
-        )}
-      </section>
+            </>
+          )}
+        </Bloc>
 
-      {/* -------------------------------------------------------- à l'accueil */}
-      <section className="flex flex-col gap-4">
-        <h2 className="text-[22px] text-navy">Publiés à l&apos;accueil</h2>
-        {aLAccueil.length === 0 ? (
-          <p className="border border-line px-5 py-6 text-[15px] text-gray-mid">
-            Aucun témoignage publié — l&apos;accueil affiche les emplacements de réserve.
-          </p>
-        ) : (
-          aLAccueil.map((temoignage, rang) => (
-            <Carte key={temoignage.id} temoignage={temoignage} rang={rang + 1}>
-              <form action={depublierTemoignage}>
-                <input type="hidden" name="id" value={temoignage.id} />
-                <button
-                  type="submit"
-                  className="border border-line px-5 py-[9px] text-[14px] text-slate-deep transition-colors hover:border-gold hover:text-gold-ink"
-                >
-                  Dépublier
-                </button>
-              </form>
-            </Carte>
-          ))
-        )}
-      </section>
+        {/* -------------------------------------------------------- à l'accueil */}
+        <Bloc
+          titre="Publiés à l'accueil"
+          vide="Aucun témoignage publié — l'accueil affiche les emplacements de réserve."
+          elements={aLAccueil}
+          rangs
+        >
+          {(temoignage) => (
+            <form action={depublierTemoignage}>
+              <input type="hidden" name="id" value={temoignage.id} />
+              <button
+                type="submit"
+                className="na-presse rounded-full border border-line px-5 py-[9px] text-[14px] text-slate-deep transition-colors hover:border-gold hover:text-gold-ink"
+              >
+                Dépublier
+              </button>
+            </form>
+          )}
+        </Bloc>
 
-      {/* ------------------------------------------------------------- refusés */}
-      {refuses.length > 0 && (
-        <section className="flex flex-col gap-4">
-          <h2 className="text-[22px] text-navy">Refusés</h2>
-          {refuses.map((temoignage) => (
-            <Carte key={temoignage.id} temoignage={temoignage}>
+        {/* ------------------------------------------------------------- refusés */}
+        {refuses.length > 0 && (
+          <Bloc titre="Refusés" vide="" elements={refuses}>
+            {(temoignage) => (
               <form action={validerTemoignage}>
                 <input type="hidden" name="id" value={temoignage.id} />
                 <button
                   type="submit"
-                  className="border border-line px-5 py-[9px] text-[14px] text-slate-deep transition-colors hover:border-gold hover:text-gold-ink"
+                  className="na-presse rounded-full border border-line px-5 py-[9px] text-[14px] text-slate-deep transition-colors hover:border-gold hover:text-gold-ink"
                 >
                   Revenir dessus
                 </button>
               </form>
-            </Carte>
-          ))}
-        </section>
-      )}
-
-      {/* -------------------------------------------------------- notifications */}
-      <section className="flex flex-col gap-3">
-        <h2 className="text-[22px] text-navy">Notifications</h2>
-        {notifications.length === 0 ? (
-          <p className="text-[15px] text-gray-mid">Aucune notification.</p>
-        ) : (
-          <ul className="flex flex-col gap-2">
-            {notifications.slice(0, 10).map((notification) => (
-              <li
-                key={notification.id}
-                className="flex flex-wrap justify-between gap-3 border-b border-line-soft py-2 text-[14px]"
-              >
-                <span className={notification.lueLe ? "text-gray-mid" : "text-navy"}>
-                  {notification.message}
-                </span>
-                <span className="font-mono text-[12px] text-muted">
-                  {dateCourte(notification.creeLe)}
-                </span>
-              </li>
-            ))}
-          </ul>
+            )}
+          </Bloc>
         )}
-        <p className="text-[13px] text-muted italic">
-          L&apos;envoi d&apos;un email à chaque dépôt reste à brancher — voir le commentaire dans{" "}
-          <code className="font-mono">lib/temoignages/actions.ts</code>.
-        </p>
-      </section>
+
+        {/* -------------------------------------------------------- notifications */}
+        <section className="flex flex-col gap-3">
+          <h2 className="text-[20px] text-navy">Notifications</h2>
+          <div className="na-carte rounded-3xl p-5 shadow-sm">
+            {notifications.length === 0 ? (
+              <p className="text-[15px] text-gray-mid">Aucune notification.</p>
+            ) : (
+              <ul className="flex flex-col">
+                {notifications.slice(0, 10).map((notification, i) => (
+                  <li
+                    key={notification.id}
+                    className={`flex flex-wrap items-baseline justify-between gap-3 py-[10px] text-[14px] ${
+                      i > 0 ? "border-t border-line-soft" : ""
+                    }`}
+                  >
+                    <span className={notification.lueLe ? "text-gray-mid" : "text-navy"}>
+                      {notification.message}
+                    </span>
+                    <span className="font-mono text-[12px] text-muted">
+                      {dateCourte(notification.creeLe)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <p className="text-[13px] text-muted italic">
+            L&apos;envoi d&apos;un email à chaque dépôt reste à brancher — voir le commentaire dans{" "}
+            <code className="font-mono">lib/temoignages/actions.ts</code>.
+          </p>
+        </section>
+      </div>
     </main>
+  );
+}
+
+/** Une section de la file, avec son titre, son vide et ses cartes. */
+function Bloc({
+  titre,
+  vide,
+  elements,
+  rangs = false,
+  children,
+}: {
+  titre: string;
+  vide: string;
+  elements: Temoignage[];
+  rangs?: boolean;
+  children: (temoignage: Temoignage) => React.ReactNode;
+}) {
+  return (
+    <section className="flex flex-col gap-3">
+      <h2 className="text-[20px] text-navy">{titre}</h2>
+      {elements.length === 0 ? (
+        <p className="na-carte rounded-3xl px-5 py-6 text-[15px] text-gray-mid shadow-sm">{vide}</p>
+      ) : (
+        elements.map((temoignage, i) => (
+          <Carte key={temoignage.id} temoignage={temoignage} rang={rangs ? i + 1 : undefined}>
+            {children(temoignage)}
+          </Carte>
+        ))
+      )}
+    </section>
   );
 }
 
@@ -242,15 +300,35 @@ function Carte({
   rang?: number;
   children: React.ReactNode;
 }) {
+  const estVideo = temoignage.format === "video";
+
   return (
-    <article className="flex flex-col gap-4 border border-line p-5 lg:p-6">
-      <div className="flex flex-wrap items-baseline justify-between gap-3">
-        <span className="font-mono text-[10px] tracking-[0.14em] text-gold-ink uppercase">
-          {rang ? `Place ${rang} · ` : ""}
-          {temoignage.format === "video" ? "Vidéo" : "Écrit"} · {dateCourte(temoignage.soumisLe)}
-        </span>
+    <article className="na-carte na-carte-actif na-monte flex flex-col gap-4 rounded-3xl p-5 shadow-sm lg:p-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className={`na-statut ${estVideo ? "na-statut-cours" : "na-statut-neutre"}`}>
+            {estVideo ? (
+              <Video className="h-[14px] w-[14px]" aria-hidden />
+            ) : (
+              <CheckCircle className="h-[14px] w-[14px]" aria-hidden />
+            )}
+            {estVideo ? "Vidéo" : "Écrit"}
+          </span>
+          {rang && (
+            <span className="na-statut na-statut-succes">
+              <Star className="h-[14px] w-[14px]" aria-hidden />
+              Place {rang}
+            </span>
+          )}
+          <span className="font-mono text-[12px] text-muted">
+            {dateCourte(temoignage.soumisLe)}
+          </span>
+        </div>
         {temoignage.motifRefus && (
-          <span className="text-[13px] text-[#b0203a]">Refusé : {temoignage.motifRefus}</span>
+          <span className="na-statut na-statut-alerte">
+            <AlertTriangle className="h-[14px] w-[14px]" aria-hidden />
+            {temoignage.motifRefus}
+          </span>
         )}
       </div>
 
@@ -276,7 +354,9 @@ function Carte({
         <span className="text-[13px] text-muted">{temoignage.auteurCompte}</span>
       </p>
 
-      <div className="flex flex-wrap items-center gap-3 border-t border-line-soft pt-4">{children}</div>
+      <div className="flex flex-wrap items-center gap-3 border-t border-line-soft pt-4">
+        {children}
+      </div>
     </article>
   );
 }

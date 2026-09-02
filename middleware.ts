@@ -4,6 +4,11 @@ import { NextResponse, type NextRequest } from "next/server";
 /** Préfixes exigeant une session valide. */
 const ROUTES_PROTEGEES = [
   "/espace-client",
+  /* Le back-office exige une session ; le rôle `admin`, lui, est vérifié dans
+     la page — il demande une lecture en base que le middleware n'a pas à
+     payer sur chaque requête. */
+  "/admin",
+  "/devis",
   /* Accessible seulement par le lien de réinitialisation, qui ouvre une
      session en passant par /auth/confirm. */
   "/mot-de-passe-nouveau",
@@ -76,9 +81,22 @@ export async function middleware(requete: NextRequest) {
 }
 
 export const config = {
-  /* Tout sauf les fichiers statiques et les images — inutile d'y vérifier une
-     session, et coûteux à chaque requête. */
+  /**
+   * Uniquement les routes qui ont besoin d'une session.
+   *
+   * Le matcher couvrait auparavant tout le site sauf les fichiers statiques.
+   * Or `getUser()` interroge Supabase par le reseau : mesure a 350-580 ms par
+   * appel depuis ce poste. Chaque page vitrine — accueil, services, blog,
+   * contact — payait donc un demi-tour de reseau avant meme de commencer a
+   * rendre, pour une session dont elle n'a aucun usage.
+   *
+   * Rafraichir le jeton sur les pages publiques n'apporte rien : il est
+   * revalide ici des que le visiteur entre dans l'espace client.
+   */
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|pdf)$).*)",
+    "/espace-client/:path*",
+    "/admin/:path*",
+    "/mot-de-passe-nouveau/:path*",
+    "/connexion",
   ],
 };

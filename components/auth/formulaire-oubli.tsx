@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { Loader2, Mail } from "lucide-react";
 import { creerClientNavigateur } from "@/lib/supabase/client";
+import { ShinyButton } from "@/components/ui/shiny-button";
+
+import { reinitialiserMotDePasse } from "@/lib/actions-auth";
 
 /**
  * Demande de réinitialisation.
@@ -21,10 +24,7 @@ export function FormulaireOubli() {
     event.preventDefault();
     setEnCours(true);
     try {
-      const supabase = creerClientNavigateur();
-      await supabase.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: `${window.location.origin}/auth/confirm?next=/mot-de-passe-nouveau`,
-      });
+      await reinitialiserMotDePasse(email.trim(), window.location.origin);
     } catch {
       /* Même en cas d'échec réseau, on n'en dit pas plus : le message ci-dessous
          reste le même. L'utilisateur peut relancer. */
@@ -65,14 +65,14 @@ export function FormulaireOubli() {
         </div>
       </div>
 
-      <button
+      <ShinyButton
         type="submit"
         disabled={enCours}
-        className="mt-1 flex items-center justify-center gap-2 border border-white/70 px-6 py-[15px] text-[16px] font-semibold text-white transition-colors hover:bg-white hover:text-navy disabled:cursor-not-allowed disabled:opacity-60"
+        className="mt-1 flex items-center justify-center gap-2 !px-6 !py-[15px] !text-[16px] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {enCours && <Loader2 aria-hidden size={17} className="animate-spin" />}
         Envoyer le lien
-      </button>
+      </ShinyButton>
     </form>
   );
 }

@@ -70,7 +70,8 @@
     "cta": {
       "titre": "Dites-nous ce qui vous prend du temps.",
       "texte": "Réponse sous 24 h ouvrées, devis gratuit et sans engagement.",
-      "telechargerBrochure": "Télécharger la brochure"
+      "telechargerBrochure": "Télécharger la brochure",
+      "voirFormules": "Voir les formules"
     }
   },
   "chiffres": {

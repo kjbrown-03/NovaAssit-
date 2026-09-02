@@ -149,7 +149,6 @@ export const CardTransformed = React.forwardRef<HTMLDivElement, CardStickyProps>
 
     return (
       <motion.div
-        layout="position"
         ref={ref}
         style={{
           top: index * incrementY,

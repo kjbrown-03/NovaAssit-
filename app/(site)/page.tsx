@@ -104,7 +104,7 @@ export default function Accueil() {
             <li
               key={service.numero}
               data-reveal
-              style={revealDelay(i * 70)}
+              style={revealDelay(i * 40)}
               className="group relative flex flex-col gap-[11px] border-t border-line-soft bg-paper py-[18px] transition-colors duration-300 lg:border-t-0 lg:px-[30px] lg:py-8 lg:hover:bg-stone-50"
             >
               <span className="font-mono text-[11px] text-gold lg:text-[12px]">{service.numero}</span>
@@ -143,7 +143,7 @@ export default function Accueil() {
             <li
               key={formule.id}
               data-reveal
-              style={revealDelay(i * 90)}
+              style={revealDelay(i * 50)}
               className={`flex flex-col gap-[14px] p-6 transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(11,31,58,0.12)] lg:gap-[22px] lg:px-8 lg:py-9 ${
                 formule.miseEnAvant
                   ? "border-2 border-gold lg:px-[31px] lg:py-[35px]"
@@ -242,9 +242,15 @@ export default function Accueil() {
           </div>
           <div className="flex shrink-0 flex-col gap-[14px] sm:flex-row">
             <ButtonPrimary href="/devis">{tc("demanderDevis")}</ButtonPrimary>
-            <ButtonOutline href="/brochure-nova-assist.pdf" external>
-              {t("cta.telechargerBrochure")}
-            </ButtonOutline>
+            {/* La brochure PDF est un livrable du cahier des charges (§1.4) mais
+                le fichier n'existe pas encore. Le lien pointait vers un 404 ;
+                en attendant, ce bouton mène aux formules — qui portent la même
+                information. Pour rétablir la brochure : déposer le PDF dans
+                `public/brochure-nova-assist.pdf` et remplacer ce bouton par
+                <ButtonOutline href="/brochure-nova-assist.pdf" external>
+                  {t("cta.telechargerBrochure")}
+                </ButtonOutline> */}
+            <ButtonOutline href="/offres">{t("cta.voirFormules")}</ButtonOutline>
           </div>
         </div>
       </section>

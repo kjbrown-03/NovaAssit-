@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ButtonPrimary, Eyebrow, PhotoSlot } from "@/components/ui";
 import { SERVICES } from "@/lib/content";
 import { EXEMPLES } from "@/lib/exemples-photos";
+import { revealDelay } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Nos services",
@@ -57,12 +58,14 @@ export default function Services() {
       </section>
 
       {/* ------------------------------------------------------------ six lignes */}
-      <section data-reveal className="mx-auto max-w-[1180px] px-5 pb-12 lg:px-14 lg:pb-[60px]">
+      <section className="mx-auto max-w-[1180px] px-5 pb-12 lg:px-14 lg:pb-[60px]">
         <h2 className="sr-only">Le détail des six domaines</h2>
         <ul className="flex flex-col">
           {SERVICES.map((service, i) => (
             <li
               key={service.numero}
+              data-reveal
+              style={revealDelay(i * 40)}
               className={`group grid items-baseline gap-3 border-t border-line py-6 transition-colors duration-300 lg:grid-cols-[56px_1.1fr_1.5fr_150px] lg:gap-[26px] lg:px-4 lg:py-7 lg:hover:bg-stone-50 ${
                 i === SERVICES.length - 1 ? "border-b" : ""
               }`}

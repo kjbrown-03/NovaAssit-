@@ -117,7 +117,7 @@
     border-radius: 50%;
     background: linear-gradient(-45deg, var(--color-gold-ink), var(--color-gold));
     transform: translateY(-50%);
-    transition: transform 1.4s ease-in-out;
+    transition: transform 0.8s ease-in-out;
   }
   .na-auth[data-mode="inscription"] .na-auth-disque {
     transform: translate(100%, -50%);
@@ -138,9 +138,14 @@
     min-height: 100svh;
     width: 50%;
     margin-left: 50%;
+    /* `minmax(0, 1fr)` plutôt que la colonne implicite : sans lui, la taille
+       minimale automatique d'un élément de grille l'autorise à dépasser la
+       colonne, et le formulaire sort du cadre — que `overflow: hidden` rogne
+       au lieu de le laisser défiler. */
+    grid-template-columns: minmax(0, 1fr);
     justify-items: center;
     padding: 48px 24px;
-    transition: transform 1.4s ease-in-out;
+    transition: transform 0.8s ease-in-out;
   }
   .na-auth[data-mode="inscription"] .na-auth-pile {
     transform: translateX(-100%);
@@ -149,10 +154,11 @@
   .na-auth-form {
     grid-area: 1 / 1 / 2 / 2;
     width: 100%;
-    max-width: 400px;
+    min-width: 0;
+    max-width: min(400px, 100%);
     transition:
-      opacity 0.4s ease-in-out,
-      transform 0.6s ease-in-out;
+      opacity 0.25s ease-in-out,
+      transform 0.35s ease-in-out;
   }
   .na-auth-form[data-actif="false"] {
     opacity: 0;
@@ -210,12 +216,11 @@
     .na-auth {
       --na-disque: 1400px;
       --na-bande: 160px;
-      /* Le formulaire d'inscription doit tenir entre les deux bandes dorées,
-         quitte à ce que la page défile un peu sur les petits écrans. Hauteur
-         fixée dans une variable : le disque s'en sert pour viser le bas exact
-         du bloc, que ce soit la fenêtre ou ce plancher qui l'emporte. */
-      --na-hauteur: max(100svh, 880px);
-      min-height: var(--na-hauteur);
+      /* Aucune hauteur imposée : le bloc suit son contenu, et le disque se
+         cale sur ses deux bords (`top: 0` puis `top: 100%`). Les bandes dorées
+         tombent donc toujours en face des panneaux, que le formulaire soit
+         court ou long — contrairement à une hauteur devinée à l'avance, qui
+         laissait l'or recouvrir le bas de l'inscription. */
     }
 
     .na-auth-disque {
@@ -223,9 +228,15 @@
       right: auto;
       left: 50%;
       transform: translate(-50%, calc(var(--na-bande) - var(--na-disque)));
+      /* `top` est animé avec la transformation : c'est lui qui porte le
+         basculement d'un bord à l'autre. */
+      transition:
+        transform 0.8s ease-in-out,
+        top 0.8s ease-in-out;
     }
     .na-auth[data-mode="inscription"] .na-auth-disque {
-      transform: translate(-50%, calc(var(--na-hauteur) - var(--na-bande)));
+      top: 100%;
+      transform: translate(-50%, calc(-1 * var(--na-bande)));
     }
 
     .na-auth-pile,
@@ -233,10 +244,9 @@
       width: 100%;
       margin-left: 0;
       transform: none;
-      min-height: var(--na-hauteur);
       /* Le formulaire commence sous la bande dorée haute et s'arrête avant
          la bande basse, au lieu de glisser dessous quand il est long. */
-      padding: calc(var(--na-bande) + 20px) 24px;
+      padding: calc(var(--na-bande) + 12px) 20px;
     }
 
     .na-auth-panneaux {
@@ -271,17 +281,11 @@
    ------------------------------------------------------------------ */
 .js [data-reveal] {
   opacity: 0;
-  /* Décalage franc : en dessous de ~30px le mouvement passe inaperçu. */
-  transform: translateY(38px);
-  /* 0,45 s : assez pour que le mouvement se lise, assez court pour qu'un
-     changement d'onglet ne donne pas l'impression d'attendre la page. */
+  transform: translateY(24px);
   transition:
-    opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
   transition-delay: var(--reveal-delay, 0ms);
-  /* will-change retiré : il forçait un layer GPU par section, coûteux
-     en mémoire vidéo sur mobile. Le navigateur promeut automatiquement
-     les éléments animés pendant la transition. */
 }
 
 /* Posée le temps d'un frame sur le premier écran d'une navigation interne :
@@ -722,109 +726,244 @@
 /* ===========================================================================
    Console — habillage des tableaux de bord (espace client, back-office)
 
-   Direction reprise du portfolio : une surface sombre continue, des panneaux
-   de verre à liseré fin, et la *lueur* comme signal de profondeur plutôt que
-   des ombres portées. Transposée à la charte Nova : le quasi-noir devient
-   bleu nuit profond, le néon bleu devient or.
+   Direction reprise d'IMSOP : cartes de verre claires très arrondies, et
+   surtout un système de statuts par teinte — fond très pâle, texte foncé de
+   la même famille, et un anneau fin plutôt qu'une bordure franche. Chaque
+   statut porte une icône : la couleur seule ne doit jamais porter le sens.
 
-   Réservé aux espaces privés. Les pages vitrine gardent le papier clair :
-   c'est justement le contraste qui fait qu'on sait qu'on est « entré ».
+   Transposé à la charte Nova : le bleu médical devient l'or et le bleu nuit.
    =========================================================================== */
 
+/* Fond de console : le blanc bleuté d'IMSOP devient un blanc sablé. */
 .na-console {
-  --console-fond: #061223;
-  --console-verre: rgba(255, 255, 255, 0.045);
-  --console-liseré: rgba(201, 162, 39, 0.18);
-
-  position: relative;
-  background: var(--console-fond);
-  color: var(--color-white, #fff);
-  isolation: isolate;
+  background: #fbfaf7;
 }
 
-/* Halo doré diffus, ancré en haut à gauche : il donne un point d'origine à la
-   lumière et évite la platitude d'un aplat sombre. */
-.na-console::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    radial-gradient(70rem 40rem at 12% -10%, rgba(201, 162, 39, 0.14), transparent 62%),
-    radial-gradient(50rem 34rem at 92% 8%, rgba(18, 41, 74, 0.85), transparent 60%);
+/* Carte de verre. Ni rayon ni ombre ici — chaque appelant pose les siens,
+   comme dans IMSOP, sinon les surcharges deviennent des batailles de
+   spécificité. */
+.na-carte {
+  background: color-mix(in srgb, var(--color-paper, #fff) 80%, transparent);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--color-line, #e2ddd1);
 }
 
-/* Panneau de verre. `backdrop-filter` est décoratif : sur un navigateur qui ne
-   le gère pas, le fond translucide suffit à détacher le panneau. */
-.na-verre {
-  position: relative;
-  border: 1px solid var(--console-liseré);
-  border-radius: 16px;
-  background: var(--console-verre);
-  backdrop-filter: blur(14px);
+/* Bandeau d'alerte : pastille d'icône teintée à gauche, titre, texte, action.
+   Les quatre tons couvrent les états rencontrés dans un tableau de bord. */
+.na-alerte {
+  border-radius: 24px;
+  padding: 20px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.na-alerte > .na-alerte-icone {
+  border-radius: 12px;
+  padding: 8px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
 }
 
-/* Panneau mis en avant — celui que l'œil doit trouver en premier. */
-.na-verre-fort {
-  border-color: rgba(201, 162, 39, 0.42);
-  background: linear-gradient(
-    160deg,
-    rgba(201, 162, 39, 0.13),
-    rgba(255, 255, 255, 0.03) 46%
-  );
-  box-shadow:
-    0 0 0 1px rgba(201, 162, 39, 0.08),
-    0 24px 60px -28px rgba(201, 162, 39, 0.55);
-}
-
-/* Réaction au survol : la carte monte à peine et son liseré s'allume. */
-.na-verre-actif {
-  transition:
-    transform 0.35s cubic-bezier(0.22, 0.61, 0.16, 1),
-    border-color 0.35s ease,
-    box-shadow 0.35s ease;
-}
-.na-verre-actif:hover {
-  transform: translateY(-2px);
-  border-color: rgba(201, 162, 39, 0.45);
-  box-shadow: 0 20px 44px -26px rgba(201, 162, 39, 0.6);
-}
-
-/* Socle lumineux, écho du podium holographique du portfolio : une ellipse
-   dorée posée sous l'indicateur principal. */
-.na-socle::after {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  left: 50%;
-  bottom: -14px;
-  width: 68%;
-  height: 42px;
-  transform: translateX(-50%);
-  pointer-events: none;
-  border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(201, 162, 39, 0.42), transparent 78%);
-  filter: blur(14px);
-}
-
-/* Jauge : la part consommée en or, le reste en creux. */
-.na-jauge {
-  height: 6px;
+/* --- statuts : fond pâle + texte foncé + anneau fin --------------------- */
+.na-statut {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.na-statut-attente {
+  background: #fdf6e3;
+  color: #7a6410;
+  box-shadow: inset 0 0 0 1px rgba(201, 162, 39, 0.28);
+}
+.na-statut-cours {
+  background: #eef3fa;
+  color: #14406f;
+  box-shadow: inset 0 0 0 1px rgba(11, 31, 58, 0.18);
+}
+.na-statut-succes {
+  background: #edf7ef;
+  color: #1c6b34;
+  box-shadow: inset 0 0 0 1px rgba(28, 107, 52, 0.2);
+}
+.na-statut-alerte {
+  background: #fdeef0;
+  color: #8f1b30;
+  box-shadow: inset 0 0 0 1px rgba(143, 27, 48, 0.2);
+}
+.na-statut-neutre {
+  background: var(--color-stone-50, #f7f5f0);
+  color: var(--color-slate-deep, #3a4658);
+  box-shadow: inset 0 0 0 1px var(--color-line, #e2ddd1);
+}
+
+/* Jauge — la part consommée en or. */
+.na-jauge {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-stone-100, #efece4);
   overflow: hidden;
 }
 .na-jauge > span {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--color-gold, #c9a227), #e6c869);
-  box-shadow: 0 0 14px rgba(201, 162, 39, 0.55);
+  background: linear-gradient(90deg, var(--color-gold, #c9a227), #dcbb4e);
+}
+
+/* Bouton flottant d'action principale, repris du FAB d'IMSOP : l'icône
+   pivote à l'approche, le bouton s'enfonce au clic. */
+.na-fab {
+  transition:
+    transform 0.3s ease,
+    background-color 0.3s ease;
+}
+.na-fab:active {
+  transform: scale(0.95);
+}
+.na-fab .na-fab-icone {
+  transition: transform 0.3s ease;
+}
+.na-fab:hover .na-fab-icone {
+  transform: rotate(90deg);
+}
+
+/* Apparition douce vers le haut, comme `animate-fade-in-up` d'IMSOP. */
+@keyframes na-monte {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.na-monte {
+  animation: na-monte 0.45s cubic-bezier(0.22, 0.61, 0.16, 1) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .na-verre-actif:hover {
+  .na-monte {
+    animation: none;
+  }
+  .na-fab:hover .na-fab-icone,
+  .na-fab:active {
     transform: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Largeur de page stable
+
+   Sans cette réserve, l'apparition des cartes — qui démarre 10 px plus bas
+   que leur place — allonge brièvement la page, la barre de défilement
+   apparaît puis disparaît, et toute la mise en page se rétrécit et s'élargit
+   de quelques pixels. C'est ce battement qu'on prenait pour un effet raté.
+
+   `stable` réserve la gouttière en permanence : la largeur ne bouge plus,
+   que la barre soit là ou non.
+   -------------------------------------------------------------------------- */
+html {
+  scrollbar-gutter: stable;
+}
+
+/* --------------------------------------------------------------------------
+   Console — couche d'interaction
+
+   IMSOP ne se contente pas de cartes teintées : presque tout réagit au survol,
+   à l'appui, à l'arrivée. Sans ça l'habillage paraît figé — c'est ce qui
+   manquait à la première passe.
+   -------------------------------------------------------------------------- */
+
+/* Carte réactive : elle monte à peine, son ombre s'ouvre, son liseré tiède. */
+.na-carte-actif {
+  transition:
+    transform 0.28s cubic-bezier(0.22, 0.61, 0.16, 1),
+    box-shadow 0.28s ease,
+    border-color 0.28s ease;
+}
+.na-carte-actif:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--color-gold, #c9a227) 45%, transparent);
+  box-shadow: 0 18px 36px -22px rgba(11, 31, 58, 0.35);
+}
+
+/* Ligne de liste : fond très légèrement teinté au survol, comme les rangées
+   de dossiers d'IMSOP. */
+.na-ligne {
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+.na-ligne:hover {
+  background-color: color-mix(in srgb, var(--color-gold, #c9a227) 7%, transparent);
+  border-color: color-mix(in srgb, var(--color-gold, #c9a227) 35%, transparent);
+}
+
+/* Flèche d'un lien d'action : elle avance quand on survole le lien entier. */
+.na-fleche {
+  transition: transform 0.25s ease;
+}
+.group:hover .na-fleche {
+  transform: translateX(4px);
+}
+
+/* Retour d'appui — tous les boutons de la console s'enfoncent légèrement. */
+.na-presse {
+  transition:
+    transform 0.15s ease,
+    opacity 0.2s ease;
+}
+.na-presse:active {
+  transform: scale(0.97);
+}
+
+/* Entrée échelonnée : chaque élément part avec son propre retard, posé en
+   ligne par `--na-delai`. Sans décalage, l'apparition ne se lit pas. */
+.na-monte {
+  animation: na-monte 0.5s cubic-bezier(0.22, 0.61, 0.16, 1) both;
+  animation-delay: var(--na-delai, 0ms);
+}
+
+/* La jauge se remplit à l'arrivée plutôt que d'être déjà pleine : c'est ce
+   remplissage qui fait comprendre qu'il s'agit d'une proportion. */
+@keyframes na-remplit {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.na-jauge > span {
+  transform-origin: left;
+  animation: na-remplit 0.9s cubic-bezier(0.22, 0.61, 0.16, 1) 0.25s both;
+}
+
+/* Pastille de statut : légère montée au survol de la carte qui la porte. */
+.na-statut {
+  transition: transform 0.25s ease;
+}
+.na-carte-actif:hover .na-statut {
+  transform: translateY(-1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .na-carte-actif:hover,
+  .na-carte-actif:hover .na-statut,
+  .na-presse:active,
+  .group:hover .na-fleche {
+    transform: none;
+  }
+  .na-jauge > span {
+    animation: none;
   }
 }

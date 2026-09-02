@@ -5,11 +5,14 @@
  */
 
 export const CONTACT = {
-  telephone: "+237 6XX XX XX XX",
+  /* ⚠️ NUMÉRO DE TEST — 693 90 41 97, à remplacer par la ligne définitive
+     avant la mise en ligne. Les deux champs ci-dessous doivent rester
+     cohérents : c'est le même numéro, écrit pour l'affichage puis pour wa.me. */
+  telephone: "+237 693 90 41 97",
   email: "contact@novaassist.cm",
   ville: "Douala, Cameroun",
-  /* Numéro au format international sans « + » pour le lien wa.me. */
-  whatsapp: "2376XXXXXXXX",
+  /* Format international sans « + » ni espaces, exigé par wa.me. */
+  whatsapp: "237693904197",
 } as const;
 
 export const whatsappLink = (message = "Bonjour Nova Assist, je souhaite un devis.") =>
