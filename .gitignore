@@ -21,3 +21,6 @@ hawkscan-*.log
 
 # Build de verification (voir NOVA_DIST_DIR dans next.config.mjs)
 .next-verif
+
+# Cache du compilateur TypeScript — regénéré à chaque build.
+*.tsbuildinfo
