@@ -194,5 +194,54 @@
       "fonction": "Role, Company — City"
     },
     "voirVideo": "Watch the video"
+  },
+  "contact": {
+    "metaTitre": "Contact",
+    "metaDescription": "Reach us on WhatsApp, by email or by phone. An answer within 24 working hours.",
+    "filAriane": "Home · Contact",
+    "titre": "Let's talk about what is eating your time",
+    "intro": "WhatsApp is the fastest route — and it is where most of your own clients already are. For a priced proposal, the quote form takes under three minutes.",
+    "telephone": "Phone",
+    "email": "Email",
+    "adresse": "Address"
+  },
+  "blog": {
+    "metaTitre": "Blog",
+    "metaDescription": "Sector-by-sector use cases: SME support, medical practice, retail. Nova Assist resources, sector by sector.",
+    "filAriane": "Home · Blog",
+    "titre": "Resources by sector",
+    "intro": "Sector-by-sector use cases drawn from real situations: what an assistant takes on, and what it changes day to day."
+  },
+  "pageServices": {
+    "metaTitre": "Services",
+    "metaDescription": "Customer relations, appointment booking, debt collection, administrative tasks, community management and sales support — six areas, one point of contact.",
+    "filAriane": "Home · Services",
+    "titre": "Six areas, one point of contact",
+    "intro": "You are not juggling several providers. A lead assistant centralises your requests and brings in the team as needed.",
+    "photoRatio": "Photo · 4:3",
+    "photoLegende": "Two assistants at their desks, three-quarter view",
+    "detailTitre": "The six areas in detail",
+    "derouleTitre": "How an assignment unfolds",
+    "etape": "Step",
+    "etapes": [
+      {
+        "titre": "Scoping call",
+        "texte": "45 minutes to understand your business, your channels and your friction points."
+      },
+      {
+        "titre": "Quote and agreement",
+        "texte": "Written scope, proposed plan, signed non-disclosure agreement."
+      },
+      {
+        "titre": "Getting started",
+        "texte": "Access to your tools, drafting of standard replies, a first trial week."
+      },
+      {
+        "titre": "Regular follow-up",
+        "texte": "Activity report and a monthly review to adjust the scope."
+      }
+    ],
+    "ctaTitre": "A need that is not on the list?",
+    "ctaBouton": "Tell us about it"
   }
 }

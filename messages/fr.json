@@ -194,5 +194,54 @@
       "fonction": "Fonction, Entreprise — Ville"
     },
     "voirVideo": "Voir la vidéo"
+  },
+  "contact": {
+    "metaTitre": "Contact",
+    "metaDescription": "Écrivez-nous sur WhatsApp, par email ou par téléphone. Réponse sous 24 h ouvrées.",
+    "filAriane": "Accueil · Contact",
+    "titre": "Parlons de ce qui vous prend du temps",
+    "intro": "Le plus rapide reste WhatsApp — c'est aussi par là que passent la plupart de vos clients. Pour une demande chiffrée, le formulaire de devis vous prend moins de trois minutes.",
+    "telephone": "Téléphone",
+    "email": "Email",
+    "adresse": "Adresse"
+  },
+  "blog": {
+    "metaTitre": "Blog",
+    "metaDescription": "Cas d'usage par secteur : assistance PME, cabinet médical, commerce. Les ressources Nova Assist, secteur par secteur.",
+    "filAriane": "Accueil · Blog",
+    "titre": "Ressources par secteur",
+    "intro": "Des cas d'usage secteur par secteur, à partir de situations réelles : ce qu'une assistante prend en charge, et ce que ça change au quotidien."
+  },
+  "pageServices": {
+    "metaTitre": "Nos services",
+    "metaDescription": "Relation client, prise de rendez-vous, recouvrement, tâches administratives, community management et support commercial — six domaines, une seule interlocutrice.",
+    "filAriane": "Accueil · Nos services",
+    "titre": "Six domaines, une seule interlocutrice",
+    "intro": "Vous ne coordonnez pas plusieurs prestataires. Une assistante référente centralise vos demandes et mobilise l'équipe selon le besoin.",
+    "photoRatio": "Photo · 4:3",
+    "photoLegende": "Deux assistantes en poste, plan de trois quarts",
+    "detailTitre": "Le détail des six domaines",
+    "derouleTitre": "Comment se déroule une mission",
+    "etape": "Étape",
+    "etapes": [
+      {
+        "titre": "Entretien de cadrage",
+        "texte": "45 minutes pour comprendre votre activité, vos canaux et vos irritants."
+      },
+      {
+        "titre": "Devis et accord",
+        "texte": "Périmètre écrit, formule proposée, accord de confidentialité signé."
+      },
+      {
+        "titre": "Mise en route",
+        "texte": "Accès aux outils, rédaction des réponses types, première semaine test."
+      },
+      {
+        "titre": "Suivi régulier",
+        "texte": "Rapport d'activité et point mensuel pour ajuster le périmètre."
+      }
+    ],
+    "ctaTitre": "Un besoin qui ne figure pas dans la liste ?",
+    "ctaBouton": "Nous en parler"
   }
 }
