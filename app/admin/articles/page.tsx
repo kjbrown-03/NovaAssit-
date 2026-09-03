@@ -132,7 +132,9 @@ export default async function AdminArticles({
                   <p className="max-w-[70ch] text-[14px] leading-[1.55] text-slate-mid">
                     {article.chapo}
                   </p>
-                  <span className="font-mono text-[12px] text-muted">/blog/{article.slug}</span>
+                  <span className="font-mono text-[12px] break-all text-muted">
+                    /blog/{article.slug}
+                  </span>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2 border-t border-line-soft pt-4">
@@ -187,7 +189,7 @@ export default async function AdminArticles({
 
                   {/* La suppression est définitive — d'où l'archivage juste à
                       côté, qui répond au même besoin sans rien perdre. */}
-                  <form action={supprimerArticle} className="ml-auto">
+                  <form action={supprimerArticle} className="sm:ml-auto">
                     <input type="hidden" name="id" value={article.id} />
                     <button
                       type="submit"

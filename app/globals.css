@@ -542,6 +542,13 @@
     height: clamp(252px, 34vw, 296px);
     perspective: 1100px;
     cursor: grab;
+    /* `touch-action` ne s'hérite pas : déclaré sur le parent, il laissait la
+       scène en `auto` et le navigateur revendiquait le glissement horizontal.
+       La rotation au doigt était donc morte sur mobile. Il doit être posé sur
+       l'élément qui reçoit les événements de pointeur, c'est-à-dire ici.
+       `pan-y` laisse le défilement vertical au navigateur et nous confie
+       l'horizontal. */
+    touch-action: pan-y;
   }
   .na-orbite-scene:active {
     cursor: grabbing;
@@ -593,6 +600,28 @@
       0 0 0 1px color-mix(in oklab, var(--color-gold) 38%, transparent),
       0 20px 46px -14px color-mix(in oklab, var(--color-gold) 55%, transparent);
     outline: none;
+  }
+
+  /* Sous 480 px, un rayon de 150 px place les faces extrêmes à 176 px du
+     centre : sur un écran de 320 px elles sortaient du cadre, que
+     `overflow: hidden` rognait. On resserre l'anneau et les cartes plutôt que
+     de les laisser être coupées. */
+  @media (max-width: 479px) {
+    .na-orbite {
+      --na-orbite-rayon: 118px;
+    }
+    .na-orbite-scene {
+      height: 236px;
+    }
+    .na-orbite-face {
+      width: 132px;
+      height: 186px;
+      padding: 12px 12px 14px;
+      gap: 6px;
+    }
+    .na-orbite-emetteur {
+      width: min(320px, 92%);
+    }
   }
 
   /* --------------------------------------------- l'émetteur sous l'anneau */

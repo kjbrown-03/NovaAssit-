@@ -84,7 +84,12 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           ligne en revenant à la marge. */}
       <div className="mt-2 flex max-w-[68ch] flex-col gap-5">
         {paragraphes.map((paragraphe, i) => (
-          <p key={i} className="text-[16px] leading-[1.75] text-ink-700 lg:text-[17px]">
+          <p
+            key={i}
+            /* Le corps est saisi librement : une URL sans espace serait plus
+               large que l'écran sans `break-words`. */
+            className="text-[16px] leading-[1.75] break-words text-ink-700 lg:text-[17px]"
+          >
             {paragraphe}
           </p>
         ))}
