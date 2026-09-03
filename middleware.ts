@@ -1,6 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { COOKIE_EPHEMERE, COOKIE_NAVIGATEUR_OUVERT } from "@/lib/session-navigateur";
+
 /** Préfixes exigeant une session valide. */
 const ROUTES_PROTEGEES = [
   "/espace-client",
@@ -9,6 +11,9 @@ const ROUTES_PROTEGEES = [
      payer sur chaque requête. */
   "/admin",
   "/devis",
+  /* Le paiement suppose un compte : « dès la formule choisie et le compte
+     client créé » (cahier des charges §5.1). */
+  "/paiement",
   /* Accessible seulement par le lien de réinitialisation, qui ouvre une
      session en passant par /auth/confirm. */
   "/mot-de-passe-nouveau",
@@ -56,6 +61,32 @@ export async function middleware(requete: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  /* --- « Se souvenir de moi » décoché : la session meurt avec le navigateur.
+     Le témoin persistant dit que la session était éphémère ; le témoin de
+     session, lui, disparaît de lui-même quand le navigateur se ferme. L'un
+     sans l'autre, c'est donc qu'on a rouvert le navigateur : on efface les
+     jetons plutôt que de rendre l'espace client à quelqu'un d'autre.
+     Voir `lib/session-navigateur.ts` pour le pourquoi de ce montage. */
+  const ephemere = requete.cookies.has(COOKIE_EPHEMERE);
+  const navigateurOuvert = requete.cookies.has(COOKIE_NAVIGATEUR_OUVERT);
+
+  if (user && ephemere && !navigateurOuvert) {
+    const url = requete.nextUrl.clone();
+    url.pathname = "/connexion";
+    url.search = "";
+    url.searchParams.set("motif", "session-fermee");
+
+    const fin = NextResponse.redirect(url);
+    /* Les jetons Supabase sont répartis sur un ou plusieurs cookies `sb-…`
+       selon leur taille : on les efface tous plutôt que d'en deviner le
+       découpage. */
+    for (const { name } of requete.cookies.getAll()) {
+      if (name.startsWith("sb-")) fin.cookies.delete(name);
+    }
+    fin.cookies.delete(COOKIE_EPHEMERE);
+    return fin;
+  }
+
   const chemin = requete.nextUrl.pathname;
   const protegee = ROUTES_PROTEGEES.some(
     (prefixe) => chemin === prefixe || chemin.startsWith(`${prefixe}/`),
@@ -64,17 +95,37 @@ export async function middleware(requete: NextRequest) {
   if (protegee && !user) {
     const url = requete.nextUrl.clone();
     url.pathname = "/connexion";
-    /* Mémorise la destination pour y revenir après connexion. */
-    url.searchParams.set("suite", chemin);
+    /* On repart d'une chaîne vide : sans ça, les paramètres de la page demandée
+       resteraient collés à l'URL de connexion, en double avec `suite`. */
+    url.search = "";
+    /* La destination emporte sa chaîne de requête : sans elle,
+       `/paiement?formule=premium` reviendrait sur un paiement sans formule. */
+    url.searchParams.set("suite", chemin + requete.nextUrl.search);
     return NextResponse.redirect(url);
   }
 
-  /* Déjà connecté : la page de connexion n'a plus d'objet. */
+  /* Arriver sur /connexion, c'est vouloir s'identifier — éventuellement sous
+     un autre compte que celui encore ouvert. Renvoyer au tableau de bord
+     rendait le formulaire inatteignable : un poste partagé gardait le compte
+     précédent, et rien ne permettait d'en changer sans chercher le bouton de
+     déconnexion à l'intérieur de l'espace client.
+     On ferme donc la session et on sert le formulaire. Pas de redirection ici :
+     la page est rendue dans la foulée, et la réponse emporte l'effacement. */
   if (chemin === "/connexion" && user) {
-    const url = requete.nextUrl.clone();
-    url.pathname = "/espace-client";
-    url.search = "";
-    return NextResponse.redirect(url);
+    const jetons = requete.cookies
+      .getAll()
+      .map(({ name }) => name)
+      .filter((name) => name.startsWith("sb-"));
+
+    /* Retirés de la requête *avant* de la passer plus loin : la page se rend
+       ainsi déjà comme anonyme, au lieu d'attendre la requête suivante. */
+    jetons.forEach((name) => requete.cookies.delete(name));
+
+    const fin = NextResponse.next({ request: requete });
+    jetons.forEach((name) => fin.cookies.delete(name));
+    fin.cookies.delete(COOKIE_EPHEMERE);
+    fin.cookies.delete(COOKIE_NAVIGATEUR_OUVERT);
+    return fin;
   }
 
   return reponse;
@@ -93,9 +144,13 @@ export const config = {
    * Rafraichir le jeton sur les pages publiques n'apporte rien : il est
    * revalide ici des que le visiteur entre dans l'espace client.
    */
+  /* ⚠️ Toute entrée de ROUTES_PROTEGEES doit figurer ici : une route absente de
+     ce matcher n'est jamais vue par le middleware, et reste donc ouverte quoi
+     qu'en dise la liste. */
   matcher: [
     "/espace-client/:path*",
     "/admin/:path*",
+    "/paiement/:path*",
     "/mot-de-passe-nouveau/:path*",
     "/connexion",
   ],

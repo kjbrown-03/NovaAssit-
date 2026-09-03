@@ -4,8 +4,9 @@ import { LogOut } from "lucide-react";
  * Déconnexion — un vrai formulaire POST, sans JavaScript.
  *
  * Fonctionne donc même si le script ne s'est pas chargé, ce qui compte sur les
- * connexions visées par le cahier des charges (§6.3) : rester bloqué connecté
- * sur un poste partagé serait le pire cas.
+ * connexions lentes visées par le projet : rester bloqué connecté sur un poste
+ * partagé serait le pire cas. Prudence de notre part — le cahier des charges ne
+ * dit rien de la déconnexion.
  *
  * Présenté comme une entrée à part entière, avec son icône, plutôt qu'en petit
  * lien discret — c'est la convention des tableaux de bord, et on ne cherche pas

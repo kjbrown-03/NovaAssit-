@@ -1,17 +1,13 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import {
   AlertTriangle,
-  ArrowRight,
   CheckCircle,
   Clock,
   Inbox,
-  ShieldAlert,
   Star,
   Video,
 } from "lucide-react";
 
-import { Wordmark } from "@/components/wordmark";
 import {
   depublierTemoignage,
   refuserTemoignage,
@@ -19,6 +15,7 @@ import {
 } from "@/lib/temoignages/actions";
 import {
   compterValides,
+  etatDepot,
   listerNotifications,
   listerParStatut,
   listerPourAccueil,
@@ -41,35 +38,21 @@ const dateCourte = (iso: string) =>
     minute: "2-digit",
   });
 
-export default async function ModerationTemoignages({
-  searchParams,
-}: {
-  searchParams: Promise<{ cle?: string }>;
-}) {
-  /**
-   * Garde-fou minimal en attendant une vraie authentification : si la variable
-   * `NOVA_ADMIN_CLE` est définie, il faut la présenter dans l'URL. Sinon la page
-   * est ouverte, et le bandeau ci-dessous le dit sans détour.
-   *
-   * ⚠️ Ce n'est pas de la sécurité : une clé en clair dans l'URL fuit par
-   * l'historique et les journaux. À remplacer par la session admin.
-   */
-  const cleAttendue = process.env.NOVA_ADMIN_CLE;
-  const { cle } = await searchParams;
+export default async function ModerationTemoignages() {
+  const panne = await etatDepot();
 
-  if (cleAttendue && cle !== cleAttendue) {
+  if (panne) {
     return (
-      <main id="contenu" className="na-console min-h-svh px-5 py-20">
-        <div className="mx-auto max-w-[560px]">
-          <div className="na-carte na-monte rounded-3xl p-8 shadow-sm">
-            <h1 className="mb-3 text-[26px] text-navy">Accès réservé</h1>
-            <p className="text-[15px] leading-[1.6] text-slate-mid">
-              Cette page demande la clé d&apos;administration. Ajoutez-la à l&apos;adresse :
-              <code className="ml-1 font-mono text-[14px] text-gold-ink">?cle=…</code>
-            </p>
-          </div>
-        </div>
-      </main>
+      <section className="na-carte na-monte rounded-3xl p-6 shadow-sm">
+        <h1 className="mb-3 text-[24px] text-navy">Modération des témoignages</h1>
+        <p className="text-[15px] leading-[1.6] text-slate-mid">
+          Lecture impossible : <code className="font-mono text-[14px] text-gold-ink">{panne}</code>
+        </p>
+        <p className="mt-3 text-[14px] text-muted">
+          Jouez <code className="font-mono">supabase/007-temoignages.sql</code> dans Supabase →
+          SQL Editor.
+        </p>
+      </section>
     );
   }
 
@@ -92,45 +75,11 @@ export default async function ModerationTemoignages({
   ] as const;
 
   return (
-    <main id="contenu" className="na-console min-h-svh px-5 py-10 lg:py-14">
-      <div className="mx-auto flex max-w-[940px] flex-col gap-8">
-        <header className="na-monte flex flex-col gap-5">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <Wordmark size={20} tone="on-paper" />
-            <Link
-              href="/"
-              className="group flex items-center gap-1.5 text-[14px] text-gold-ink hover:underline"
-            >
-              Retour au site
-              <ArrowRight className="na-fleche h-4 w-4" aria-hidden />
-            </Link>
-          </div>
-          <div className="flex flex-col gap-2">
-            <span className="na-eyebrow">Back-office</span>
-            <h1 className="text-[30px] text-navy lg:text-[38px]">Modération des témoignages</h1>
-          </div>
-        </header>
-
-        {!cleAttendue && (
-          <div
-            role="alert"
-            className="na-alerte na-carte na-monte border-[#f0c2cb] bg-[#fdeef0]/80 shadow-sm"
-          >
-            <span className="na-alerte-icone bg-[#f8d6dc]">
-              <ShieldAlert className="h-5 w-5 text-[#8f1b30]" aria-hidden />
-            </span>
-            <div className="flex flex-col gap-1">
-              <h2 className="text-[15px] font-bold text-[#7a1729]">Page non protégée</h2>
-              <p className="text-[14px] leading-[1.55] text-[#8f1b30]/90">
-                N&apos;importe qui connaissant son adresse peut publier un témoignage sur la page
-                d&apos;accueil. Définissez{" "}
-                <code className="font-mono text-[13px]">NOVA_ADMIN_CLE</code> dans{" "}
-                <code className="font-mono text-[13px]">.env.local</code> en attendant la vraie
-                authentification.
-              </p>
-            </div>
-          </div>
-        )}
+    <>
+      <div className="flex flex-col gap-2">
+        <span className="na-eyebrow">Back-office</span>
+        <h1 className="text-[28px] text-navy lg:text-[34px]">Modération des témoignages</h1>
+      </div>
 
         {/* ---------------------------------------------------------- compteurs */}
         <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -256,8 +205,7 @@ export default async function ModerationTemoignages({
             <code className="font-mono">lib/temoignages/actions.ts</code>.
           </p>
         </section>
-      </div>
-    </main>
+    </>
   );
 }
 
@@ -351,7 +299,9 @@ function Carte({
         <b className="font-semibold text-navy">{temoignage.auteur}</b> — {temoignage.fonction},{" "}
         {temoignage.entreprise} · {temoignage.ville}
         <br />
-        <span className="text-[13px] text-muted">{temoignage.auteurCompte}</span>
+        <span className="font-mono text-[12px] text-muted">
+          compte {temoignage.auteurCompte.slice(0, 8)}
+        </span>
       </p>
 
       <div className="flex flex-wrap items-center gap-3 border-t border-line-soft pt-4">

@@ -21,8 +21,8 @@ export type CarteTemoignage = {
 };
 
 /* Emplacements de réserve, affichés tant qu'aucun témoignage n'est publié.
-   Le cahier des charges (§5.1) demande que la section tienne debout sans
-   contenu réel au lancement. */
+   Le cahier des charges demande de « prévoir la structure même sans
+   témoignages au lancement ». */
 const RESERVE = [
   { cle: "cliniqueDouala", format: "video" },
   { cle: "commerceYaounde", format: "texte" },

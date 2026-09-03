@@ -1,41 +1,40 @@
 import { NextResponse } from "next/server";
-import nodemailer from "nodemailer";
+
+import {
+  corpsHtml,
+  corpsTexte,
+  echapperHtml,
+  emailConfigure,
+  envoyerNotification,
+} from "@/lib/email";
+import { enregistrerDemandeDevis } from "@/lib/supabase/devis";
 
 /**
  * Réception d'une demande de devis.
  *
  * La demande est validée puis transmise par email à l'adresse professionnelle
- * Nova Assist (cahier des charges §6.1). Le transport SMTP se configure par les
+ * Nova Assist. Le cahier des charges demande « Gestion des demandes devis
+ * reçues » avec « Notification email + tableau suivi ». Le transport SMTP se
+ * configure par les
  * variables `SMTP_*` — voir `.env.example`.
  *
  * ⚠️ Restent à faire avant mise en ligne :
- *   1. une protection anti-spam — captcha ou Turnstile (§6.4) ; en l'état, le
- *      formulaire est ouvert à l'envoi automatisé,
- *   2. une persistance des demandes, pour le tableau de suivi du back-office
- *      (§5.1) : aujourd'hui, un email perdu est une demande perdue.
+ *   1. une protection anti-spam — captcha ou Turnstile ; en l'état, le
+ *      formulaire est ouvert à l'envoi automatisé. Le cahier des charges ne
+ *      l'exige pas explicitement, mais un formulaire ouvert le deviendra vite,
+ *   2. le « tableau suivi » exigé par le cahier : sans persistance, un email
+ *      perdu est une demande perdue.
  */
 
 type Demande = Record<string, unknown>;
 
-/** Échappe une valeur avant insertion dans le corps HTML de l'email. */
-function echapper(valeur: unknown): string {
-  const texte =
-    typeof valeur === "string"
-      ? valeur
-      : Array.isArray(valeur)
-        ? valeur.filter((v) => typeof v === "string").join(", ")
-        : "";
-
-  return texte
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+/** Chaîne non vide, ou `null` — la base préfère l'absence à la chaîne vide. */
+function texteOuNull(valeur: unknown): string | null {
+  return typeof valeur === "string" && valeur.trim() ? valeur.trim() : null;
 }
 
 /** Valeur échappée, ou une mention lisible quand le champ est vide. */
-const champ = (valeur: unknown, defaut = "Non renseigné") => echapper(valeur) || defaut;
+const champ = (valeur: unknown, defaut = "Non renseigné") => echapperHtml(valeur) || defaut;
 
 /**
  * Nettoie une valeur destinée à l'en-tête `Subject`.
@@ -73,17 +72,41 @@ export async function POST(requete: Request) {
     );
   }
 
-  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM, SMTP_TO } = process.env;
+  /* Enregistrement AVANT l'envoi : c'est lui qui garantit qu'une demande ne se
+     perd pas. Le cahier des charges demande « Notification email + tableau
+     suivi » — l'email alerte, la table conserve. Tant que rien n'était
+     persisté, une panne SMTP effaçait la demande. */
+  const enregistree = await enregistrerDemandeDevis({
+    entreprise,
+    contact_nom: contactNom,
+    email,
+    secteur: texteOuNull(corps.secteur),
+    effectif: texteOuNull(corps.effectif),
+    domaines: domaines.filter((d): d is string => typeof d === "string"),
+    canaux: Array.isArray(corps.canaux)
+      ? corps.canaux.filter((c): c is string => typeof c === "string")
+      : [],
+    messages_par_jour: texteOuNull(corps.messagesParJour),
+    plage: texteOuNull(corps.plage),
+    precision_libre: texteOuNull(corps.precision),
+    formule_suggeree: texteOuNull(corps.formuleSuggeree),
+  });
 
-  /* Sans transport configuré, la demande serait perdue en silence. On refuse
-     plutôt que d'afficher une confirmation mensongère au visiteur. */
-  if (!SMTP_USER || !SMTP_PASS) {
+  if (!emailConfigure()) {
     console.error(
-      "[devis] SMTP_USER ou SMTP_PASS manquante — demande NON transmise :",
-      { entreprise, email },
+      "[devis] SMTP_USER ou SMTP_PASS manquante — aucun email envoyé :",
+      { entreprise, email, enregistree: Boolean(enregistree) },
     );
+
+    /* Enregistrée mais non notifiée : la demande est consultable dans le
+       back-office, la confirmation au visiteur n'est donc pas mensongère. */
+    if (enregistree) {
+      return NextResponse.json({ ok: true, notifiee: false }, { status: 200 });
+    }
+
+    /* Ni enregistrée ni envoyée : là, elle serait réellement perdue. */
     return NextResponse.json(
-      { erreur: "Service d'envoi indisponible." },
+      { erreur: "Service indisponible." },
       { status: 503 },
     );
   }
@@ -102,65 +125,20 @@ export async function POST(requete: Request) {
     ["Formule pressentie", champ(corps.formuleSuggeree, "Inconnue")],
   ];
 
-  const corpsHtml = `
-    <div style="font-family: sans-serif; color: #0b1f3a; max-width: 600px; padding: 20px;">
-      <h2 style="color: #c9a227;">Nouvelle demande de devis</h2>
-      <p>Une nouvelle demande a été soumise sur le site Nova Assist.</p>
-      <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
-        ${lignes
-          .map(
-            ([intitule, valeur], i) => `
-          <tr>
-            <td style="padding: 10px; ${
-              i < lignes.length - 1 ? "border-bottom: 1px solid #eee;" : ""
-            } font-weight: bold; width: 40%;">${intitule}</td>
-            <td style="padding: 10px; ${
-              i < lignes.length - 1 ? "border-bottom: 1px solid #eee;" : ""
-            }">${valeur}</td>
-          </tr>`,
-          )
-          .join("")}
-      </table>
-    </div>`;
+  const titre = "Nouvelle demande de devis — site Nova Assist";
+  const envoye = await envoyerNotification({
+    sujet: `[Devis] Nouvelle demande de ${ligneSure(entreprise)}`,
+    texte: corpsTexte(titre, lignes),
+    html: corpsHtml(titre, lignes),
+    repondreA: email,
+  });
 
-  /* Version texte : certaines messageries n'affichent pas le HTML, et sa
-     présence améliore le classement anti-spam. */
-  const corpsTexte = [
-    "Nouvelle demande de devis — site Nova Assist",
-    "",
-    ...lignes.map(([intitule, valeur]) => `${intitule} : ${valeur}`),
-  ].join("\n");
-
-  try {
-    const port = Number(SMTP_PORT) || 465;
-    const transport = nodemailer.createTransport({
-      host: SMTP_HOST || "smtp.gmail.com",
-      port,
-      /* 465 est du TLS implicite ; 587 démarre en clair puis passe en STARTTLS. */
-      secure: port === 465,
-      auth: { user: SMTP_USER, pass: SMTP_PASS },
-    });
-
-    await transport.sendMail({
-      from: SMTP_FROM || '"Nova Assist Web" <noreply@novaassist.cm>',
-      to: SMTP_TO || SMTP_USER,
-      replyTo: email,
-      subject: `[Devis] Nouvelle demande de ${ligneSure(entreprise)}`,
-      text: corpsTexte,
-      html: corpsHtml,
-    });
-  } catch (erreur) {
-    /* Journalisé avec les coordonnées : c'est le dernier filet avant qu'une
-       demande ne disparaisse pour de bon. */
-    console.error("[devis] échec de l'envoi — demande NON transmise :", {
-      entreprise,
-      email,
-      erreur,
-    });
-    return NextResponse.json(
-      { erreur: "L'envoi a échoué." },
-      { status: 502 },
-    );
+  if (!envoye) {
+    /* Journalisé avec les coordonnées. La demande n'est pas perdue pour autant
+       — elle est en base et visible dans le back-office —, mais personne n'a
+       été prévenu, et ça doit se voir dans les journaux. */
+    console.error("[devis] demande enregistrée mais NON notifiée :", { entreprise, email });
+    return NextResponse.json({ ok: true, notifiee: false }, { status: 201 });
   }
 
   console.info("[devis] demande transmise pour", entreprise);

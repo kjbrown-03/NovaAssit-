@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import {
   CheckCircle,
   Clock,
@@ -60,6 +61,11 @@ export default async function EspaceClient() {
   const { profil, demandes, documents, prochaineFacture, enCours, prioritaires } =
     await chargerTableauDeBord();
 
+  /* L'administration n'a rien à faire ici : ce tableau de bord affiche les
+     demandes, factures et heures d'un client, données qu'un compte
+     d'administration n'a pas. On la renvoie vers son back-office. */
+  if (profil?.role === "admin") redirect("/admin/devis");
+
   /* Le middleware garantit une session ; le profil, lui, peut manquer si le
      déclencheur SQL n'a pas tourné. On le dit plutôt que d'afficher un vide. */
   const entreprise = profil?.entreprise ?? "Profil incomplet";
@@ -81,7 +87,12 @@ export default async function EspaceClient() {
              déploie au survol — et au focus clavier, sans quoi on ne pourrait
              pas le parcourir à la tabulation. Le contenu s'élargit d'autant. */
           "group/rail flex flex-col gap-6 bg-navy py-[26px] transition-[width] duration-200 ease-linear " +
-          "md:w-[76px] md:shrink-0 md:overflow-hidden md:hover:w-[252px] md:focus-within:w-[252px] lg:gap-8"
+          /* Collée en haut et haute d'un écran : sans ça, la latérale s'étire
+             sur toute la hauteur du contenu et `mt-auto` renvoie la
+             déconnexion tout en bas d'une page très longue — invisible sans
+             faire défiler jusqu'au pied. */
+          "md:sticky md:top-0 md:h-svh md:w-[76px] md:shrink-0 md:overflow-x-hidden md:overflow-y-auto " +
+          "md:hover:w-[252px] md:focus-within:w-[252px] lg:gap-8"
         }
       >
         <div className="relative h-[26px] px-5">
@@ -303,8 +314,9 @@ export default async function EspaceClient() {
                       {documents.map((doc) => (
                         <li key={doc.id} className="na-ligne -mx-2 flex justify-between gap-4 rounded-lg px-2 py-1 text-ink-700">
                           <span>{doc.titre}</span>
-                          {/* Lien signé à générer à la demande — voir §6.4 : un PDF de
-                              facture ne doit pas rester accessible indéfiniment. */}
+                          {/* Lien signé à générer à la demande : un PDF de facture ne
+                              doit pas rester accessible indéfiniment. Prudence de
+                              notre part, pas une exigence du cahier des charges. */}
                           <span className="shrink-0 text-muted-light">PDF</span>
                         </li>
                       ))}

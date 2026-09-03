@@ -21,6 +21,8 @@ export type Temoignage = {
   entreprise: string;
   ville: string;
   /** Compte client à l'origine du dépôt, pour retrouver qui a écrit quoi. */
+  /* Identifiant du compte qui a déposé (`profils.id`), et non une adresse
+     email : c'est la session qui fait foi. */
   auteurCompte: string;
   statut: StatutTemoignage;
   soumisLe: string;
@@ -29,9 +31,12 @@ export type Temoignage = {
 };
 
 /** Ce que le formulaire de l'espace client transmet. */
+/* `auteurCompte` n'en fait pas partie : le compte est déduit de la session par
+   le dépôt, jamais du formulaire — sinon un client pourrait témoigner au nom
+   d'un autre. */
 export type NouveauTemoignage = Omit<
   Temoignage,
-  "id" | "statut" | "soumisLe" | "traiteLe" | "motifRefus"
+  "id" | "statut" | "soumisLe" | "traiteLe" | "motifRefus" | "auteurCompte"
 >;
 
 export type Notification = {

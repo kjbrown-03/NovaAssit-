@@ -126,7 +126,7 @@ export function FormulesOrbite({
               /* Ancre reprise des anciennes cartes de prix : le pied de page
                  pointe vers /offres#essentiel, #professionnel et #premium. */
               id={formule.id}
-              href={`/devis?formule=${formule.id}`}
+              href={`/paiement?formule=${formule.id}`}
               onClick={filtrerClic}
               data-avant={formule.miseEnAvant}
               className="na-orbite-face"

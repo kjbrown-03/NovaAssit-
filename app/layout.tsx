@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
+import { MesureConversions } from "@/components/mesure-conversions";
 import { getLocale, getTranslations } from "next-intl/server";
 import "./globals.css";
 
@@ -58,6 +59,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             {t("allerAuContenu")}
           </a>
           {children}
+          <MesureConversions />
         </NextIntlClientProvider>
       </body>
     </html>

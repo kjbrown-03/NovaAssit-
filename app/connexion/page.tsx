@@ -12,9 +12,9 @@ export const metadata: Metadata = {
 export default async function ConnexionPage({
   searchParams,
 }: {
-  searchParams: Promise<{ mode?: string; suite?: string; erreur?: string }>;
+  searchParams: Promise<{ mode?: string; suite?: string; erreur?: string; motif?: string }>;
 }) {
-  const { mode, suite, erreur } = await searchParams;
+  const { mode, suite, erreur, motif } = await searchParams;
 
   /* `/connexion?mode=inscription` ouvre directement le formulaire de création
      de compte — c'est le lien posé depuis les appels à l'action du site. */
@@ -37,7 +37,12 @@ export default async function ConnexionPage({
         messageInitial={
           erreur
             ? "Ce lien de confirmation n'est plus valable. Il a peut-être expiré ou déjà été utilisé — reconnectez-vous, ou refaites une demande."
-            : null
+            : /* Posé par le middleware quand une session non mémorisée a
+                 survécu à la fermeture du navigateur — voir
+                 `lib/session-navigateur.ts`. */
+              motif === "session-fermee"
+              ? "Vous aviez décoché « Se souvenir de moi » : la session a été fermée à la fermeture du navigateur. Reconnectez-vous."
+              : null
         }
       />
     </main>

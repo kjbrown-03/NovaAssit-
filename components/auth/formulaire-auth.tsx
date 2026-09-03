@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { AuthSwitch, type AuthMode } from "@/components/ui/auth-switch";
 import { creerClientNavigateur } from "@/lib/supabase/client";
+import { marquerSession } from "@/lib/session-navigateur";
 
 /**
  * Traduit les refus renvoyés par Supabase, qui arrivent en anglais et dans une
@@ -63,6 +64,12 @@ export function FormulaireAuth({
       });
       if (error) return messageLisible(error.message);
 
+      /* Une case décochée n'apparaît pas dans le FormData : sa seule présence
+         vaut « oui ». Voir `lib/session-navigateur.ts` pour la raison d'être
+         des témoins — la bibliothèque ne laisse pas régler la durée du cookie
+         de session elle-même. */
+      marquerSession(donnees.has("memoriser"));
+
       /* `refresh()` en plus de la navigation : les composants serveur doivent
          être rejoués avec la session fraîche, sinon le tableau de bord se
          rendrait encore comme un visiteur anonyme. */
@@ -96,6 +103,10 @@ export function FormulaireAuth({
     if (!data.session) {
       return "Compte créé. Ouvrez le lien de confirmation envoyé à votre adresse pour activer votre accès.";
     }
+
+    /* Le formulaire d'inscription n'a pas de case « se souvenir » : on vient de
+       créer le compte sur cet appareil, la session y reste. */
+    marquerSession(true);
 
     router.replace("/espace-client");
     router.refresh();

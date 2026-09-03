@@ -148,7 +148,6 @@ export function FormulaireTemoignage() {
             { nom: "fonction", libelle: "Fonction", type: "text", auto: "organization-title" },
             { nom: "entreprise", libelle: "Entreprise", type: "text", auto: "organization" },
             { nom: "ville", libelle: "Ville", type: "text", auto: "address-level2" },
-            { nom: "email", libelle: "Email", type: "email", auto: "email" },
           ] as const
         ).map((champ) => {
           const e = erreur(champ.nom);

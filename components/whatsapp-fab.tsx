@@ -1,8 +1,9 @@
 import { whatsappLink } from "@/lib/content";
 
 /**
- * Bouton WhatsApp flottant, exigé sur toutes les pages avec priorité mobile
- * (cahier des charges §5.1). Vert de marque WhatsApp, posé au-dessus du contenu.
+ * Bouton WhatsApp flottant. Le cahier des charges le veut « Visible sur toutes
+ * les pages, priorité mobile ». Vert de marque WhatsApp, posé au-dessus du
+ * contenu.
  */
 export function WhatsAppFab() {
   return (

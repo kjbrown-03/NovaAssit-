@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { creerClientServeur } from "@/lib/supabase/server";
+import { COOKIE_EPHEMERE, COOKIE_NAVIGATEUR_OUVERT } from "@/lib/session-navigateur";
 
 /**
  * Ferme la session et renvoie à l'accueil.
@@ -13,5 +14,12 @@ export async function POST(requete: NextRequest) {
   await supabase.auth.signOut();
 
   /* 303 : le navigateur doit repasser en GET après le POST. */
-  return NextResponse.redirect(new URL("/", requete.nextUrl.origin), 303);
+  const reponse = NextResponse.redirect(new URL("/", requete.nextUrl.origin), 303);
+
+  /* Les témoins de « se souvenir de moi » n'ont plus d'objet sans session ;
+     laissés en place, le prochain visiteur de ce navigateur hériterait d'un
+     réglage qu'il n'a pas choisi. */
+  reponse.cookies.delete(COOKIE_EPHEMERE);
+  reponse.cookies.delete(COOKIE_NAVIGATEUR_OUVERT);
+  return reponse;
 }

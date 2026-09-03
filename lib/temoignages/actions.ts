@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { corpsHtml, corpsTexte, echapperHtml, envoyerNotification } from "@/lib/email";
 import { ajouter, ajouterNotification, changerStatut, compterValides } from "./depot";
 import { MAX_ACCUEIL, type FormatTemoignage, type NouveauTemoignage } from "./types";
 
@@ -32,16 +33,44 @@ function lienValide(valeur: string): boolean {
 /**
  * Prévient l'administration qu'un témoignage attend une validation.
  *
- * ⚠️ À BRANCHER AVANT MISE EN LIGNE : la notification est aujourd'hui écrite
- * dans le dépôt et affichée dans `/admin/temoignages`. Il reste à envoyer un
- * email réel via un fournisseur (Resend, Postmark, SMTP), au même endroit que
- * l'email de demande de devis — voir `app/api/devis/route.ts`, qui porte la
- * même dette.
+ * Deux canaux : une trace en base, qui alimente la liste du back-office et
+ * survit à tout, et un email qui va chercher l'administration là où elle est.
+ * L'email peut échouer — serveur indisponible, identifiants expirés — sans que
+ * le témoignage soit perdu pour autant : il attend dans la file de modération.
  */
-async function notifierAdmin(id: string, auteur: string, entreprise: string) {
-  const message = `Nouveau témoignage de ${auteur} (${entreprise}) — à valider.`;
-  await ajouterNotification(id, message);
-  console.info(`[temoignages] ${message}`);
+async function notifierAdmin(temoignage: {
+  id: string;
+  auteur: string;
+  entreprise: string;
+  ville: string;
+  fonction: string;
+  format: FormatTemoignage;
+  citation: string;
+  videoUrl?: string;
+}) {
+  const message = `Nouveau témoignage de ${temoignage.auteur} (${temoignage.entreprise}) — à valider.`;
+  await ajouterNotification(temoignage.id, message);
+
+  const lignes: [string, string][] = [
+    ["Auteur", echapperHtml(temoignage.auteur)],
+    ["Fonction", echapperHtml(temoignage.fonction)],
+    ["Entreprise", echapperHtml(temoignage.entreprise)],
+    ["Ville", echapperHtml(temoignage.ville)],
+    ["Format", temoignage.format === "video" ? "Vidéo" : "Écrit"],
+    ["Témoignage", echapperHtml(temoignage.citation)],
+  ];
+  if (temoignage.videoUrl) lignes.push(["Vidéo", echapperHtml(temoignage.videoUrl)]);
+
+  const titre = "Nouveau témoignage à valider";
+  const envoye = await envoyerNotification({
+    sujet: `[Témoignage] ${temoignage.auteur} — ${temoignage.entreprise}`,
+    texte: `${corpsTexte(titre, lignes)}
+
+À valider dans le back-office : /admin/temoignages`,
+    html: `${corpsHtml(titre, lignes)}<p style="font-family: sans-serif; font-size: 14px;">À valider dans le back-office : <b>/admin/temoignages</b></p>`,
+  });
+
+  console.info(`[temoignages] ${message}${envoye ? "" : " (email non envoyé)"}`);
 }
 
 export async function soumettreTemoignage(
@@ -60,10 +89,6 @@ export async function soumettreTemoignage(
     fonction: texte(donnees, "fonction"),
     entreprise: texte(donnees, "entreprise"),
     ville: texte(donnees, "ville"),
-    /* Tant qu'il n'y a pas d'authentification, le compte se déduit de l'email
-       saisi. À remplacer par l'identifiant de session une fois la connexion
-       branchée — voir `components/ui/auth-switch.tsx`. */
-    auteurCompte: texte(donnees, "email"),
   };
 
   const erreurs: Record<string, string> = {};
@@ -97,7 +122,28 @@ export async function soumettreTemoignage(
   }
 
   const temoignage = await ajouter(entree);
-  await notifierAdmin(temoignage.id, temoignage.auteur, temoignage.entreprise);
+
+  /* `null` signifie qu'aucune session n'a été trouvée, ou que la politique RLS
+     a refusé l'insertion. Dans les deux cas, mieux vaut le dire que d'afficher
+     un remerciement pour un témoignage qui n'existe pas. */
+  if (!temoignage) {
+    return {
+      ok: false,
+      message:
+        "Votre témoignage n'a pas pu être enregistré. Reconnectez-vous et réessayez — si cela persiste, écrivez-nous sur WhatsApp.",
+    };
+  }
+
+  await notifierAdmin({
+    id: temoignage.id,
+    auteur: temoignage.auteur,
+    entreprise: temoignage.entreprise,
+    ville: temoignage.ville,
+    fonction: temoignage.fonction,
+    format: temoignage.format,
+    citation: temoignage.citation,
+    videoUrl: temoignage.videoUrl,
+  });
 
   revalidatePath("/espace-client");
   revalidatePath("/admin/temoignages");

@@ -7,8 +7,8 @@ export const metadata: Metadata = {
     "Cas d'usage par secteur : assistance PME, cabinet médical, commerce. Les premiers articles arrivent au lancement.",
 };
 
-/* Les articles par secteur sont prévus au cahier des charges (§3.2, §5.1) mais
-   ne figurent pas dans la maquette. Cette page tient la place dans la
+/* Le cahier des charges prévoit « Blog ressources — Articles par secteur cible
+   (PME, santé, immobilier…) », mais aucun article ne figure dans la maquette. Cette page tient la place dans la
    navigation en attendant la rédaction des contenus. */
 const SUJETS = [
   "Assistance pour une PME : par où commencer",

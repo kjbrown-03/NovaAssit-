@@ -175,14 +175,14 @@ export default function Accueil() {
               </ul>
               {formule.miseEnAvant ? (
                 <ButtonPrimary
-                  href={`/devis?formule=${formule.id}`}
+                  href={`/paiement?formule=${formule.id}`}
                   className="mt-auto p-[14px] text-[15px]"
                 >
                   {tf(`${formule.id}.cta`)}
                 </ButtonPrimary>
               ) : (
                 <ButtonOutline
-                  href={`/devis?formule=${formule.id}`}
+                  href={`/paiement?formule=${formule.id}`}
                   className="mt-auto !p-[13px] text-[15px] font-semibold"
                 >
                   {tf(`${formule.id}.cta`)}
@@ -242,7 +242,8 @@ export default function Accueil() {
           </div>
           <div className="flex shrink-0 flex-col gap-[14px] sm:flex-row">
             <ButtonPrimary href="/devis">{tc("demanderDevis")}</ButtonPrimary>
-            {/* La brochure PDF est un livrable du cahier des charges (§1.4) mais
+            {/* Le cahier des charges prévoit « Téléchargement brochure PDF — Fichier
+                léger, formulaire optionnel avant téléchargement », mais
                 le fichier n'existe pas encore. Le lien pointait vers un 404 ;
                 en attendant, ce bouton mène aux formules — qui portent la même
                 information. Pour rétablir la brochure : déposer le PDF dans
