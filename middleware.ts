@@ -10,9 +10,16 @@ const ROUTES_PROTEGEES = [
      la page — il demande une lecture en base que le middleware n'a pas à
      payer sur chaque requête. */
   "/admin",
-  "/devis",
-  /* Le paiement suppose un compte : « dès la formule choisie et le compte
-     client créé » (cahier des charges §5.1). */
+  /* `/devis` n'est PAS ici, volontairement. L'arborescence du cahier des
+     charges place « Devis » au même niveau que « Inscription » et
+     « Connexion » : c'est une page publique. Exiger un compte avant de
+     demander un prix, c'est perdre la plupart des demandes — et le
+     back-office existe précisément pour recevoir celles de visiteurs qui
+     n'ont pas encore de compte. */
+
+  /* Le paiement, lui, suppose un compte : le cahier prévoit « Paiement en
+     ligne des packages, via API Tara, dès formule choisie et compte client
+     créé ». */
   "/paiement",
   /* Accessible seulement par le lien de réinitialisation, qui ouvre une
      session en passant par /auth/confirm. */
@@ -54,12 +61,20 @@ export async function middleware(requete: NextRequest) {
     },
   );
 
-  /* `getUser()` et non `getSession()` : seul le premier revalide le jeton
-     auprès de Supabase. `getSession` se contente de lire un cookie, qui peut
-     être forgé. */
+  /* `getSession()` lit le cookie sans appel réseau ; `getUser()` part valider
+     le jeton auprès de Supabase — 350 à 580 ms mesurés sur cette liaison, sur
+     *chaque* requête d'une route protégée.
+
+     Ce middleware n'accorde aucun accès : il redirige. Un cookie forgé
+     passerait ici, puis se heurterait à la vraie barrière — Supabase rejette
+     un jeton mal signé sur chaque lecture de données, et RLS ne rendrait
+     aucune ligne. Le back-office, lui, revérifie le rôle en base dans sa
+     coque. La validation réseau était donc payée trois fois par page pour un
+     seul contrôle utile. */
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user ?? null;
 
   /* --- « Se souvenir de moi » décoché : la session meurt avec le navigateur.
      Le témoin persistant dit que la session était éphémère ; le témoin de

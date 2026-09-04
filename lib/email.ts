@@ -18,6 +18,12 @@ export type Notification = {
   html: string;
   /** Adresse du visiteur, pour pouvoir lui répondre d'un clic. */
   repondreA?: string;
+  /**
+   * Destinataire. Par défaut l'administration (`SMTP_TO`, à défaut
+   * `SMTP_USER`) : la plupart des messages sont des alertes internes. Les
+   * emails d'authentification, eux, vont au visiteur.
+   */
+  destinataire?: string;
 };
 
 /** Sans identifiants, on ne tente rien : l'appelant décide quoi faire. */
@@ -56,7 +62,7 @@ export async function envoyerNotification(notification: Notification): Promise<b
 
     await transport.sendMail({
       from: SMTP_FROM || `"Nova Assist" <${SMTP_USER}>`,
-      to: SMTP_TO || SMTP_USER,
+      to: notification.destinataire || SMTP_TO || SMTP_USER,
       replyTo: notification.repondreA,
       subject: ligneSure(notification.sujet),
       text: notification.texte,

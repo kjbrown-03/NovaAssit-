@@ -20,10 +20,19 @@ export type IdentiteAdmin = {
 export async function identiteAdmin(): Promise<IdentiteAdmin | null> {
   const supabase = await creerClientServeur();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  /* `getSession()` lit le cookie sans appel réseau, là où `getUser()` part
+     valider le jeton auprès de Supabase — 350 à 580 ms mesurés depuis ce
+     poste. Le middleware a déjà fait cette validation pour toute route
+     `/admin`, la refaire ici doublait le coût de chaque page du back-office.
 
+     L'identifiant ne sert qu'à cibler la ligne : c'est la lecture en base qui
+     décide du rôle, et RLS qui la garde. Un cookie forgé ne donnerait aucun
+     profil, donc aucun accès. */
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  const user = session?.user;
   if (!user) return null;
 
   const { data } = await supabase

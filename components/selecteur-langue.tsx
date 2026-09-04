@@ -4,15 +4,23 @@ import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 
-import { LANGUES, type Langue } from "@/i18n/config";
-import { changerLangue } from "@/lib/actions-langue";
+import { COOKIE_LANGUE, LANGUES, type Langue } from "@/i18n/config";
+
+/** Un an : le choix de langue n'a pas de raison d'expirer plus tôt. */
+const DUREE = 60 * 60 * 24 * 365;
 
 /**
  * Bascule Français / English.
  *
- * Le choix est écrit dans un cookie par une action serveur, puis `refresh()`
- * refait rendre l'arbre côté serveur : toutes les pages et tous les composants
- * repassent dans la nouvelle langue, sans rechargement complet.
+ * Le cookie est écrit **par le navigateur**, pas par une action serveur.
+ * L'action faisait un aller-retour rien que pour poser le cookie, puis
+ * `refresh()` en faisait un second pour re-rendre la page : deux allers-retours
+ * là où un seul est nécessaire. Sur une liaison où chaque aller-retour coûte
+ * 350 à 580 ms, la bascule paraissait bloquée.
+ *
+ * Le cookie n'est pas `httpOnly` — il ne porte aucun secret, seulement « fr »
+ * ou « en » —, le script peut donc l'écrire lui-même. `refresh()` refait alors
+ * rendre l'arbre serveur, qui lit la nouvelle valeur.
  */
 export function SelecteurLangue({ tone = "on-paper" }: { tone?: "on-navy" | "on-paper" }) {
   const locale = useLocale() as Langue;
@@ -24,10 +32,9 @@ export function SelecteurLangue({ tone = "on-paper" }: { tone?: "on-navy" | "on-
 
   const basculer = (langue: Langue) => {
     if (langue === locale) return;
-    demarrer(async () => {
-      await changerLangue(langue);
-      router.refresh();
-    });
+
+    document.cookie = `${COOKIE_LANGUE}=${langue}; Max-Age=${DUREE}; Path=/; SameSite=Lax`;
+    demarrer(() => router.refresh());
   };
 
   return (
