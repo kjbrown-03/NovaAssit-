@@ -1,4 +1,6 @@
-import { creerClientServeur } from "@/lib/supabase/server";
+import { unstable_cache } from "next/cache";
+
+import { creerClientPublic, creerClientServeur } from "@/lib/supabase/server";
 
 import type { Article, NouvelArticle, StatutArticle } from "./types";
 
@@ -120,6 +122,63 @@ export async function listerSlugsPublies(): Promise<string[]> {
   const { data } = await supabase.from("articles").select("slug").eq("statut", "publie");
   return (data ?? []).map((l) => l.slug as string);
 }
+
+/* ------------------------------------------------------- lecture en cache
+
+   Le blog est public et identique pour tous : sans cache, mille visiteurs
+   simultanés déclenchent mille requêtes Supabase pour le même contenu. Ces
+   deux fonctions passent par le client sans cookies — `unstable_cache` refuse
+   un appel à `cookies()`, et à raison : un cache partagé ne doit dépendre
+   d'aucun visiteur en particulier.
+
+   L'étiquette `articles` est invalidée par les actions du back-office : une
+   publication est donc visible immédiatement, sans attendre l'expiration.
+   ------------------------------------------------------------------------ */
+
+export const ETIQUETTE = "articles";
+
+/** Filet de sécurité si une invalidation se perd : une heure au maximum. */
+const DUREE = 3600;
+
+export const listerPubliesEnCache = unstable_cache(
+  async (): Promise<Article[]> => {
+    const supabase = creerClientPublic();
+    const { data } = await supabase
+      .from("articles")
+      .select(COLONNES)
+      .eq("statut", "publie")
+      .order("publie_le", { ascending: false });
+
+    return ((data ?? []) as LigneArticle[]).map(versArticle);
+  },
+  ["articles-publies"],
+  { tags: [ETIQUETTE], revalidate: DUREE },
+);
+
+/**
+ * Un article publié, mis en cache.
+ *
+ * Renvoie `null` pour un brouillon : la page appelante retombe alors sur
+ * `lireParSlug`, qui tient compte de la session et laisse l'administration
+ * relire son brouillon. Le chemin fréquenté — un article publié, lu par un
+ * visiteur — ne touche donc jamais la base.
+ */
+export const lirePublieEnCache = unstable_cache(
+  async (slug: string): Promise<Article | null> => {
+    const supabase = creerClientPublic();
+    const { data } = await supabase
+      .from("articles")
+      .select(COLONNES)
+      .eq("slug", slug)
+      .eq("statut", "publie")
+      .maybeSingle();
+
+    return data ? versArticle(data as LigneArticle) : null;
+  },
+  ["article-publie"],
+  { tags: [ETIQUETTE], revalidate: DUREE },
+);
+
 
 /* --------------------------------------------------------------- écriture */
 

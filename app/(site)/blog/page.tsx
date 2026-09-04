@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ButtonPrimary, Eyebrow } from "@/components/ui";
 
-import { listerPublies } from "@/lib/articles/depot";
+import { listerPubliesEnCache } from "@/lib/articles/depot";
 import { minutesDeLecture } from "@/lib/articles/types";
 
 export const metadata: Metadata = {
@@ -23,7 +23,8 @@ const dateCourte = (iso: string) =>
  * d'afficher des titres qui n'existent pas.
  */
 export default async function Blog() {
-  const articles = await listerPublies();
+  /* Lecture en cache : mille visiteurs simultanés ne font qu'une requête. */
+  const articles = await listerPubliesEnCache();
 
   return (
     <section className="mx-auto flex max-w-[1180px] flex-col gap-[18px] px-5 pt-10 pb-16 lg:px-14 lg:pt-[66px] lg:pb-24">

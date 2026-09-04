@@ -1,9 +1,9 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 import { identiteAdmin } from "@/lib/supabase/admin";
-import { changerStatut, creer, lireParId, modifier, supprimer } from "./depot";
+import { ETIQUETTE, changerStatut, creer, lireParId, modifier, supprimer } from "./depot";
 import {
   CHAPO_MAX,
   TITRE_MAX,
@@ -41,6 +41,9 @@ async function refuserSiPasAdmin(): Promise<EtatEditeur | null> {
 
 /** Rafraîchit tout ce qui montre des articles. */
 function rafraichir(slug?: string) {
+  /* Vide le cache des lectures publiques : sans ça, une publication
+     n'apparaîtrait qu'à l'expiration du cache, jusqu'à une heure plus tard. */
+  revalidateTag(ETIQUETTE);
   revalidatePath("/admin/articles");
   revalidatePath("/blog");
   if (slug) revalidatePath(`/blog/${slug}`);

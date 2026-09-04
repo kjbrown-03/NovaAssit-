@@ -10,14 +10,13 @@ const ROUTES_PROTEGEES = [
      la page — il demande une lecture en base que le middleware n'a pas à
      payer sur chaque requête. */
   "/admin",
-  /* `/devis` n'est PAS ici, volontairement. L'arborescence du cahier des
-     charges place « Devis » au même niveau que « Inscription » et
-     « Connexion » : c'est une page publique. Exiger un compte avant de
-     demander un prix, c'est perdre la plupart des demandes — et le
-     back-office existe précisément pour recevoir celles de visiteurs qui
-     n'ont pas encore de compte. */
+  /* Le devis passe par un compte : c'est le choix de Nova Assist, pour que
+     chaque demande arrive rattachée à un client identifié et retrouvable dans
+     l'espace client. L'arborescence du cahier des charges plaçait « Devis »
+     parmi les pages publiques — c'est un écart assumé. */
+  "/devis",
 
-  /* Le paiement, lui, suppose un compte : le cahier prévoit « Paiement en
+  /* Le paiement aussi suppose un compte : le cahier prévoit « Paiement en
      ligne des packages, via API Tara, dès formule choisie et compte client
      créé ». */
   "/paiement",
@@ -44,6 +43,10 @@ export async function middleware(requete: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      /* Même raison que dans `lib/supabase/server.ts` : la bibliothèque ne pose
+         pas `secure` d'elle-même, et le middleware réécrit le cookie à chaque
+         rafraîchissement de session. */
+      cookieOptions: { secure: process.env.NODE_ENV === "production" },
       cookies: {
         getAll() {
           return requete.cookies.getAll();
@@ -165,6 +168,7 @@ export const config = {
   matcher: [
     "/espace-client/:path*",
     "/admin/:path*",
+    "/devis/:path*",
     "/paiement/:path*",
     "/mot-de-passe-nouveau/:path*",
     "/connexion",

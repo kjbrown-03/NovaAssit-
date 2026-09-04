@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 import { ButtonPrimary, Eyebrow } from "@/components/ui";
-import { lireParSlug } from "@/lib/articles/depot";
+import { lirePublieEnCache, lireParSlug } from "@/lib/articles/depot";
 import { enParagraphes, minutesDeLecture } from "@/lib/articles/types";
 
 const dateLongue = (iso: string) =>
@@ -16,7 +16,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const article = await lireParSlug(slug);
+  const article = (await lirePublieEnCache(slug)) ?? (await lireParSlug(slug));
 
   if (!article) return { title: "Article introuvable", robots: { index: false } };
 
@@ -46,7 +46,10 @@ export async function generateMetadata({
  */
 export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const article = await lireParSlug(slug);
+  /* Chemin fréquenté d'abord : un article publié sort du cache sans toucher la
+     base. Le repli n'est emprunté que pour un brouillon, donc par
+     l'administration seule — RLS refusera de toute façon aux autres. */
+  const article = (await lirePublieEnCache(slug)) ?? (await lireParSlug(slug));
 
   if (!article) notFound();
 
