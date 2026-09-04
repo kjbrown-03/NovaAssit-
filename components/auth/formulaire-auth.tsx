@@ -79,37 +79,32 @@ export function FormulaireAuth({
     }
 
     /* -------------------------------------------------------- inscription */
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password: motDePasse,
-      options: {
-        /* Ces clés sont lues telles quelles par le déclencheur SQL
-           `gerer_nouveau_compte` pour remplir la table `profils`. */
-        data: {
-          entreprise: String(donnees.get("entreprise") ?? "").trim(),
-          contact_nom: String(donnees.get("nom") ?? "").trim(),
-        },
-        /* Le lien de confirmation doit revenir sur la route de rappel, seule
-           capable d'échanger le code contre une session et de poser les
-           cookies. Une page ordinaire ignorerait le code. */
-        emailRedirectTo: `${window.location.origin}/auth/confirm?next=/espace-client`,
-      },
+    /* Passe par notre route serveur et non par `supabase.auth.signUp` : le
+       service d'envoi intégré de Supabase est plafonné à deux emails par
+       heure, si bien qu'après deux inscriptions plus personne ne pouvait
+       créer de compte. La route génère le lien côté Supabase puis l'expédie
+       par notre SMTP. */
+    const reponse = await fetch("/api/inscription", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,
+        motDePasse,
+        entreprise: String(donnees.get("entreprise") ?? "").trim(),
+        nom: String(donnees.get("nom") ?? "").trim(),
+      }),
     });
-    if (error) return messageLisible(error.message);
 
-    /* Sans session, c'est que la confirmation par email est exigée — réglage
-       par défaut de Supabase, et le bon pour un service qui promet de la
-       confidentialité. */
-    if (!data.session) {
-      return "Compte créé. Ouvrez le lien de confirmation envoyé à votre adresse pour activer votre accès.";
+    if (!reponse.ok) {
+      const erreur = await reponse.json().catch(() => ({}));
+      return typeof erreur.erreur === "string"
+        ? erreur.erreur
+        : "L'inscription n'a pas abouti. Réessayez dans un instant.";
     }
 
-    /* Le formulaire d'inscription n'a pas de case « se souvenir » : on vient de
-       créer le compte sur cet appareil, la session y reste. */
-    marquerSession(true);
-
-    router.replace("/espace-client");
-    router.refresh();
+    /* La réponse est volontairement la même qu'une adresse soit déjà inscrite
+       ou non : le dire permettrait d'énumérer les clients de Nova Assist. */
+    return "Si cette adresse peut être inscrite, un lien de confirmation vient de vous être envoyé. Ouvrez-le pour activer votre accès.";
   }
 
   return (
