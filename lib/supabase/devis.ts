@@ -106,6 +106,7 @@ export const STYLE_STATUT_DEVIS: Record<StatutDevis, string> = {
  */
 export async function reporterDansLeSuivi(params: {
   profilId: string;
+  devisId: number;
   reference: string;
   domaines: string[];
   precision: string | null;
@@ -130,6 +131,8 @@ export async function reporterDansLeSuivi(params: {
 
     const { error } = await supabase.from("demandes").insert({
       profil_id: params.profilId,
+      /* Le lien qui permettra à l'administration de faire suivre le statut. */
+      devis_id: params.devisId,
       reference: params.reference,
       objet,
       detail: detail || null,
@@ -157,4 +160,48 @@ export function referenceDemande(idDevis: string, date = new Date()): string {
   const jour = date.toISOString().slice(2, 10).replace(/-/g, "");
   const suffixe = idDevis.replace(/[^a-zA-Z0-9]/g, "").slice(0, 4).toUpperCase();
   return `NA-${jour}-${suffixe}`;
+}
+
+
+/**
+ * Traduit un statut du back-office vers celui que lit le client.
+ *
+ * Les deux vocabulaires ne se recouvrent pas : l'administration distingue une
+ * demande neuve d'une demande en traitement, distinction sans intérêt pour le
+ * client, qui veut savoir si c'est en cours ou fini. `attente_retour` n'a pas
+ * d'équivalent côté devis — il reste réservé aux demandes ouvertes à la main
+ * depuis le back-office.
+ */
+export function statutClientPour(statut: StatutDevis): "en_cours" | "terminee" {
+  return statut === "traitee" || statut === "perdue" ? "terminee" : "en_cours";
+}
+
+/**
+ * Répercute l'avancement sur le suivi du client.
+ *
+ * Écrit avec `service_role` : le schéma n'ouvre volontairement aucune politique
+ * UPDATE sur `demandes` — « le statut est piloté par Nova Assist, jamais par le
+ * client ». C'est donc à ce titre qu'on écrit ici, et pour la seule ligne
+ * rattachée à ce devis.
+ *
+ * Ne lève jamais : l'avancement côté administration a déjà eu lieu, ce report
+ * ne doit pas le remettre en cause.
+ */
+export async function repercuterStatutAuClient(
+  devisId: number,
+  statut: StatutDevis,
+): Promise<void> {
+  try {
+    const supabase = creerClientAdmin();
+    const { error } = await supabase
+      .from("demandes")
+      .update({ statut: statutClientPour(statut) })
+      .eq("devis_id", devisId);
+
+    if (error) {
+      console.error("[devis] statut non répercuté au client :", error.message);
+    }
+  } catch (erreur) {
+    console.error("[devis] statut non répercuté au client :", erreur);
+  }
 }

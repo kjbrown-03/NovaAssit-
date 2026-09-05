@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { creerClientServeur } from "./server";
-import type { StatutDevis } from "./devis";
+import { repercuterStatutAuClient, type StatutDevis } from "./devis";
 
 const STATUTS: StatutDevis[] = ["nouveau", "en_cours", "traitee", "perdue"];
 
@@ -32,7 +32,15 @@ export async function changerStatutDevis(donnees: FormData): Promise<void> {
     })
     .eq("id", id);
 
-  if (error) console.error("[devis] changement de statut refusé :", error.message);
+  if (error) {
+    console.error("[devis] changement de statut refusé :", error.message);
+    return;
+  }
+
+  /* Le client doit voir bouger sa demande : sans ce report, elle restait
+     figée « en cours » quoi que fasse l'administration. */
+  await repercuterStatutAuClient(id, statut as StatutDevis);
 
   revalidatePath("/admin/devis");
+  revalidatePath("/espace-client");
 }

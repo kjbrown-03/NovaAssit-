@@ -109,6 +109,7 @@ export async function POST(requete: Request) {
     if (user) {
       await reporterDansLeSuivi({
         profilId: user.id,
+        devisId: Number(enregistree.id),
         reference: referenceDemande(String(enregistree.id)),
         domaines: domaines.filter((d): d is string => typeof d === "string"),
         precision: texteOuNull(corps.precision),
