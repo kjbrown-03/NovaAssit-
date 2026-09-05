@@ -36,10 +36,17 @@ function clientAdmin() {
   return createClient(url, cle, { auth: { persistSession: false } });
 }
 
-/** Le bouton doré du gabarit, seul élément interactif du message. */
+/**
+ * Le bouton doré du gabarit, seul élément interactif du message.
+ *
+ * L'adresse est échappée comme n'importe quel texte inséré dans du HTML : elle
+ * contient désormais des `&` — `?token_hash=...&type=...&next=...` — et un `&`
+ * nu dans un attribut est ambigu pour un analyseur HTML. Les navigateurs sont
+ * tolérants, les assainisseurs des messageries beaucoup moins.
+ */
 function bouton(lien: string, libelle: string): string {
   return `<p style="margin: 26px 0;">
-    <a href="${lien}" style="background:#0b1f3a;color:#ffffff;text-decoration:none;padding:14px 28px;font-family:sans-serif;font-size:15px;font-weight:600;display:inline-block;">${echapperHtml(libelle)}</a>
+    <a href="${echapperHtml(lien)}" style="background:#0b1f3a;color:#ffffff;text-decoration:none;padding:14px 28px;font-family:sans-serif;font-size:15px;font-weight:600;display:inline-block;">${echapperHtml(libelle)}</a>
   </p>`;
 }
 
