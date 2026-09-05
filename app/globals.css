@@ -520,7 +520,16 @@
    ------------------------------------------------------------------ */
 @layer components {
   .na-orbite {
-    --na-orbite-rayon: clamp(150px, 30vw, 248px);
+    /* Le rayon doit valoir environ 1,4 fois la largeur d'une face.
+
+       Avec un pas de 42°, deux voisines cessent de se recouvrir quand
+       R·sin(42°) dépasse la demi-largeur de la face centrale plus celle de la
+       face inclinée, soit R ≈ 1,4·largeur. Le desktop respectait ce rapport
+       (248 / 180 = 1,38) et s'affichait bien ; le mobile était à 130 / 124,
+       soit 1,05 — les cartes se chevauchaient de 25 px et se tronquaient
+       mutuellement. Le rayon est donc plancher-né à 170 px, jamais en dessous
+       de ce que la largeur des faces exige. */
+    --na-orbite-rayon: clamp(170px, 34vw, 248px);
     position: relative;
     display: flex;
     flex-direction: column;
@@ -539,7 +548,7 @@
   .na-orbite-scene {
     position: relative;
     width: 100%;
-    height: clamp(252px, 34vw, 296px);
+    height: clamp(286px, 38vw, 330px);
     perspective: 1100px;
     cursor: grab;
     /* `touch-action` ne s'hérite pas : déclaré sur le parent, il laissait la
@@ -566,8 +575,8 @@
     top: 50%;
     left: 50%;
     display: flex;
-    width: clamp(152px, 21vw, 180px);
-    height: clamp(198px, 26vw, 226px);
+    width: clamp(118px, 21vw, 180px);
+    height: clamp(206px, 29vw, 244px);
     flex-direction: column;
     gap: 7px;
     border: 1px solid color-mix(in oklab, var(--color-gold-line) 32%, transparent);
@@ -626,14 +635,15 @@
        recouvrent d'une trentaine de pixels : c'est l'aspect de l'effet
        d'origine, la face centrale passant devant par la profondeur 3D. */
     .na-orbite {
-      --na-orbite-rayon: 130px;
+      /* Le `clamp` général tient déjà le rayon à 170 px ici. */
+      --na-orbite-rayon: 170px;
     }
     .na-orbite-scene {
-      height: 224px;
+      height: 286px;
     }
     .na-orbite-face {
-      width: 124px;
-      height: 176px;
+      width: 118px;
+      height: 206px;
       padding: 11px 11px 13px;
       gap: 5px;
     }
