@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getLocale, getTranslations } from "next-intl/server";
 import {
   CheckCircle,
   Clock,
@@ -25,27 +26,32 @@ import { MAX_ACCUEIL } from "@/lib/temoignages/types";
 import {
   chargerTableauDeBord,
   dateCourte,
-  libelleFormule,
-  libelleStatut,
   semaineCourante,
   STYLE_STATUT,
 } from "@/lib/supabase/espace-client";
 
-export const metadata: Metadata = {
-  title: "Espace client",
-  description: "Suivi de vos demandes, documents, factures et rapports Nova Assist.",
-  robots: { index: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("pageEspace");
+  return { title: t("metaTitre"), description: t("metaDescription"), robots: { index: false } };
+}
 
+/* Les intitulés viennent des messages, alignés par position sur `pageEspace.nav`. */
 const NAV = [
-  { libelle: "Tableau de bord", href: "#contenu", Icone: LayoutDashboard },
-  { libelle: "Mes demandes", href: "#demandes", Icone: Folder },
-  { libelle: "Documents", href: "#documents", Icone: FileText },
-  { libelle: "Factures", href: "#documents", Icone: Receipt },
-  { libelle: "Mon témoignage", href: "#temoignage", Icone: MessageSquareQuote },
-  { libelle: "Mon profil", href: "#profil", Icone: UserRound },
-  { libelle: "Mon abonnement", href: "#abonnement", Icone: Wallet },
+  { href: "#contenu", Icone: LayoutDashboard },
+  { href: "#demandes", Icone: Folder },
+  { href: "#documents", Icone: FileText },
+  { href: "#documents", Icone: Receipt },
+  { href: "#temoignage", Icone: MessageSquareQuote },
+  { href: "#profil", Icone: UserRound },
+  { href: "#abonnement", Icone: Wallet },
 ];
+
+/* Clé de message pour chaque statut de demande. */
+const CLE_STATUT = {
+  en_cours: "statutEnCours",
+  attente_retour: "statutAttenteRetour",
+  terminee: "statutTerminee",
+} as const;
 
 /* Chaque statut porte son icône : la teinte seule ne doit pas porter le sens. */
 const ICONE_STATUT = {
@@ -56,6 +62,18 @@ const ICONE_STATUT = {
 
 export default async function EspaceClient() {
   const { profil, demandes, documents, enCours, prioritaires } = await chargerTableauDeBord();
+  const t = await getTranslations("pageEspace");
+  const tf = await getTranslations("formules");
+  const tc = await getTranslations("commun");
+  const locale = await getLocale();
+
+  const libNav = t.raw("nav") as string[];
+
+  /* Le nom de la formule est traduit ici plutôt que par `libelleFormule` :
+     ce dernier sert aussi au back-office, qui reste en français. */
+  const nomFormule = profil?.formule
+    ? t("formuleLibelle", { nom: tf(`${profil.formule}.nom`) })
+    : t("formuleADefinir");
 
   /* L'administration n'a rien à faire ici : ce tableau de bord affiche les
      demandes, factures et heures d'un client, données qu'un compte
@@ -64,7 +82,7 @@ export default async function EspaceClient() {
 
   /* Le middleware garantit une session ; le profil, lui, peut manquer si le
      déclencheur SQL n'a pas tourné. On le dit plutôt que d'afficher un vide. */
-  const entreprise = profil?.entreprise ?? "Profil incomplet";
+  const entreprise = profil?.entreprise ?? t("profilIncomplet");
   const prenomOuNom = profil?.contact_nom?.trim();
 
   /* Seul le forfait souscrit est encore affiché, dans la fiche entreprise.
@@ -101,11 +119,11 @@ export default async function EspaceClient() {
           </span>
         </div>
 
-        <nav aria-label="Espace client" className="md:px-3">
+        <nav aria-label={t("navAria")} className="md:px-3">
           {/* Sur mobile la latérale devient une barre d'onglets défilante. */}
           <ul className="na-scroll flex gap-1 overflow-x-auto px-3 md:flex-col md:overflow-visible md:px-0">
-            {NAV.map(({ libelle, href, Icone }, i) => (
-              <li key={libelle} className="shrink-0">
+            {NAV.map(({ href, Icone }, i) => (
+              <li key={i} className="shrink-0">
                 <Link
                   href={href}
                   aria-current={i === 0 ? "page" : undefined}
@@ -117,7 +135,7 @@ export default async function EspaceClient() {
                 >
                   <Icone className="h-[18px] w-[18px] shrink-0" aria-hidden />
                   <span className="transition-opacity duration-200 md:opacity-0 md:group-hover/rail:opacity-100 md:group-focus-within/rail:opacity-100">
-                    {libelle}
+                    {libNav[i]}
                   </span>
                 </Link>
               </li>
@@ -129,7 +147,7 @@ export default async function EspaceClient() {
           <BlocProfil
             nom={prenomOuNom ?? null}
             entreprise={entreprise}
-            formule={libelleFormule(profil?.formule ?? null)}
+            formule={nomFormule}
           />
           <BoutonDeconnexion />
         </div>
@@ -145,12 +163,12 @@ export default async function EspaceClient() {
           <header className="hidden h-16 shrink-0 items-center justify-between gap-4 border-b border-line-soft px-8 md:flex">
             <div className="flex min-w-0 flex-col">
               <h1 className="truncate text-[19px] font-semibold text-navy">
-                {prenomOuNom ? `Bonjour, ${prenomOuNom}` : "Bonjour"}
+                {prenomOuNom ? t("bonjourNom", { nom: prenomOuNom }) : t("bonjour")}
               </h1>
-              <p className="text-[13px] text-gray-mid">{semaineCourante()}</p>
+              <p className="text-[13px] text-gray-mid">{semaineCourante(new Date(), locale)}</p>
             </div>
             <ShinyButton href="/devis" className="!px-[20px] !py-[10px] !text-[14px]">
-              Nouvelle demande
+              {t("nouvelleDemande")}
             </ShinyButton>
           </header>
 
@@ -159,9 +177,9 @@ export default async function EspaceClient() {
               {/* En-tête mobile : la barre du haut est masquée sous md. */}
               <div className="flex flex-col gap-1 md:hidden">
                 <h1 className="text-[26px] text-navy">
-                  {prenomOuNom ? `Bonjour, ${prenomOuNom}` : "Bonjour"}
+                  {prenomOuNom ? t("bonjourNom", { nom: prenomOuNom }) : t("bonjour")}
                 </h1>
-                <p className="text-[15px] text-gray-mid">{semaineCourante()}</p>
+                <p className="text-[15px] text-gray-mid">{semaineCourante(new Date(), locale)}</p>
               </div>
 
               {!profil && (
@@ -170,11 +188,8 @@ export default async function EspaceClient() {
                     <Clock className="h-5 w-5 text-gold-ink" aria-hidden />
                   </span>
                   <div className="flex flex-col gap-1">
-                    <h2 className="text-[15px] font-bold text-navy">Fiche entreprise à créer</h2>
-                    <p className="text-[14px] leading-[1.55] text-slate-deep">
-                      Écrivez-nous sur WhatsApp et nous la complétons — vos demandes resteront
-                      visibles ici ensuite.
-                    </p>
+                    <h2 className="text-[15px] font-bold text-navy">{t("ficheTitre")}</h2>
+                    <p className="text-[14px] leading-[1.55] text-slate-deep">{t("ficheTexte")}</p>
                   </div>
                 </div>
               )}
@@ -182,7 +197,7 @@ export default async function EspaceClient() {
               {/* ------------------------------------------------------ indicateurs */}
               <section aria-labelledby="titre-indicateurs">
                 <h2 id="titre-indicateurs" className="sr-only">
-                  Votre activité du mois
+                  {t("activiteTitre")}
                 </h2>
                 {/* Un seul indicateur depuis le retrait des heures consommées
                     et de la prochaine facture : aucune des deux n'était
@@ -197,13 +212,16 @@ export default async function EspaceClient() {
                   <div className="na-carte na-carte-actif flex flex-col gap-3 rounded-3xl p-5 shadow-sm sm:max-w-[340px]">
                     <dt className="na-statut na-statut-cours self-start">
                       <RefreshCw className="h-[14px] w-[14px]" aria-hidden />
-                      Demandes en cours
+                      {t("demandesEnCours")}
                     </dt>
                     <dd className="font-serif text-[32px] leading-none text-navy">{enCours}</dd>
                     <p className="text-[13px] text-gray-mid">
                       {prioritaires > 0
-                        ? `Dont ${prioritaires} prioritaire${prioritaires > 1 ? "s" : ""}`
-                        : "Aucune prioritaire"}
+                        ? t(
+                            prioritaires > 1 ? "dontPrioritairesPluriel" : "dontPrioritaires",
+                            { n: prioritaires },
+                          )
+                        : t("aucunePrioritaire")}
                     </p>
                   </div>
                 </dl>
@@ -211,14 +229,12 @@ export default async function EspaceClient() {
 
               {/* --------------------------------------------------------- demandes */}
               <section id="demandes" className="na-monte flex flex-col gap-4">
-                <h2 className="text-[20px] text-navy lg:text-[23px]">Mes demandes</h2>
+                <h2 className="text-[20px] text-navy lg:text-[23px]">{t("mesDemandes")}</h2>
 
                 {demandes.length === 0 ? (
                   <div className="na-carte rounded-3xl px-6 py-10 text-center shadow-sm">
-                    <p className="text-[16px] text-slate-mid">Aucune demande pour l&apos;instant.</p>
-                    <p className="mt-2 text-[15px] text-gray-mid">
-                      Celles que vous nous adressez apparaîtront ici, avec leur statut.
-                    </p>
+                    <p className="text-[16px] text-slate-mid">{t("aucuneDemande")}</p>
+                    <p className="mt-2 text-[15px] text-gray-mid">{t("aucuneDemandeAide")}</p>
                   </div>
                 ) : (
                   <ul className="flex flex-col gap-3">
@@ -236,12 +252,12 @@ export default async function EspaceClient() {
                             </span>
                             <span className="text-[16px] text-ink">{demande.objet}</span>
                             <span className="text-[13px] text-gray-mid">
-                              Reçue le {dateCourte(demande.recue_le)}
+                              {t("recueLe", { date: dateCourte(demande.recue_le, locale) })}
                             </span>
                           </div>
                           <span className={`${STYLE_STATUT[demande.statut]} shrink-0`}>
                             <IconeStatut className="h-[14px] w-[14px]" aria-hidden />
-                            {libelleStatut(demande.statut)}
+                            {t(CLE_STATUT[demande.statut])}
                           </span>
                         </li>
                       );
@@ -253,10 +269,10 @@ export default async function EspaceClient() {
               {/* ------------------------------------------- documents + contact */}
               <div id="documents" className="na-monte grid gap-3 lg:grid-cols-2">
                 <section className="na-carte na-carte-actif flex flex-col gap-4 rounded-3xl p-6 shadow-sm">
-                  <h2 className="text-[19px] text-navy">Derniers documents</h2>
+                  <h2 className="text-[19px] text-navy">{t("documentsTitre")}</h2>
                   {documents.length === 0 ? (
                     <p className="text-[15px] leading-[1.6] text-gray-mid">
-                      Vos rapports, factures et contrats signés se rangeront ici.
+                      {t("documentsVides")}
                     </p>
                   ) : (
                     <ul className="flex flex-col gap-3 text-[15px]">
@@ -274,7 +290,7 @@ export default async function EspaceClient() {
                 </section>
 
                 <section className="na-carte na-carte-actif flex flex-col gap-[14px] rounded-3xl p-6 shadow-sm">
-                  <h2 className="text-[19px] text-navy">Votre interlocutrice</h2>
+                  <h2 className="text-[19px] text-navy">{t("interlocutriceTitre")}</h2>
                   <div className="flex items-center gap-4">
                     <span
                       aria-hidden
@@ -283,18 +299,16 @@ export default async function EspaceClient() {
                       1:1
                     </span>
                     <span className="flex flex-col gap-[3px]">
-                      <span className="text-[17px] text-navy">Nom à compléter</span>
-                      <span className="text-[14px] text-gray-mid">Assistante senior · 6j / 7</span>
+                      <span className="text-[17px] text-navy">{t("interlocutriceNom")}</span>
+                      <span className="text-[14px] text-gray-mid">{t("interlocutriceRole")}</span>
                     </span>
                   </div>
                   <ShinyButton
-                    href={whatsappLink(
-                      "Bonjour, je vous écris depuis mon espace client Nova Assist.",
-                    )}
+                    href={whatsappLink(t("messageWhatsApp"))}
                     external
                     className="mt-auto w-full !p-[13px] !text-[15px]"
                   >
-                    Écrire sur WhatsApp
+                    {tc("ecrireWhatsApp")}
                   </ShinyButton>
                 </section>
               </div>
@@ -321,32 +335,33 @@ export default async function EspaceClient() {
                     <div className="flex flex-col">
                       <h2 className="text-[19px] text-navy">{prenomOuNom || entreprise}</h2>
                       <p className="text-[14px] text-gray-mid">
-                        {prenomOuNom ? entreprise : "Contact à compléter"}
+                        {prenomOuNom ? entreprise : t("contactACompleter")}
                       </p>
                     </div>
                   </div>
                   <span className="na-statut na-statut-neutre">
                     <Wallet className="h-[14px] w-[14px]" aria-hidden />
-                    {libelleFormule(profil?.formule ?? null)}
+                    {nomFormule}
                   </span>
                 </div>
 
                 <dl className="grid gap-4 border-t border-line-soft pt-4 sm:grid-cols-2">
                   <div className="flex flex-col gap-1">
-                    <dt className="na-eyebrow">Entreprise</dt>
+                    <dt className="na-eyebrow">{t("profilEntreprise")}</dt>
                     <dd className="text-[15px] text-ink">{entreprise}</dd>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <dt className="na-eyebrow">Forfait mensuel</dt>
+                    <dt className="na-eyebrow">{t("profilForfait")}</dt>
                     <dd className="text-[15px] text-ink">
-                      {heuresIncluses !== null ? `${heuresIncluses} h par mois` : "À définir"}
+                      {heuresIncluses !== null
+                        ? t("forfaitHeures", { h: heuresIncluses })
+                        : t("forfaitADefinir")}
                     </dd>
                   </div>
                 </dl>
 
                 <p className="text-[13px] text-muted italic">
-                  Pour modifier ces informations, écrivez-nous sur WhatsApp — nous les mettons à
-                  jour depuis le back-office.
+                  {t("profilNote")}
                 </p>
               </section>
 
@@ -359,12 +374,10 @@ export default async function EspaceClient() {
                 className="na-carte na-monte flex flex-col gap-5 rounded-3xl p-6 shadow-sm lg:p-8"
               >
                 <div className="flex flex-col gap-2">
-                  <span className="na-eyebrow">Votre abonnement</span>
-                  <h2 className="text-[20px] text-navy lg:text-[24px]">Les formules</h2>
+                  <span className="na-eyebrow">{t("abonnementEyebrow")}</span>
+                  <h2 className="text-[20px] text-navy lg:text-[24px]">{t("abonnementTitre")}</h2>
                   <p className="max-w-[62ch] text-[15px] leading-[1.6] text-slate-mid">
-                    {profil?.formule
-                      ? "Vous pouvez changer de formule à tout moment, avec un préavis de 30 jours. Les heures non consommées sont reportées d'un mois."
-                      : "Aucune formule n'est encore active sur votre compte. Choisissez celle qui correspond à votre volume."}
+                    {profil?.formule ? t("abonnementAvecFormule") : t("abonnementSansFormule")}
                   </p>
                 </div>
 
@@ -382,11 +395,11 @@ export default async function EspaceClient() {
                       >
                         <div className="flex items-start justify-between gap-3">
                           <span className="font-mono text-[10px] tracking-[0.18em] text-gold-ink uppercase">
-                            {formule.nom}
+                            {tf(`${formule.id}.nom`)}
                           </span>
                           {active && (
                             <span className="shrink-0 bg-gold px-[9px] py-1 font-mono text-[9px] tracking-[0.12em] text-navy uppercase">
-                              Votre formule
+                              {t("votreFormule")}
                             </span>
                           )}
                         </div>
@@ -394,23 +407,25 @@ export default async function EspaceClient() {
                         <p className="font-serif text-[26px] leading-none text-navy">
                           {formule.prixCourt}{" "}
                           <span className="font-sans text-[13px] text-gray-mid">
-                            {formule.unite}
+                            {tf("unite")}
                           </span>
                         </p>
 
                         <p className="text-[14px] leading-[1.5] text-slate-mid">
-                          {formule.pourCourt}
+                          {tf(`${formule.id}.pourCourt`)}
                         </p>
 
                         <ul className="flex flex-col gap-[6px] text-[13px] leading-[1.45] text-ink-700">
-                          {formule.inclus.slice(0, 3).map((ligne) => (
-                            <li key={ligne}>{ligne}</li>
-                          ))}
+                          {(tf.raw(`${formule.id}.inclus`) as string[])
+                            .slice(0, 3)
+                            .map((ligne) => (
+                              <li key={ligne}>{ligne}</li>
+                            ))}
                         </ul>
 
                         {active ? (
                           <p className="mt-auto pt-1 font-mono text-[11px] tracking-[0.12em] text-gold-ink uppercase">
-                            Formule en cours
+                            {t("formuleEnCours")}
                           </p>
                         ) : (
                           <ShinyButton
@@ -418,7 +433,7 @@ export default async function EspaceClient() {
                             variant={formule.miseEnAvant ? "primary" : "outline"}
                             className="mt-auto !p-[11px] !text-[14px]"
                           >
-                            {profil?.formule ? "Passer à cette formule" : "Passer au paiement"}
+                            {profil?.formule ? t("passerACetteFormule") : t("passerAuPaiement")}
                           </ShinyButton>
                         )}
                       </li>
@@ -433,12 +448,10 @@ export default async function EspaceClient() {
                 className="na-carte na-monte flex flex-col gap-5 rounded-3xl p-6 shadow-sm lg:p-8"
               >
                 <div className="flex flex-col gap-2">
-                  <span className="na-eyebrow">Votre retour</span>
-                  <h2 className="text-[20px] text-navy lg:text-[24px]">Partager un témoignage</h2>
+                  <span className="na-eyebrow">{t("temoignageEyebrow")}</span>
+                  <h2 className="text-[20px] text-navy lg:text-[24px]">{t("temoignageTitre")}</h2>
                   <p className="max-w-[62ch] text-[15px] leading-[1.6] text-slate-mid">
-                    Écrit ou filmé, votre retour aide les entreprises qui hésitent encore. Il est
-                    relu par notre équipe avant publication, et la page d&apos;accueil en présente{" "}
-                    {MAX_ACCUEIL} au maximum.
+                    {t("temoignageTexte", { max: MAX_ACCUEIL })}
                   </p>
                 </div>
                 <FormulaireTemoignage
@@ -460,7 +473,7 @@ export default async function EspaceClient() {
         className="na-fab na-presse fixed right-4 bottom-6 z-40 flex h-14 items-center gap-2 rounded-full bg-navy px-5 text-[15px] font-medium text-white shadow-xl shadow-navy/25 hover:bg-gold hover:text-navy sm:right-8"
       >
         <Plus className="na-fab-icone h-6 w-6" aria-hidden />
-        Nouvelle demande
+        {t("nouvelleDemande")}
       </Link>
     </div>
   );

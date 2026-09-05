@@ -164,8 +164,8 @@ export const libelleFormule = (f: Formule | null) =>
   f ? `Formule ${LIBELLE_FORMULE[f]}` : "Formule à définir";
 
 /** « 28 août » — format court, comme dans la maquette. */
-export function dateCourte(iso: string): string {
-  return new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long" }).format(
+export function dateCourte(iso: string, locale = "fr"): string {
+  return new Intl.DateTimeFormat(etiquette(locale), { day: "numeric", month: "long" }).format(
     new Date(iso),
   );
 }
@@ -182,7 +182,11 @@ export function dateEcheance(iso: string): string {
 export const montant = (fcfa: number) => new Intl.NumberFormat("fr-FR").format(fcfa);
 
 /** « Semaine du 24 au 30 août 2026 » — lundi au dimanche de la semaine en cours. */
-export function semaineCourante(maintenant = new Date()): string {
+/* `en-GB` plutôt que `en` : « 5 September » garde l'ordre jour-mois du
+   français, là où le format américain l'inverse — source d'erreur de lecture. */
+const etiquette = (locale: string) => (locale === "en" ? "en-GB" : "fr-FR");
+
+export function semaineCourante(maintenant = new Date(), locale = "fr"): string {
   const lundi = new Date(maintenant);
   /* getDay() : 0 = dimanche. On recule jusqu'au lundi précédent. */
   const decalage = (lundi.getDay() + 6) % 7;
