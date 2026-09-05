@@ -43,6 +43,33 @@ function bouton(lien: string, libelle: string): string {
   </p>`;
 }
 
+/**
+ * Retrouve un compte par son adresse.
+ *
+ * `supabase-js` n'expose pas de recherche par email : on pagine la liste
+ * d'administration. Bornée à 2 000 comptes — bien au-delà de ce que Nova
+ * Assist aura avant longtemps, et sans risque de balayer indéfiniment.
+ */
+async function trouverCompte(
+  supabase: ReturnType<typeof clientAdmin>,
+  email: string,
+): Promise<{ id: string; confirme: boolean } | null> {
+  const recherche = email.toLowerCase();
+
+  for (let page = 1; page <= 10; page++) {
+    const { data, error } = await supabase.auth.admin.listUsers({ page, perPage: 200 });
+    if (error || !data?.users?.length) return null;
+
+    const trouve = data.users.find((u) => (u.email ?? "").toLowerCase() === recherche);
+    if (trouve) {
+      return { id: trouve.id, confirme: Boolean(trouve.email_confirmed_at) };
+    }
+
+    if (data.users.length < 200) return null;
+  }
+  return null;
+}
+
 export type ResultatLien = { ok: true } | { ok: false; erreur: string };
 
 /**
@@ -73,9 +100,35 @@ export async function envoyerLienInscription(params: {
       },
     });
 
-    if (error) return { ok: false, erreur: error.message };
+    /* `generateLink` de type `signup` échoue si l'adresse est déjà prise. Deux
+       cas très différents se cachent derrière cette erreur :
 
-    const lien = data.properties?.action_link;
+       - le compte existe et n'est PAS confirmé : la personne s'est inscrite,
+         n'a pas ouvert son lien, et réessaie. Sans ce repli, elle resterait
+         bloquée pour toujours — chaque nouvelle tentative échouant en silence.
+       - le compte est confirmé : il n'y a rien à envoyer, la personne doit se
+         connecter. On reste muet, pour ne pas confirmer l'existence du compte
+         à qui teste des adresses. */
+    let lien = data?.properties?.action_link;
+
+    if (error) {
+      const compte = await trouverCompte(supabase, params.email);
+      if (!compte || compte.confirme) {
+        return { ok: false, erreur: error.message };
+      }
+
+      /* Un lien magique confirme l'adresse à son ouverture, exactement comme
+         le lien d'inscription d'origine. */
+      const relance = await supabase.auth.admin.generateLink({
+        type: "magiclink",
+        email: params.email,
+        options: { redirectTo: `${params.origine}/auth/confirm?next=/espace-client` },
+      });
+
+      if (relance.error) return { ok: false, erreur: relance.error.message };
+      lien = relance.data?.properties?.action_link;
+    }
+
     if (!lien) return { ok: false, erreur: "Lien de confirmation introuvable." };
 
     const titre = "Confirmez votre adresse";

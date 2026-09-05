@@ -572,11 +572,24 @@
     gap: 7px;
     border: 1px solid color-mix(in oklab, var(--color-gold-line) 32%, transparent);
     border-radius: 10px;
-    background: linear-gradient(
-      165deg,
-      color-mix(in oklab, white 9%, transparent),
-      color-mix(in oklab, white 2%, transparent)
-    );
+    /* Fond OPAQUE, posé sur le bleu nuit de la section.
+
+       Les faces étaient translucides à 9 % : sur un écran étroit, où l'anneau
+       se resserre au point que les cartes se chevauchent, les trois tarifs se
+       lisaient les uns par-dessus les autres — « 165 000320 000 »,
+       « PROFESSIONNELPREMIUM ». Le recouvrement fait partie de l'effet ; le
+       voir au travers, non. Une face opaque masque ce qu'il y a derrière,
+       comme les cartes d'un vrai éventail.
+
+       Le voile clair reste, superposé au fond plein : l'aspect verre est
+       conservé, la transparence ne l'est pas. */
+    background:
+      linear-gradient(
+        165deg,
+        color-mix(in oklab, white 10%, transparent),
+        color-mix(in oklab, white 3%, transparent)
+      ),
+      var(--color-navy-700);
     padding: 15px 15px 17px;
     text-align: left;
     transform: translate(-50%, -50%) rotateY(var(--na-orbite-angle))

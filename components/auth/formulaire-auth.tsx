@@ -103,8 +103,16 @@ export function FormulaireAuth({
     }
 
     /* La réponse est volontairement la même qu'une adresse soit déjà inscrite
-       ou non : le dire permettrait d'énumérer les clients de Nova Assist. */
-    return "Si cette adresse peut être inscrite, un lien de confirmation vient de vous être envoyé. Ouvrez-le pour activer votre accès.";
+       ou non : le dire permettrait d'énumérer les clients de Nova Assist.
+
+       Mais le message ne doit pas pour autant laisser quelqu'un sans issue :
+       une personne déjà inscrite attendrait un email qui ne viendra pas. Il
+       nomme donc les deux chemins sans révéler lequel s'applique. */
+    return (
+      "Si cette adresse peut être inscrite, un lien de confirmation vient de partir — " +
+      "ouvrez-le pour activer votre accès. Si vous avez déjà un compte, connectez-vous " +
+      "plutôt : le lien « Mot de passe oublié » vous dépannera si besoin."
+    );
   }
 
   return (
