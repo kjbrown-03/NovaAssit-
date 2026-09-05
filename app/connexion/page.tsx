@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { FormulaireAuth } from "@/components/auth/formulaire-auth";
 import type { AuthMode } from "@/components/ui/auth-switch";
 
-export const metadata: Metadata = {
-  title: "Connexion",
-  description:
-    "Connectez-vous à votre espace client Nova Assist ou créez votre compte pour suivre vos demandes, documents et factures.",
-  robots: { index: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("auth");
+  return {
+    title: t("metaTitre"),
+    description: t("metaDescription"),
+    robots: { index: false },
+  };
+}
 
 export default async function ConnexionPage({
   searchParams,
@@ -15,6 +18,7 @@ export default async function ConnexionPage({
   searchParams: Promise<{ mode?: string; suite?: string; erreur?: string; motif?: string }>;
 }) {
   const { mode, suite, erreur, motif } = await searchParams;
+  const t = await getTranslations("auth");
 
   /* `/connexion?mode=inscription` ouvre directement le formulaire de création
      de compte — c'est le lien posé depuis les appels à l'action du site. */
@@ -36,12 +40,12 @@ export default async function ConnexionPage({
         suite={destination}
         messageInitial={
           erreur
-            ? "Ce lien de confirmation n'est plus valable. Il a peut-être expiré ou déjà été utilisé — reconnectez-vous, ou refaites une demande."
+            ? t("lienInvalide")
             : /* Posé par le middleware quand une session non mémorisée a
                  survécu à la fermeture du navigateur — voir
                  `lib/session-navigateur.ts`. */
               motif === "session-fermee"
-              ? "Vous aviez décoché « Se souvenir de moi » : la session a été fermée à la fermeture du navigateur. Reconnectez-vous."
+              ? t("sessionFermee")
               : null
         }
       />

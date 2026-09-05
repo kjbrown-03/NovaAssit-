@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { FormulesOrbite, type Periode } from "@/components/formules-orbite";
 import type { Formule } from "@/lib/content";
 
-const PERIODES: { valeur: Periode; libelle: string }[] = [
-  { valeur: "mensuel", libelle: "Mensuel" },
-  { valeur: "annuel", libelle: "Annuel — 2 mois offerts" },
-];
+/* Les libellés vivent dans les fichiers de messages : seule la liste des
+   valeurs, qui ne change pas avec la langue, reste ici. */
+const PERIODES: Periode[] = ["mensuel", "annuel"];
 
 /**
  * La bascule de périodicité et les formules.
@@ -19,6 +19,7 @@ const PERIODES: { valeur: Periode; libelle: string }[] = [
  * immédiats coûterait plus qu'il ne rapporte.
  */
 export function OffresTarifs({ formules }: { formules: Formule[] }) {
+  const t = useTranslations("pageOffres");
   const [periode, setPeriode] = useState<Periode>("mensuel");
 
   return (
@@ -29,10 +30,10 @@ export function OffresTarifs({ formules }: { formules: Formule[] }) {
       <div className="mx-auto max-w-[1180px] px-5 pt-[26px] pb-8 lg:px-14 lg:pb-10">
         <div
           role="group"
-          aria-label="Périodicité de facturation"
+          aria-label={t("periodicite")}
           className="flex flex-wrap items-center gap-[14px]"
         >
-          {PERIODES.map(({ valeur, libelle }) => {
+          {PERIODES.map((valeur) => {
             const actif = periode === valeur;
             return (
               <button
@@ -46,7 +47,7 @@ export function OffresTarifs({ formules }: { formules: Formule[] }) {
                     : "border border-line px-5 py-[9px] text-slate-mid hover:border-gold hover:text-navy"
                 }`}
               >
-                {libelle}
+                {t(valeur)}
               </button>
             );
           })}
@@ -55,7 +56,7 @@ export function OffresTarifs({ formules }: { formules: Formule[] }) {
 
       <section data-reveal aria-labelledby="orbite-titre" className="mb-10 lg:mb-14">
         <h2 id="orbite-titre" className="sr-only">
-          Choisir une formule
+          {t("choisirFormule")}
         </h2>
 
         {/* L'anneau tourne aussi sur téléphone : c'est là qu'il est né, et le

@@ -1,18 +1,25 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getLocale, getTranslations } from "next-intl/server";
 import { ButtonPrimary, Eyebrow } from "@/components/ui";
 
 import { listerPubliesEnCache } from "@/lib/articles/depot";
 import { minutesDeLecture } from "@/lib/articles/types";
 
-export const metadata: Metadata = {
-  title: "Blog",
-  description:
-    "Cas d'usage par secteur : assistance PME, cabinet médical, commerce. Les ressources Nova Assist, secteur par secteur.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("blog");
+  return { title: t("metaTitre"), description: t("metaDescription") };
+}
 
-const dateCourte = (iso: string) =>
-  new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+/* La date suit la langue affichée. `en-GB` plutôt que `en` : « 5 September »
+   se lit comme la forme française, là où le format américain inverse le jour
+   et le mois — source d'erreur pour un lecteur camerounais. */
+const dateCourte = (iso: string, locale: string) =>
+  new Date(iso).toLocaleDateString(locale === "en" ? "en-GB" : "fr-FR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 
 /**
  * Liste des articles publiés.
@@ -23,26 +30,27 @@ const dateCourte = (iso: string) =>
  * d'afficher des titres qui n'existent pas.
  */
 export default async function Blog() {
+  const t = await getTranslations("blog");
+  const tc = await getTranslations("commun");
+  const locale = await getLocale();
+
   /* Lecture en cache : mille visiteurs simultanés ne font qu'une requête. */
   const articles = await listerPubliesEnCache();
 
   return (
     <section className="mx-auto flex max-w-[1180px] flex-col gap-[18px] px-5 pt-10 pb-16 lg:px-14 lg:pt-[66px] lg:pb-24">
-      <Eyebrow>Accueil · Blog</Eyebrow>
+      <Eyebrow>{t("filAriane")}</Eyebrow>
       <h1 className="max-w-[20ch] text-[34px] leading-[1.08] text-navy lg:text-[54px]">
-        Ressources par secteur
+        {t("titre")}
       </h1>
       <p className="max-w-[56ch] text-[16px] leading-[1.65] text-slate-deep lg:text-[18px]">
-        Des cas d&apos;usage secteur par secteur, à partir de situations réelles : ce qu&apos;une
-        assistante prend en charge, et ce que ça change au quotidien.
+        {t("intro")}
       </p>
 
       {articles.length === 0 ? (
         <div className="mt-6 border-t border-line py-10">
           <p className="max-w-[52ch] text-[16px] leading-[1.65] text-slate-mid">
-            Les premiers articles sont en cours de rédaction. En attendant, la page des offres
-            détaille ce que couvre chaque formule — et une demande de devis reçoit une réponse
-            sous 24 h ouvrées.
+            {t("vide")}
           </p>
         </div>
       ) : (
@@ -66,9 +74,9 @@ export default async function Blog() {
                 </span>
                 <span className="shrink-0 font-mono text-[11px] tracking-[0.12em] text-muted uppercase">
                   {article.secteur ? `${article.secteur} · ` : ""}
-                  {article.publieLe ? dateCourte(article.publieLe) : ""}
+                  {article.publieLe ? dateCourte(article.publieLe, locale) : ""}
                   {" · "}
-                  {minutesDeLecture(article.corps)} min
+                  {minutesDeLecture(article.corps)} {t("min")}
                 </span>
               </Link>
             </li>
@@ -77,7 +85,7 @@ export default async function Blog() {
       )}
 
       <div className="mt-6">
-        <ButtonPrimary href="/devis">Demander un devis</ButtonPrimary>
+        <ButtonPrimary href="/devis">{tc("demanderDevis")}</ButtonPrimary>
       </div>
     </section>
   );

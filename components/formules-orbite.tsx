@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 import { MOIS_FACTURES_A_L_ANNEE, formaterFcfa, type Formule } from "@/lib/content";
@@ -36,6 +37,9 @@ export function FormulesOrbite({
   formules: Formule[];
   periode: Periode;
 }) {
+  const tf = useTranslations("formules");
+  const to = useTranslations("pageOffres");
+
   const annuel = periode === "annuel";
   const scene = useRef<HTMLDivElement>(null);
   const anneau = useRef<HTMLDivElement>(null);
@@ -133,7 +137,7 @@ export function FormulesOrbite({
               style={{ "--na-orbite-angle": `${(index - centre) * PAS}deg` } as React.CSSProperties}
             >
               <span className="font-mono text-[10px] tracking-[0.18em] text-gold uppercase">
-                {formule.nom}
+                {tf(`${formule.id}.nom`)}
               </span>
               {/* Le tarif annuel compte un chiffre de plus : il descend d'un
                   cran en taille pour tenir dans la face sans la déborder. */}
@@ -147,12 +151,12 @@ export function FormulesOrbite({
                   : formule.prixCourt}
               </span>
               <span className="font-mono text-[10px] tracking-[0.08em] text-gold-line">
-                {annuel ? "FCFA / an" : formule.unite}
+                {annuel ? tf("uniteAnnuelle") : tf("unite")}
               </span>
               <span aria-hidden className="h-px w-6 bg-gold" />
-              <span className="text-[12px] leading-[1.4] text-white/70">{formule.pourCourt}</span>
+              <span className="text-[12px] leading-[1.4] text-white/70">{tf(`${formule.id}.pourCourt`)}</span>
               <span className="mt-auto font-mono text-[10px] tracking-[0.12em] text-gold uppercase">
-                Choisir →
+                {tf("choisir")}
               </span>
             </Link>
           ))}
@@ -172,7 +176,7 @@ export function FormulesOrbite({
         </span>
       </div>
 
-      <p className="na-orbite-indice">Glissez ou touchez une formule pour la choisir</p>
+      <p className="na-orbite-indice">{to("indiceOrbite")}</p>
     </div>
   );
 }

@@ -165,7 +165,9 @@
         "Named account manager",
         "Tailored reporting"
       ]
-    }
+    },
+    "uniteAnnuelle": "FCFA / year",
+    "choisir": "Choose →"
   },
   "temoignages": {
     "eyebrow": "They trust us",
@@ -210,7 +212,14 @@
     "metaDescription": "Sector-by-sector use cases: SME support, medical practice, retail. Nova Assist resources, sector by sector.",
     "filAriane": "Home · Blog",
     "titre": "Resources by sector",
-    "intro": "Sector-by-sector use cases drawn from real situations: what an assistant takes on, and what it changes day to day."
+    "intro": "Sector-by-sector use cases drawn from real situations: what an assistant takes on, and what it changes day to day.",
+    "vide": "The first articles are being written. In the meantime, the plans page sets out what each one covers — and a quote request gets an answer within 24 working hours.",
+    "min": "min",
+    "minLecture": "min read",
+    "brouillon": "Draft",
+    "avertissementBrouillon": "This article is not published. You can see it because your account is an administrator — a visitor would get a not-found page.",
+    "tousLesArticles": "All articles",
+    "introuvable": "Article not found"
   },
   "pageServices": {
     "metaTitre": "Services",
@@ -243,5 +252,189 @@
     ],
     "ctaTitre": "A need that is not on the list?",
     "ctaBouton": "Tell us about it"
+  },
+  "pageOffres": {
+    "metaTitre": "Our plans",
+    "metaDescription": "Three virtual assistance plans — Essential, Professional, Premium. Unused hours roll over, switch plans any time, 30 days' notice.",
+    "filAriane": "Home · Our plans",
+    "titre": "Three plans, one standard",
+    "intro": "Unused hours roll over to the following month. You can switch plans or stop with 30 days' notice.",
+    "periodicite": "Billing period",
+    "mensuel": "Monthly",
+    "annuel": "Yearly — 2 months free",
+    "choisirFormule": "Choose a plan",
+    "comparerTitre": "Compare in detail",
+    "colPrestation": "Service",
+    "nonInclus": "Not included",
+    "comparatif": [
+      {
+        "prestation": "Hours included",
+        "valeurs": [
+          "20 h",
+          "60 h",
+          "Unlimited, within reason"
+        ]
+      },
+      {
+        "prestation": "WhatsApp and email",
+        "valeurs": [
+          "Included",
+          "Included",
+          "Included"
+        ]
+      },
+      {
+        "prestation": "Inbound calls",
+        "valeurs": [
+          "—",
+          "Included",
+          "Included"
+        ]
+      },
+      {
+        "prestation": "Invoice collection",
+        "valeurs": [
+          "—",
+          "Included",
+          "Included"
+        ]
+      },
+      {
+        "prestation": "Community management",
+        "valeurs": [
+          "—",
+          "Optional",
+          "Included"
+        ]
+      },
+      {
+        "prestation": "Dedicated assistant",
+        "valeurs": [
+          "—",
+          "—",
+          "Included"
+        ]
+      },
+      {
+        "prestation": "Reporting frequency",
+        "valeurs": [
+          "Monthly",
+          "Weekly",
+          "Tailored"
+        ]
+      }
+    ],
+    "faqTitre": "Frequently asked questions",
+    "faq": [
+      {
+        "question": "Can I switch plans along the way?",
+        "reponse": "Yes, at any time, effective the following month. No switching fee."
+      },
+      {
+        "question": "What happens to hours I don't use?",
+        "reponse": "They roll over to the next month, up to 25% of your plan."
+      },
+      {
+        "question": "How does payment work?",
+        "reponse": "Online from your client area via Tara, or by bank transfer against an invoice."
+      },
+      {
+        "question": "Is my data protected?",
+        "reponse": "A non-disclosure agreement is signed before any engagement, and access is granted by name."
+      }
+    ],
+    "ctaTitre": "A particular situation?",
+    "ctaTexte": "We build a tailored plan around your actual volume.",
+    "motInclus": "Included",
+    "indiceOrbite": "Swipe or tap a plan to choose it"
+  },
+  "pageAPropos": {
+    "metaTitre": "About",
+    "metaDescription": "Virtual assistance is a well-established profession internationally, and almost invisible in Cameroon. Nova Assist was created to fill that gap.",
+    "filAriane": "Home · About",
+    "titre": "The profession existed elsewhere. It was missing here.",
+    "intro": "Virtual assistance is a well-established profession internationally, and almost invisible in Cameroon. Nova Assist was created to fill that gap, with the rigour of a firm and the flexibility of a small team.",
+    "photoRatio": "Photo · 3:4",
+    "photoLegende": "Portrait of the founder, plain background",
+    "missionEyebrow": "Our mission",
+    "missionTexte": "To let business owners focus on their trade, by taking on everything that doesn't move it forward.",
+    "valeursTitre": "Our values",
+    "valeurs": [
+      {
+        "titre": "Discretion",
+        "texte": "What is said at our clients' stays with our clients."
+      },
+      {
+        "titre": "Precision",
+        "texte": "Deadlines measured and communicated, not sales promises."
+      },
+      {
+        "titre": "Closeness",
+        "texte": "One named contact, reachable on WhatsApp just like your customers."
+      }
+    ],
+    "equipeTitre": "The team",
+    "portraitRatio": "Portrait · 4:5",
+    "badgeExemple": "Sample",
+    "equipe": [
+      {
+        "nom": "Name to be confirmed",
+        "role": "Founder"
+      },
+      {
+        "nom": "Name to be confirmed",
+        "role": "Senior assistant"
+      },
+      {
+        "nom": "Name to be confirmed",
+        "role": "Collections officer"
+      }
+    ],
+    "ctaTitre": "Let's work together."
+  },
+  "auth": {
+    "metaTitre": "Sign in",
+    "metaDescription": "Sign in to your Nova Assist client area, or create an account to follow your requests, documents and invoices.",
+    "retour": "Back",
+    "connexionTitre": "Sign in",
+    "inscriptionTitre": "Sign up",
+    "email": "Email",
+    "emailPlaceholder": "you@company.cm",
+    "motDePasse": "Password",
+    "motDePassePlaceholder": "Your password",
+    "motDePasseNouveauPlaceholder": "8 characters minimum",
+    "motDePasseOublie": "Forgot your password?",
+    "afficherMotDePasse": "Show password",
+    "masquerMotDePasse": "Hide password",
+    "memoriser": "Remember me on this device",
+    "seConnecter": "Sign in",
+    "nom": "Full name",
+    "nomPlaceholder": "Mrs Ngo Bassong",
+    "entreprise": "Company",
+    "entreprisePlaceholder": "Clinique de la Dibamba",
+    "whatsapp": "WhatsApp number",
+    "whatsappPlaceholder": "+237 6 78 12 34 56",
+    "whatsappAide": "We send your activation link there too, in case the email doesn't arrive.",
+    "conditions": "I accept the terms of use and the privacy policy.",
+    "creerCompte": "Create my account",
+    "panneauNouveauTitre": "New to Nova Assist?",
+    "panneauNouveauTexte": "Create your account: your requests, reports and invoices all sit in one place from day one.",
+    "panneauNouveauCta": "Create an account",
+    "panneauDejaTitre": "Already have an account?",
+    "panneauDejaTexte": "Pick up where you left off: your open requests are waiting in your client area.",
+    "panneauDejaCta": "Sign in",
+    "maquetteConnexion": "The client area isn't connected yet. Write to us and we'll open your access.",
+    "maquetteInscription": "Request recorded on the interface side. Account creation will be switched on when the client area goes live.",
+    "erreurReseau": "The connection to the server failed. Check your network and try again.",
+    "lienInvalide": "This confirmation link is no longer valid. It may have expired or already been used — sign in again, or request a new one.",
+    "sessionFermee": "You had unticked “Remember me”: the session ended when you closed your browser. Please sign in again.",
+    "inscriptionEchouee": "Sign-up didn't go through. Please try again in a moment.",
+    "succesInscription": "If this address can be registered, a confirmation link has just been sent by email — do check your spam folder. We also send it to you on WhatsApp. If you already have an account, sign in instead: the “Forgot your password” link will help if needed.",
+    "erreurIdentifiants": "Incorrect email or password.",
+    "erreurNonConfirme": "Your address isn't confirmed yet. Open the link you received by email.",
+    "erreurDejaInscrit": "An account already exists with this address. Sign in instead.",
+    "erreurMotDePasseCourt": "The password must be at least 8 characters long.",
+    "erreurTropDeTentatives": "Too many attempts. Wait a few minutes before trying again.",
+    "erreurGenerique": "The request didn't go through. Try again, or message us on WhatsApp."
   }
 }

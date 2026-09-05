@@ -2,13 +2,20 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { ButtonPrimary, Eyebrow } from "@/components/ui";
 import { lirePublieEnCache, lireParSlug } from "@/lib/articles/depot";
 import { enParagraphes, minutesDeLecture } from "@/lib/articles/types";
 
-const dateLongue = (iso: string) =>
-  new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+/* `en-GB` plutôt que `en` : la forme « 5 September » garde l'ordre français,
+   là où le format américain inverse le jour et le mois. */
+const dateLongue = (iso: string, locale: string) =>
+  new Date(iso).toLocaleDateString(locale === "en" ? "en-GB" : "fr-FR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 
 export async function generateMetadata({
   params,
@@ -18,7 +25,10 @@ export async function generateMetadata({
   const { slug } = await params;
   const article = (await lirePublieEnCache(slug)) ?? (await lireParSlug(slug));
 
-  if (!article) return { title: "Article introuvable", robots: { index: false } };
+  if (!article) {
+    const t = await getTranslations("blog");
+    return { title: t("introuvable"), robots: { index: false } };
+  }
 
   return {
     title: article.titre,
@@ -53,11 +63,15 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
   if (!article) notFound();
 
+  const t = await getTranslations("blog");
+  const tc = await getTranslations("commun");
+  const locale = await getLocale();
+
   const paragraphes = enParagraphes(article.corps);
 
   return (
     <article className="mx-auto flex max-w-[1180px] flex-col gap-[18px] px-5 pt-10 pb-16 lg:px-14 lg:pt-[66px] lg:pb-24">
-      <Eyebrow>Accueil · Blog</Eyebrow>
+      <Eyebrow>{t("filAriane")}</Eyebrow>
 
       <h1 className="max-w-[24ch] text-[32px] leading-[1.1] text-navy lg:text-[48px]">
         {article.titre}
@@ -65,15 +79,14 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
       <p className="font-mono text-[11px] tracking-[0.12em] text-muted uppercase">
         {article.secteur ? `${article.secteur} · ` : ""}
-        {article.publieLe ? dateLongue(article.publieLe) : "Brouillon"}
+        {article.publieLe ? dateLongue(article.publieLe, locale) : t("brouillon")}
         {" · "}
-        {minutesDeLecture(article.corps)} min de lecture
+        {minutesDeLecture(article.corps)} {t("minLecture")}
       </p>
 
       {article.statut !== "publie" && (
         <p className="max-w-[62ch] border border-gold bg-gold-soft px-4 py-3 text-[14px] leading-[1.55] text-slate-deep">
-          Cet article n&apos;est pas publié. Vous le voyez parce que votre compte est
-          administrateur — un visiteur obtiendrait une page introuvable.
+          {t("avertissementBrouillon")}
         </p>
       )}
 
@@ -99,12 +112,12 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
       </div>
 
       <div className="mt-10 flex flex-wrap items-center gap-4 border-t border-line pt-8">
-        <ButtonPrimary href="/devis">Demander un devis</ButtonPrimary>
+        <ButtonPrimary href="/devis">{tc("demanderDevis")}</ButtonPrimary>
         <Link
           href="/blog"
           className="flex items-center gap-2 text-[15px] text-slate-deep transition-colors hover:text-gold-ink"
         >
-          <ArrowLeft aria-hidden size={16} /> Tous les articles
+          <ArrowLeft aria-hidden size={16} /> {t("tousLesArticles")}
         </Link>
       </div>
     </article>

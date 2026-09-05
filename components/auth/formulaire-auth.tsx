@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { AuthSwitch, type AuthMode } from "@/components/ui/auth-switch";
 import { creerClientNavigateur } from "@/lib/supabase/client";
 import { marquerSession } from "@/lib/session-navigateur";
@@ -10,25 +11,17 @@ import { marquerSession } from "@/lib/session-navigateur";
  * formulation technique. La liste couvre les cas courants ; le reste retombe
  * sur un message générique plutôt que d'exposer l'original.
  */
-function messageLisible(brut: string): string {
+function messageLisible(brut: string, t: (cle: string) => string): string {
   const m = brut.toLowerCase();
 
-  if (m.includes("invalid login credentials")) {
-    return "Email ou mot de passe incorrect.";
-  }
-  if (m.includes("email not confirmed")) {
-    return "Votre adresse n'est pas encore confirmée. Ouvrez le lien reçu par email.";
-  }
+  if (m.includes("invalid login credentials")) return t("erreurIdentifiants");
+  if (m.includes("email not confirmed")) return t("erreurNonConfirme");
   if (m.includes("already registered") || m.includes("already been registered")) {
-    return "Un compte existe déjà avec cette adresse. Connectez-vous plutôt.";
+    return t("erreurDejaInscrit");
   }
-  if (m.includes("password") && m.includes("6 characters")) {
-    return "Le mot de passe doit contenir au moins 8 caractères.";
-  }
-  if (m.includes("rate limit") || m.includes("too many")) {
-    return "Trop de tentatives. Patientez quelques minutes avant de réessayer.";
-  }
-  return "La demande n'a pas abouti. Réessayez, ou écrivez-nous sur WhatsApp.";
+  if (m.includes("password") && m.includes("6 characters")) return t("erreurMotDePasseCourt");
+  if (m.includes("rate limit") || m.includes("too many")) return t("erreurTropDeTentatives");
+  return t("erreurGenerique");
 }
 
 /**
@@ -50,6 +43,7 @@ export function FormulaireAuth({
   messageInitial?: string | null;
 }) {
   const router = useRouter();
+  const t = useTranslations("auth");
 
   async function traiter(mode: AuthMode, donnees: FormData): Promise<string | void> {
     const supabase = creerClientNavigateur();
@@ -62,7 +56,7 @@ export function FormulaireAuth({
         email,
         password: motDePasse,
       });
-      if (error) return messageLisible(error.message);
+      if (error) return messageLisible(error.message, t);
 
       /* Une case décochée n'apparaît pas dans le FormData : sa seule présence
          vaut « oui ». Voir `lib/session-navigateur.ts` pour la raison d'être
@@ -98,9 +92,7 @@ export function FormulaireAuth({
 
     if (!reponse.ok) {
       const erreur = await reponse.json().catch(() => ({}));
-      return typeof erreur.erreur === "string"
-        ? erreur.erreur
-        : "L'inscription n'a pas abouti. Réessayez dans un instant.";
+      return typeof erreur.erreur === "string" ? erreur.erreur : t("inscriptionEchouee");
     }
 
     /* La réponse est volontairement la même qu'une adresse soit déjà inscrite
@@ -109,12 +101,7 @@ export function FormulaireAuth({
        Mais le message ne doit pas pour autant laisser quelqu'un sans issue :
        une personne déjà inscrite attendrait un email qui ne viendra pas. Il
        nomme donc les deux chemins sans révéler lequel s'applique. */
-    return (
-      "Si cette adresse peut être inscrite, un lien de confirmation vient de partir par " +
-      "email — pensez à regarder vos indésirables. Nous vous l'envoyons également sur " +
-      "WhatsApp. Si vous avez déjà un compte, connectez-vous plutôt : le lien " +
-      "« Mot de passe oublié » vous dépannera si besoin."
-    );
+    return t("succesInscription");
   }
 
   return (

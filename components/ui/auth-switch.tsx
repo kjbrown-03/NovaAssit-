@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState, type InputHTMLAttributes, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { ArrowLeft, Building2, Eye, EyeOff, KeyRound, Loader2, Mail, Phone, User } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -65,9 +66,10 @@ function Champ({ label, icone: Icone, action, aide, className, id, ...props }: C
 
 /** Champ mot de passe : même gabarit, plus la bascule œil à droite. */
 function ChampMotDePasse({
-  label = "Mot de passe",
+  label,
   ...props
 }: Omit<ChampProps, "icone" | "type" | "label"> & { label?: string }) {
+  const t = useTranslations("auth");
   const [visible, setVisible] = useState(false);
   const Oeil = visible ? EyeOff : Eye;
 
@@ -75,7 +77,7 @@ function ChampMotDePasse({
     <div className="relative">
       <Champ
         {...props}
-        label={label}
+        label={label ?? t("motDePasse")}
         icone={KeyRound}
         type={visible ? "text" : "password"}
         className="pr-[46px]"
@@ -90,7 +92,7 @@ function ChampMotDePasse({
       >
         <Oeil aria-hidden size={17} />
         <span className="sr-only">
-          {visible ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+          {visible ? t("masquerMotDePasse") : t("afficherMotDePasse")}
         </span>
       </button>
     </div>
@@ -170,6 +172,7 @@ export function AuthSwitch({
   onSubmit,
   className,
 }: AuthSwitchProps) {
+  const t = useTranslations("auth");
   const [mode, setMode] = useState<AuthMode>(modeInitial);
   const [enCours, setEnCours] = useState(false);
   const [message, setMessage] = useState<string | null>(messageInitial);
@@ -193,15 +196,11 @@ export function AuthSwitch({
       } else {
         /* Attente simulée : un envoi doit toujours répondre au clic. */
         await new Promise((r) => setTimeout(r, 700));
-        setMessage(
-          connexion
-            ? "L'espace client n'est pas encore raccordé. Écrivez-nous et nous ouvrons votre accès."
-            : "Demande enregistrée côté interface. La création de compte sera activée à la mise en ligne de l'espace client.",
-        );
+        setMessage(connexion ? t("maquetteConnexion") : t("maquetteInscription"));
       }
     } catch {
       /* Une panne réseau ne doit pas laisser le formulaire muet. */
-      setMessage("La connexion au serveur a échoué. Vérifiez votre réseau et réessayez.");
+      setMessage(t("erreurReseau"));
     } finally {
       setEnCours(false);
     }
@@ -232,33 +231,35 @@ export function AuthSwitch({
         >
           <div className="flex flex-col gap-5 self-start -ml-2 sm:-ml-6 mb-2">
             <Link href="/" className="flex items-center gap-2 text-white/60 hover:text-white transition-colors text-[14px]">
-              <ArrowLeft size={16} /> Retour
+              <ArrowLeft size={16} /> {t("retour")}
             </Link>
             <Wordmark size={19} className="ml-2 sm:ml-6" />
           </div>
-          <h1 className="text-[30px] leading-tight text-white lg:text-[36px]">Connexion</h1>
+          <h1 className="text-[30px] leading-tight text-white lg:text-[36px]">
+            {t("connexionTitre")}
+          </h1>
 
           <Champ
-            label="Email"
+            label={t("email")}
             icone={Mail}
             name="email"
             type="email"
             autoComplete="email"
             required
-            placeholder="vous@entreprise.cm"
+            placeholder={t("emailPlaceholder")}
           />
           <ChampMotDePasse
             name="motdepasse"
             required
             minLength={8}
             autoComplete="current-password"
-            placeholder="Votre mot de passe"
+            placeholder={t("motDePassePlaceholder")}
             action={
               <Link
                 href="/mot-de-passe-oublie"
                 className="text-[14px] text-gold transition-opacity hover:opacity-80"
               >
-                Mot de passe oublié ?
+                {t("motDePasseOublie")}
               </Link>
             }
           />
@@ -268,10 +269,10 @@ export function AuthSwitch({
               name="memoriser"
               className="mt-[2px] h-[17px] w-[17px] shrink-0 accent-[#C9A227]"
             />
-            <span>Se souvenir de moi sur cet appareil</span>
+            <span>{t("memoriser")}</span>
           </label>
 
-          <BoutonEnvoi enCours={enCours}>Se connecter</BoutonEnvoi>
+          <BoutonEnvoi enCours={enCours}>{t("seConnecter")}</BoutonEnvoi>
           {connexion && retour}
         </form>
 
@@ -284,56 +285,58 @@ export function AuthSwitch({
         >
           <div className="flex flex-col gap-5 self-start -ml-2 sm:-ml-6 mb-2">
             <Link href="/" className="flex items-center gap-2 text-white/60 hover:text-white transition-colors text-[14px]">
-              <ArrowLeft size={16} /> Retour
+              <ArrowLeft size={16} /> {t("retour")}
             </Link>
             <Wordmark size={19} className="ml-2 sm:ml-6" />
           </div>
-          <h1 className="text-[30px] leading-tight text-white lg:text-[36px]">Inscription</h1>
+          <h1 className="text-[30px] leading-tight text-white lg:text-[36px]">
+            {t("inscriptionTitre")}
+          </h1>
 
           <Champ
-            label="Nom et prénom"
+            label={t("nom")}
             icone={User}
             name="nom"
             type="text"
             autoComplete="name"
             required
-            placeholder="Madame Ngo Bassong"
+            placeholder={t("nomPlaceholder")}
           />
           <Champ
-            label="Entreprise"
+            label={t("entreprise")}
             icone={Building2}
             name="entreprise"
             type="text"
             autoComplete="organization"
             required
-            placeholder="Clinique de la Dibamba"
+            placeholder={t("entreprisePlaceholder")}
           />
           <Champ
-            label="Email"
+            label={t("email")}
             icone={Mail}
             name="email"
             type="email"
             autoComplete="email"
             required
-            placeholder="vous@entreprise.cm"
+            placeholder={t("emailPlaceholder")}
           />
           <Champ
-            label="Numéro WhatsApp"
+            label={t("whatsapp")}
             icone={Phone}
             name="telephone"
             type="tel"
             inputMode="tel"
             autoComplete="tel"
             required
-            placeholder="+237 6 78 12 34 56"
-            aide="Nous vous y envoyons votre lien d'activation, au cas où l'email n'arriverait pas."
+            placeholder={t("whatsappPlaceholder")}
+            aide={t("whatsappAide")}
           />
           <ChampMotDePasse
             name="motdepasse"
             required
             minLength={8}
             autoComplete="new-password"
-            placeholder="8 caractères minimum"
+            placeholder={t("motDePasseNouveauPlaceholder")}
           />
           <label className="flex items-start gap-3 text-[14px] leading-[1.5] text-white/70">
             <input
@@ -342,10 +345,10 @@ export function AuthSwitch({
               required
               className="mt-[2px] h-[17px] w-[17px] shrink-0 accent-[#C9A227]"
             />
-            <span>J&apos;accepte les conditions d&apos;utilisation et la confidentialité.</span>
+            <span>{t("conditions")}</span>
           </label>
 
-          <BoutonEnvoi enCours={enCours}>Créer mon compte</BoutonEnvoi>
+          <BoutonEnvoi enCours={enCours}>{t("creerCompte")}</BoutonEnvoi>
           {!connexion && retour}
         </form>
       </div>
@@ -359,13 +362,14 @@ export function AuthSwitch({
           className="na-auth-panneau na-auth-panneau--gauche"
         >
           <h2 className="text-[24px] leading-tight text-navy lg:text-[30px]">
-            Nouveau chez Nova&nbsp;Assist ?
+            {t("panneauNouveauTitre")}
           </h2>
           <p className="max-w-[34ch] text-[15px] leading-[1.55] text-navy/75 max-lg:hidden">
-            Créez votre compte : vos demandes, vos rapports et vos factures se rangent au même
-            endroit dès le premier jour.
+            {t("panneauNouveauTexte")}
           </p>
-          <BoutonBascule onClick={() => basculer("inscription")}>Créer un compte</BoutonBascule>
+          <BoutonBascule onClick={() => basculer("inscription")}>
+            {t("panneauNouveauCta")}
+          </BoutonBascule>
         </section>
 
         <section
@@ -374,11 +378,15 @@ export function AuthSwitch({
           aria-hidden={connexion}
           className="na-auth-panneau na-auth-panneau--droite"
         >
-          <h2 className="text-[24px] leading-tight text-navy lg:text-[30px]">Déjà un compte ?</h2>
+          <h2 className="text-[24px] leading-tight text-navy lg:text-[30px]">
+            {t("panneauDejaTitre")}
+          </h2>
           <p className="max-w-[34ch] text-[15px] leading-[1.55] text-navy/75 max-lg:hidden">
-            Reprenez le fil : vos demandes en cours vous attendent dans votre espace client.
+            {t("panneauDejaTexte")}
           </p>
-          <BoutonBascule onClick={() => basculer("connexion")}>Se connecter</BoutonBascule>
+          <BoutonBascule onClick={() => basculer("connexion")}>
+            {t("panneauDejaCta")}
+          </BoutonBascule>
         </section>
       </div>
     </div>
