@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { AlertTriangle, Building2, Folder, Receipt, ShieldCheck, Users } from "lucide-react";
 
+import { BoutonRelaisWhatsApp } from "@/components/admin/bouton-relais-whatsapp";
 import { listerClients } from "@/lib/supabase/clients-admin";
+import { formaterTelephone } from "@/lib/telephone";
 import { libelleFormule } from "@/lib/supabase/espace-client";
 import type { Formule } from "@/lib/supabase/espace-client";
 
@@ -133,6 +135,22 @@ export default async function ComptesClients() {
                   </dd>
                 </div>
               </dl>
+
+              {/* Relais du lien d'activation. Proposé pour tout compte client
+                  portant un numéro : le serveur refuse de lui-même si le compte
+                  est déjà confirmé, plutôt que de laisser la liste deviner un
+                  état qui vit dans `auth.users` et non dans `profils`. */}
+              {client.role !== "admin" && client.telephone && (
+                <div className="flex flex-wrap items-center gap-3 border-t border-line-soft pt-4">
+                  <BoutonRelaisWhatsApp
+                    profilId={client.id}
+                    contactNom={client.contact_nom}
+                  />
+                  <span className="font-mono text-[12px] text-muted">
+                    {formaterTelephone(client.telephone)}
+                  </span>
+                </div>
+              )}
             </li>
           ))}
         </ul>

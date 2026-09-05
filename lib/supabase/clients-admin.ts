@@ -4,6 +4,7 @@ export type ClientAdmin = {
   id: string;
   entreprise: string;
   contact_nom: string;
+  telephone: string | null;
   formule: string | null;
   role: string;
   cree_le: string;
@@ -39,7 +40,7 @@ export async function listerClients(): Promise<{
   const { data, error } = await supabase
     .from("profils")
     .select(
-      `id, entreprise, contact_nom, formule, role, cree_le,
+      `id, entreprise, contact_nom, telephone, formule, role, cree_le,
        heures_incluses, heures_consommees,
        demandes(count),
        commandes(count),
@@ -60,6 +61,7 @@ export async function listerClients(): Promise<{
       id: l.id as string,
       entreprise: l.entreprise as string,
       contact_nom: l.contact_nom as string,
+      telephone: (l.telephone as string | null) ?? null,
       formule: (l.formule as string | null) ?? null,
       role: (l.role as string) ?? "client",
       cree_le: l.cree_le as string,
