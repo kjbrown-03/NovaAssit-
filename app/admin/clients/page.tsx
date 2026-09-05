@@ -101,7 +101,7 @@ export default async function ComptesClients() {
                 </div>
               </div>
 
-              <dl className="grid grid-cols-2 gap-3 border-t border-line-soft pt-4 sm:grid-cols-4">
+              <dl className="grid grid-cols-2 gap-3 border-t border-line-soft pt-4 sm:grid-cols-3">
                 <div className="flex flex-col gap-1">
                   <dt className="na-eyebrow">Demandes</dt>
                   <dd className="flex items-center gap-1.5 text-[15px] text-ink">
@@ -124,14 +124,6 @@ export default async function ComptesClients() {
                       <AlertTriangle className="h-[15px] w-[15px]" aria-hidden />
                     )}
                     {client.nb_factures_impayees}
-                  </dd>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <dt className="na-eyebrow">Heures du mois</dt>
-                  <dd className="text-[15px] text-ink">
-                    {client.heures_incluses !== null
-                      ? `${client.heures_consommees ?? 0} / ${client.heures_incluses} h`
-                      : "—"}
                   </dd>
                 </div>
               </dl>

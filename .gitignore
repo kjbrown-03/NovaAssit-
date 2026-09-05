@@ -24,3 +24,7 @@ hawkscan-*.log
 
 # Cache du compilateur TypeScript — regénéré à chaque build.
 *.tsbuildinfo
+
+# Sauvegardes de donnees — contiennent des donnees personnelles de clients.
+# Jamais dans Git : un historique ne se purge pas.
+sauvegardes/

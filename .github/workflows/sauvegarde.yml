@@ -1,0 +1,54 @@
+# Sauvegarde nocturne des données Nova Assist.
+#
+# Pourquoi ce fichier existe : le plan gratuit de Supabase ne fait AUCUNE
+# sauvegarde automatique. Sans ce garde-fou, une table effacée ou un projet
+# suspendu emporte définitivement les comptes, les demandes et les factures.
+#
+# Le résultat est déposé en artefact de l'exécution, PAS commité dans le dépôt.
+# C'est délibéré : ces fichiers contiennent des données personnelles de clients,
+# et un historique Git ne se purge pas. Un artefact, lui, expire tout seul et
+# n'est accessible qu'à qui peut ouvrir le dépôt.
+#
+# Secrets à créer dans Settings > Secrets and variables > Actions :
+#   SUPABASE_URL                l'URL du projet (Supabase > Project Settings > API)
+#   SUPABASE_SERVICE_ROLE_KEY   la clé service_role, au même endroit
+name: Sauvegarde des données
+
+on:
+  schedule:
+    # 02h30 UTC, soit 03h30 à Douala — hors des heures de travail.
+    - cron: "30 2 * * *"
+  # Permet de déclencher une sauvegarde à la main avant une opération risquée.
+  workflow_dispatch:
+
+jobs:
+  exporter:
+    name: Export Supabase
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # Seul `@supabase/supabase-js` est nécessaire au script, mais installer
+      # depuis le verrou garantit la même version qu'en production.
+      - run: npm ci
+
+      - name: Exporter les tables
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/sauvegarde-donnees.mjs --sortie sauvegarde
+
+      - name: Déposer l'archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: sauvegarde-${{ github.run_started_at }}
+          path: sauvegarde/
+          # 90 jours : le maximum d'un dépôt gratuit. Au-delà, il faudrait un
+          # stockage externe — dis-le si le besoin se présente.
+          retention-days: 90
+          if-no-files-found: error

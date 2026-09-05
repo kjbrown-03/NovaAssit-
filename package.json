@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "sauvegarde": "node scripts/sauvegarde-donnees.mjs",
     "scan:local": "powershell -ExecutionPolicy Bypass -File security/scan-local.ps1"
   },
   "dependencies": {
