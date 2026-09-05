@@ -6,7 +6,6 @@ import {
   Clock,
   FileText,
   Folder,
-  Gauge,
   LayoutDashboard,
   MessageSquareQuote,
   Plus,
@@ -26,10 +25,8 @@ import { MAX_ACCUEIL } from "@/lib/temoignages/types";
 import {
   chargerTableauDeBord,
   dateCourte,
-  dateEcheance,
   libelleFormule,
   libelleStatut,
-  montant,
   semaineCourante,
   STYLE_STATUT,
 } from "@/lib/supabase/espace-client";
@@ -58,8 +55,7 @@ const ICONE_STATUT = {
 } as const;
 
 export default async function EspaceClient() {
-  const { profil, demandes, documents, prochaineFacture, enCours, prioritaires } =
-    await chargerTableauDeBord();
+  const { profil, demandes, documents, enCours, prioritaires } = await chargerTableauDeBord();
 
   /* L'administration n'a rien à faire ici : ce tableau de bord affiche les
      demandes, factures et heures d'un client, données qu'un compte
@@ -71,12 +67,9 @@ export default async function EspaceClient() {
   const entreprise = profil?.entreprise ?? "Profil incomplet";
   const prenomOuNom = profil?.contact_nom?.trim();
 
+  /* Seul le forfait souscrit est encore affiché, dans la fiche entreprise.
+     La consommation ne l'est plus : personne ne pouvait la renseigner. */
   const heuresIncluses = profil?.heures_incluses ?? null;
-  const heuresConsommees = profil?.heures_consommees ?? null;
-  const ratioHeures =
-    heuresIncluses && heuresConsommees !== null && heuresIncluses > 0
-      ? Math.min(Math.round((heuresConsommees / heuresIncluses) * 100), 100)
-      : null;
 
   return (
     <div className="na-console min-h-svh md:flex">
@@ -189,40 +182,19 @@ export default async function EspaceClient() {
               {/* ------------------------------------------------------ indicateurs */}
               <section aria-labelledby="titre-indicateurs">
                 <h2 id="titre-indicateurs" className="sr-only">
-                  Vos indicateurs du mois
+                  Votre activité du mois
                 </h2>
-                <dl className="na-monte grid gap-3 sm:grid-cols-3">
-                  <div className="na-carte na-carte-actif flex flex-col gap-3 rounded-3xl p-5 shadow-sm">
-                    <dt className="na-statut na-statut-attente self-start">
-                      <Gauge className="h-[14px] w-[14px]" aria-hidden />
-                      Heures consommées
-                    </dt>
-                    {ratioHeures === null ? (
-                      <>
-                        <dd className="font-serif text-[32px] leading-none text-navy">—</dd>
-                        <p className="text-[13px] text-gray-mid">Suivi pas encore ouvert</p>
-                      </>
-                    ) : (
-                      <>
-                        <dd className="font-serif text-[32px] leading-none text-navy">
-                          {heuresConsommees}
-                          <span className="text-[16px] text-gray-mid"> / {heuresIncluses} h</span>
-                        </dd>
-                        <div
-                          role="progressbar"
-                          aria-valuenow={heuresConsommees ?? 0}
-                          aria-valuemin={0}
-                          aria-valuemax={heuresIncluses ?? 0}
-                          aria-label="Heures consommées sur le forfait"
-                          className="na-jauge"
-                        >
-                          <span style={{ width: `${ratioHeures}%` }} />
-                        </div>
-                      </>
-                    )}
-                  </div>
+                {/* Un seul indicateur depuis le retrait des heures consommées
+                    et de la prochaine facture : aucune des deux n'était
+                    alimentée — rien, dans le back-office, ne permettait de les
+                    saisir. Un tableau de bord qui affiche « — » à vie promet
+                    ce qu'il ne tient pas.
 
-                  <div className="na-carte na-carte-actif flex flex-col gap-3 rounded-3xl p-5 shadow-sm">
+                    La carte est bornée en largeur : seule sur une grille à
+                    trois colonnes, elle se serait étirée d'un bord à l'autre
+                    ou aurait laissé deux vides à sa droite. */}
+                <dl className="na-monte">
+                  <div className="na-carte na-carte-actif flex flex-col gap-3 rounded-3xl p-5 shadow-sm sm:max-w-[340px]">
                     <dt className="na-statut na-statut-cours self-start">
                       <RefreshCw className="h-[14px] w-[14px]" aria-hidden />
                       Demandes en cours
@@ -233,29 +205,6 @@ export default async function EspaceClient() {
                         ? `Dont ${prioritaires} prioritaire${prioritaires > 1 ? "s" : ""}`
                         : "Aucune prioritaire"}
                     </p>
-                  </div>
-
-                  <div className="na-carte na-carte-actif flex flex-col gap-3 rounded-3xl p-5 shadow-sm">
-                    <dt className="na-statut na-statut-neutre self-start">
-                      <Receipt className="h-[14px] w-[14px]" aria-hidden />
-                      Prochaine facture
-                    </dt>
-                    {prochaineFacture ? (
-                      <>
-                        <dd className="font-serif text-[32px] leading-none text-navy">
-                          {montant(prochaineFacture.montant_fcfa)}
-                          <span className="text-[16px] text-gray-mid"> F</span>
-                        </dd>
-                        <p className="text-[13px] text-gray-mid">
-                          Échéance le {dateEcheance(prochaineFacture.echeance)}
-                        </p>
-                      </>
-                    ) : (
-                      <>
-                        <dd className="font-serif text-[32px] leading-none text-navy">—</dd>
-                        <p className="text-[13px] text-gray-mid">Aucune facture en attente</p>
-                      </>
-                    )}
                   </div>
                 </dl>
               </section>
