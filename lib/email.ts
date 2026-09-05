@@ -38,6 +38,33 @@ export function emailConfigure(): boolean {
 const ligneSure = (valeur: string) => valeur.replace(/[\r\n]+/g, " ").slice(0, 160);
 
 /**
+ * Choisit l'expéditeur réellement utilisable.
+ *
+ * La quasi-totalité des serveurs — Gmail en tête — exigent que l'adresse
+ * annoncée dans `From` soit celle du compte authentifié, ou un de ses alias
+ * vérifiés. Un `SMTP_FROM` pointant vers un autre domaine se fait au mieux
+ * réécrire, au pire rejeter, et le message part en indésirable chez le
+ * destinataire pour cause d'authentification SPF absente.
+ *
+ * On ne garde donc `SMTP_FROM` que s'il contient l'adresse du compte. Sinon on
+ * l'ignore, en le signalant : mieux vaut un expéditeur correct qu'un message
+ * jamais lu. Le cas se produit tel quel aujourd'hui — la variable a gardé la
+ * valeur d'exemple de `.env.example`.
+ */
+function expediteurSur(smtpFrom: string | undefined, smtpUser: string): string {
+  const repli = `"Nova Assist" <${smtpUser}>`;
+  if (!smtpFrom) return repli;
+
+  if (smtpFrom.toLowerCase().includes(smtpUser.toLowerCase())) return smtpFrom;
+
+  console.warn(
+    `[email] SMTP_FROM (${smtpFrom}) ne correspond pas au compte ${smtpUser} :` +
+      " expéditeur remplacé, sans quoi le message risque le rejet ou l'indésirable.",
+  );
+  return repli;
+}
+
+/**
  * Envoie la notification. Retourne `false` plutôt que de lever : un email
  * perdu ne doit jamais faire échouer l'enregistrement qui l'a déclenché — la
  * donnée est déjà en base, c'est elle qui compte.
@@ -61,7 +88,7 @@ export async function envoyerNotification(notification: Notification): Promise<b
     });
 
     await transport.sendMail({
-      from: SMTP_FROM || `"Nova Assist" <${SMTP_USER}>`,
+      from: expediteurSur(SMTP_FROM, SMTP_USER),
       to: notification.destinataire || SMTP_TO || SMTP_USER,
       replyTo: notification.repondreA,
       subject: ligneSure(notification.sujet),

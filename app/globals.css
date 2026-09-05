@@ -607,20 +607,32 @@
      `overflow: hidden` rognait. On resserre l'anneau et les cartes plutôt que
      de les laisser être coupées. */
   @media (max-width: 479px) {
+    /* Rayon 130 px, faces de 124 px : à 42° d'écart, les faces extrêmes se
+       tiennent à 149 px du centre — l'anneau entier occupe 298 px et tient
+       donc sur le plus petit téléphone courant. Les faces voisines se
+       recouvrent d'une trentaine de pixels : c'est l'aspect de l'effet
+       d'origine, la face centrale passant devant par la profondeur 3D. */
     .na-orbite {
-      --na-orbite-rayon: 118px;
+      --na-orbite-rayon: 130px;
     }
     .na-orbite-scene {
-      height: 236px;
+      height: 224px;
     }
     .na-orbite-face {
-      width: 132px;
-      height: 186px;
-      padding: 12px 12px 14px;
-      gap: 6px;
+      width: 124px;
+      height: 176px;
+      padding: 11px 11px 13px;
+      gap: 5px;
     }
     .na-orbite-emetteur {
-      width: min(320px, 92%);
+      width: min(300px, 92%);
+      margin-top: -40px;
+    }
+    /* Un doigt masque une face entière : l'indice de manipulation compte plus
+       ici que sur un grand écran. */
+    .na-orbite-indice {
+      bottom: 12px;
+      font-size: 9.5px;
     }
   }
 
