@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, Inbox, MessageSquareQuote, Newspaper, Users } from "lucide-react";
+import { BarChart3, Inbox, MessageSquareQuote, Newspaper, UserPlus, Users } from "lucide-react";
 
 const SECTIONS = [
   { libelle: "Demandes de devis", href: "/admin/devis", Icone: Inbox },
   { libelle: "Comptes clients", href: "/admin/clients", Icone: Users },
+  { libelle: "Inscriptions à confirmer", href: "/admin/inscriptions", Icone: UserPlus },
   { libelle: "Témoignages", href: "/admin/temoignages", Icone: MessageSquareQuote },
   /* Même icône que l'entrée « Blog » de l'en-tête du site : c'est le même
      contenu, vu de l'autre côté. */

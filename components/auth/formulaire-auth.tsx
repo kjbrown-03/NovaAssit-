@@ -92,6 +92,7 @@ export function FormulaireAuth({
         motDePasse,
         entreprise: String(donnees.get("entreprise") ?? "").trim(),
         nom: String(donnees.get("nom") ?? "").trim(),
+        telephone: String(donnees.get("telephone") ?? "").trim(),
       }),
     });
 
@@ -109,9 +110,10 @@ export function FormulaireAuth({
        une personne déjà inscrite attendrait un email qui ne viendra pas. Il
        nomme donc les deux chemins sans révéler lequel s'applique. */
     return (
-      "Si cette adresse peut être inscrite, un lien de confirmation vient de partir — " +
-      "ouvrez-le pour activer votre accès. Si vous avez déjà un compte, connectez-vous " +
-      "plutôt : le lien « Mot de passe oublié » vous dépannera si besoin."
+      "Si cette adresse peut être inscrite, un lien de confirmation vient de partir par " +
+      "email — pensez à regarder vos indésirables. Nous vous l'envoyons également sur " +
+      "WhatsApp. Si vous avez déjà un compte, connectez-vous plutôt : le lien " +
+      "« Mot de passe oublié » vous dépannera si besoin."
     );
   }
 

@@ -2,7 +2,7 @@
 
 import { useId, useState, type InputHTMLAttributes, type ReactNode } from "react";
 import Link from "next/link";
-import { ArrowLeft, Building2, Eye, EyeOff, KeyRound, Loader2, Mail, User } from "lucide-react";
+import { ArrowLeft, Building2, Eye, EyeOff, KeyRound, Loader2, Mail, Phone, User } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Wordmark } from "@/components/wordmark";
@@ -16,6 +16,8 @@ type ChampProps = InputHTMLAttributes<HTMLInputElement> & {
   icone: LucideIcon;
   /** Contenu aligné à droite du libellé — « Mot de passe oublié ? ». */
   action?: ReactNode;
+  /** Précision sous le champ : à quoi sert la donnée demandée. */
+  aide?: ReactNode;
 };
 
 /**
@@ -23,9 +25,10 @@ type ChampProps = InputHTMLAttributes<HTMLInputElement> & {
  * qui passe à l'or au focus. Disposition reprise de la maquette
  * d'authentification fournie, avec les angles vifs de la charte Nova Assist.
  */
-function Champ({ label, icone: Icone, action, className, id, ...props }: ChampProps) {
+function Champ({ label, icone: Icone, action, aide, className, id, ...props }: ChampProps) {
   const genere = useId();
   const champId = id ?? genere;
+  const aideId = `${champId}-aide`;
 
   return (
     <div className="flex flex-col gap-[7px]">
@@ -43,6 +46,7 @@ function Champ({ label, icone: Icone, action, className, id, ...props }: ChampPr
         />
         <input
           id={champId}
+          aria-describedby={aide ? aideId : undefined}
           className={cn(
             "w-full border border-white/15 bg-white/[0.04] py-[13px] pr-4 pl-[44px] text-[15px] text-white outline-none transition-colors placeholder:text-white/35 hover:border-white/25 focus:border-gold focus:bg-white/[0.07]",
             className,
@@ -50,6 +54,11 @@ function Champ({ label, icone: Icone, action, className, id, ...props }: ChampPr
           {...props}
         />
       </div>
+      {aide && (
+        <p id={aideId} className="text-[13px] leading-[1.45] text-white/50">
+          {aide}
+        </p>
+      )}
     </div>
   );
 }
@@ -307,6 +316,17 @@ export function AuthSwitch({
             autoComplete="email"
             required
             placeholder="vous@entreprise.cm"
+          />
+          <Champ
+            label="Numéro WhatsApp"
+            icone={Phone}
+            name="telephone"
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel"
+            required
+            placeholder="+237 6 78 12 34 56"
+            aide="Nous vous y envoyons votre lien d'activation, au cas où l'email n'arriverait pas."
           />
           <ChampMotDePasse
             name="motdepasse"

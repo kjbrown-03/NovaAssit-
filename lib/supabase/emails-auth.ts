@@ -1,6 +1,11 @@
 import { createClient } from "@supabase/supabase-js";
 
 import { corpsHtml, corpsTexte, echapperHtml, envoyerNotification } from "@/lib/email";
+import {
+  formaterTelephone,
+  lienWhatsApp,
+  messageActivation,
+} from "@/lib/telephone";
 
 /**
  * Emails d'authentification envoyés par nos soins, via nodemailer.
@@ -27,7 +32,7 @@ type TypeLien = "signup" | "recovery";
  * n'ont ni cookie ni session à gérer, et `admin.generateLink` exige la clé
  * `service_role`.
  */
-function clientAdmin() {
+export function clientAdmin() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const cle = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -109,6 +114,104 @@ function lienVersConfirmation(
   return url.toString();
 }
 
+/**
+ * Prévient l'administration d'une inscription, lien prêt à relayer sur WhatsApp.
+ *
+ * Le site ne peut pas écrire de lui-même à un client sur WhatsApp : seule l'API
+ * WhatsApp Business le permet, et elle se paie au message. Le relais se fait
+ * donc à la main — ce courrier porte un lien `wa.me` qui ouvre la conversation
+ * avec le nouveau compte, message déjà rédigé. Il reste à appuyer sur envoyer.
+ *
+ * Pourquoi ce détour plutôt que de compter sur l'email seul : tant que Nova
+ * Assist expédie depuis une adresse Gmail sans domaine authentifié, Gmail
+ * classe le message en indésirable — et y désactive les liens. Le client ne
+ * peut alors pas activer son compte, sans jamais comprendre pourquoi.
+ *
+ * Ne lève jamais : une notification perdue ne doit pas faire échouer une
+ * inscription qui, elle, a abouti.
+ */
+async function prevenirAdminInscription(params: {
+  email: string;
+  entreprise: string;
+  contactNom: string;
+  telephone: string | null;
+  lien: string;
+}): Promise<void> {
+  try {
+    const titre = "Nouvelle inscription — lien à relayer";
+    const lignes: [string, string][] = [
+      ["Entreprise", echapperHtml(params.entreprise)],
+      ["Contact", echapperHtml(params.contactNom)],
+      ["Email", echapperHtml(params.email)],
+      [
+        "WhatsApp",
+        params.telephone
+          ? echapperHtml(formaterTelephone(params.telephone))
+          : "non renseigné",
+      ],
+    ];
+
+    const relais = params.telephone
+      ? lienWhatsApp(params.telephone, messageActivation(params.contactNom, params.lien))
+      : null;
+
+    const bloc = relais
+      ? `<p style="margin: 26px 0;">
+          <a href="${echapperHtml(relais)}" style="background:#25d366;color:#ffffff;text-decoration:none;padding:14px 28px;font-family:sans-serif;font-size:15px;font-weight:600;display:inline-block;">Envoyer le lien sur WhatsApp</a>
+        </p>
+        <p style="font-family:sans-serif;font-size:13px;color:#8a8474;">WhatsApp s'ouvre sur la conversation, le message déjà rédigé : il reste à appuyer sur envoyer.</p>`
+      : `<p style="font-family:sans-serif;font-size:14px;color:#8a8474;">Aucun numéro exploitable : ce compte ne peut être relancé que par email.</p>`;
+
+    await envoyerNotification({
+      sujet: `Nova Assist — inscription de ${params.entreprise}`,
+      texte:
+        `${corpsTexte(titre, lignes)}
+
+Lien d'activation :
+${params.lien}` +
+        (relais ? `
+
+Relais WhatsApp :
+${relais}` : ""),
+      html: `${corpsHtml(titre, lignes)}${bloc}
+        <p style="font-family:sans-serif;font-size:13px;color:#8a8474;">Lien d'activation brut :<br>${echapperHtml(params.lien)}</p>`,
+    });
+  } catch (erreur) {
+    console.error("[auth] notification d'inscription :", erreur);
+  }
+}
+
+/**
+ * Produit un lien d'activation neuf pour une adresse déjà inscrite.
+ *
+ * Sert au relais manuel depuis le back-office. Le lien est fabriqué au moment
+ * du clic, jamais au chargement de la liste, pour deux raisons : il n'a pas le
+ * temps d'expirer avant d'avoir servi, et consulter la page n'invalide pas les
+ * liens déjà relayés — Supabase ne garde qu'un jeton à la fois par compte.
+ */
+export async function lienActivationPour(
+  email: string,
+  origine: string,
+): Promise<string | null> {
+  try {
+    const supabase = clientAdmin();
+    const { data, error } = await supabase.auth.admin.generateLink({
+      type: "magiclink",
+      email,
+      options: { redirectTo: `${origine}/auth/confirm?next=/espace-client` },
+    });
+
+    if (error) {
+      console.error("[auth] lien d'activation :", error.message);
+      return null;
+    }
+    return lienVersConfirmation(origine, data?.properties, "/espace-client");
+  } catch (erreur) {
+    console.error("[auth] lien d'activation :", erreur);
+    return null;
+  }
+}
+
 export type ResultatLien = { ok: true } | { ok: false; erreur: string };
 
 /**
@@ -122,6 +225,8 @@ export async function envoyerLienInscription(params: {
   motDePasse: string;
   entreprise: string;
   contactNom: string;
+  /** Numéro WhatsApp déjà normalisé, ou `null` si la saisie était illisible. */
+  telephone: string | null;
   origine: string;
 }): Promise<ResultatLien> {
   try {
@@ -134,7 +239,11 @@ export async function envoyerLienInscription(params: {
       options: {
         /* Lues telles quelles par le déclencheur SQL `gerer_nouveau_compte`
            pour remplir la table `profils`. */
-        data: { entreprise: params.entreprise, contact_nom: params.contactNom },
+        data: {
+          entreprise: params.entreprise,
+          contact_nom: params.contactNom,
+          telephone: params.telephone,
+        },
         redirectTo: `${params.origine}/auth/confirm?next=/espace-client`,
       },
     });
@@ -166,6 +275,18 @@ export async function envoyerLienInscription(params: {
 
       if (relance.error) return { ok: false, erreur: relance.error.message };
       lien = lienVersConfirmation(params.origine, relance.data?.properties, "/espace-client");
+
+      /* Le compte existait déjà : le déclencheur SQL ne rejouera pas, et un
+         numéro donné à cette deuxième tentative ne serait jamais enregistré.
+         Une première inscription faite sans numéro resterait alors sans
+         relais possible — exactement le cas qu'on cherche à couvrir. */
+      if (params.telephone) {
+        const { error: majErreur } = await supabase
+          .from("profils")
+          .update({ telephone: params.telephone })
+          .eq("id", compte.id);
+        if (majErreur) console.error("[auth] report du numéro :", majErreur.message);
+      }
     }
 
     if (!lien) return { ok: false, erreur: "Lien de confirmation introuvable." };
@@ -182,6 +303,18 @@ export async function envoyerLienInscription(params: {
       texte: `${corpsTexte(titre, lignes)}\n\nOuvrez ce lien pour activer votre accès :\n${lien}`,
       html: `${corpsHtml(titre, lignes)}${bouton(lien, "Activer mon accès")}
         <p style="font-family:sans-serif;font-size:13px;color:#8a8474;">Si le bouton ne fonctionne pas, copiez cette adresse dans votre navigateur :<br>${echapperHtml(lien)}</p>`,
+    });
+
+    /* L'administration reçoit le même lien, avec de quoi le relayer sur
+       WhatsApp. C'est le filet : si l'email tombe en indésirable, le compte
+       reste activable. Envoyé même quand l'email au client a échoué — c'est
+       précisément là qu'il devient indispensable. */
+    await prevenirAdminInscription({
+      email: params.email,
+      entreprise: params.entreprise,
+      contactNom: params.contactNom,
+      telephone: params.telephone,
+      lien,
     });
 
     return envoye ? { ok: true } : { ok: false, erreur: "L'email n'a pas pu être envoyé." };

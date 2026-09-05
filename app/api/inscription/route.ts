@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { emailConfigure } from "@/lib/email";
 import { urlDuSite } from "@/lib/site-url";
+import { normaliserTelephone } from "@/lib/telephone";
 import { envoyerLienInscription } from "@/lib/supabase/emails-auth";
 
 /**
@@ -21,7 +22,13 @@ import { envoyerLienInscription } from "@/lib/supabase/emails-auth";
 const MOT_DE_PASSE_MIN = 8;
 
 export async function POST(requete: Request) {
-  let corps: { email?: unknown; motDePasse?: unknown; entreprise?: unknown; nom?: unknown };
+  let corps: {
+    email?: unknown;
+    motDePasse?: unknown;
+    entreprise?: unknown;
+    nom?: unknown;
+    telephone?: unknown;
+  };
   try {
     corps = await requete.json();
   } catch {
@@ -33,11 +40,18 @@ export async function POST(requete: Request) {
   const entreprise = typeof corps.entreprise === "string" ? corps.entreprise.trim() : "";
   const nom = typeof corps.nom === "string" ? corps.nom.trim() : "";
 
+  /* Le numéro sert au relais WhatsApp du lien d'activation : il est normalisé
+     ici, une fois pour toutes, plutôt qu'au moment de construire le lien. Un
+     numéro que l'on n'a pas su lire est refusé — le reconstruire de travers
+     enverrait le lien d'activation à un tiers. */
+  const telephone = typeof corps.telephone === "string" ? normaliserTelephone(corps.telephone) : null;
+
   const manquants: string[] = [];
   if (!/^\S+@\S+\.\S+$/.test(email)) manquants.push("email");
   if (motDePasse.length < MOT_DE_PASSE_MIN) manquants.push("motDePasse");
   if (!entreprise) manquants.push("entreprise");
   if (!nom) manquants.push("nom");
+  if (!telephone) manquants.push("telephone");
 
   if (manquants.length > 0) {
     return NextResponse.json(
@@ -57,6 +71,7 @@ export async function POST(requete: Request) {
     motDePasse,
     entreprise,
     contactNom: nom,
+    telephone,
     origine,
   });
 
