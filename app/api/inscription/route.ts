@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { emailConfigure } from "@/lib/email";
+import { urlDuSite } from "@/lib/site-url";
 import { envoyerLienInscription } from "@/lib/supabase/emails-auth";
 
 /**
@@ -50,7 +51,7 @@ export async function POST(requete: Request) {
     return NextResponse.json({ erreur: "Service indisponible." }, { status: 503 });
   }
 
-  const origine = new URL(requete.url).origin;
+  const origine = urlDuSite(requete);
   const resultat = await envoyerLienInscription({
     email,
     motDePasse,
