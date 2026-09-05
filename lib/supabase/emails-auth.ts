@@ -70,6 +70,38 @@ async function trouverCompte(
   return null;
 }
 
+/**
+ * Construit le lien nous-memes, vers notre propre route.
+ *
+ * `properties.action_link` pointe vers le point de verification de Supabase,
+ * qui redirige ensuite. Deux fragilites en decoulent :
+ *
+ *   - la destination doit figurer dans la liste autorisee du tableau de bord,
+ *     sans quoi Supabase la remplace en silence par son « Site URL » — c'est
+ *     ce qui a casse tous les liens de confirmation ;
+ *   - selon le mode du projet, il renvoie les jetons dans le FRAGMENT de
+ *     l'URL (`#access_token=...`), que le serveur ne recoit jamais.
+ *
+ * Avec `hashed_token`, le lien mene directement a `/auth/confirm`, qui appelle
+ * `verifyOtp` et pose les cookies de session. Plus aucune dependance au
+ * reglage du tableau de bord, ni au mode de flux.
+ */
+function lienVersConfirmation(
+  origine: string,
+  proprietes: { hashed_token?: string; verification_type?: string } | null | undefined,
+  suite: string,
+): string | null {
+  const jeton = proprietes?.hashed_token;
+  const type = proprietes?.verification_type;
+  if (!jeton || !type) return null;
+
+  const url = new URL("/auth/confirm", origine);
+  url.searchParams.set("token_hash", jeton);
+  url.searchParams.set("type", type);
+  url.searchParams.set("next", suite);
+  return url.toString();
+}
+
 export type ResultatLien = { ok: true } | { ok: false; erreur: string };
 
 /**
@@ -109,7 +141,7 @@ export async function envoyerLienInscription(params: {
        - le compte est confirmé : il n'y a rien à envoyer, la personne doit se
          connecter. On reste muet, pour ne pas confirmer l'existence du compte
          à qui teste des adresses. */
-    let lien = data?.properties?.action_link;
+    let lien = lienVersConfirmation(params.origine, data?.properties, "/espace-client");
 
     if (error) {
       const compte = await trouverCompte(supabase, params.email);
@@ -126,7 +158,7 @@ export async function envoyerLienInscription(params: {
       });
 
       if (relance.error) return { ok: false, erreur: relance.error.message };
-      lien = relance.data?.properties?.action_link;
+      lien = lienVersConfirmation(params.origine, relance.data?.properties, "/espace-client");
     }
 
     if (!lien) return { ok: false, erreur: "Lien de confirmation introuvable." };
@@ -168,7 +200,7 @@ export async function envoyerLienReinitialisation(params: {
 
     if (error) return { ok: false, erreur: error.message };
 
-    const lien = data.properties?.action_link;
+    const lien = lienVersConfirmation(params.origine, data.properties, "/mot-de-passe-nouveau");
     if (!lien) return { ok: false, erreur: "Lien de réinitialisation introuvable." };
 
     const titre = "Réinitialisation de votre mot de passe";
