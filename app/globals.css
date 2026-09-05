@@ -1031,3 +1031,45 @@ html {
     animation: none;
   }
 }
+
+
+/* ------------------------------------------------------------------
+   Poussée latérale — arrivée sur le paiement.
+
+   Reprise du mouvement du portfolio, où chaque section est une diapositive
+   poussée horizontalement : même durée et même courbe (0,65 s,
+   cubic-bezier(0.22, 0.61, 0.16, 1)), avec la légère mise à l'échelle qui
+   donne sa profondeur au geste.
+
+   Une différence assumée : seule la page entrante glisse. Next démonte la
+   page quittée avant de monter la suivante, il n'y a donc rien à faire sortir
+   par la gauche. La faire glisser des deux côtés demanderait l'API View
+   Transitions, encore expérimentale dans Next 15.
+
+   Le contenu n'est jamais invisible — pas d'`opacity: 0` au départ : si
+   l'animation ne joue pas, la page est simplement là.
+   ------------------------------------------------------------------ */
+.na-pousse {
+  /* `clip` plutôt que `hidden` : n'ouvre pas de contexte de défilement, donc
+     ne casse pas les positions collantes de la page. */
+  overflow-x: clip;
+}
+
+.na-pousse > * {
+  animation: na-pousse-entrante 0.65s cubic-bezier(0.22, 0.61, 0.16, 1) both;
+}
+
+@keyframes na-pousse-entrante {
+  from {
+    transform: translateX(100%) scale(0.96);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .na-pousse > * {
+    animation: none;
+  }
+}

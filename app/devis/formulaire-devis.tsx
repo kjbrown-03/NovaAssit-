@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+
+import type { ProfilConnu } from "@/lib/supabase/profil";
 import {
   CANAUX,
   EFFECTIFS,
@@ -69,12 +71,23 @@ function formulePressentie(d: Donnees): Formule {
   return FORMULES.find((f) => f.id === id)!;
 }
 
-export function FormulaireDevis() {
+export function FormulaireDevis({ profil }: { profil?: ProfilConnu | null }) {
   const params = useSearchParams();
   const formuleDemandee = params.get("formule");
 
   const [etape, setEtape] = useState(0);
-  const [donnees, setDonnees] = useState<Donnees>(VIDE);
+  /* Ce que le client a déjà donné à l'inscription n'est pas redemandé. Les
+     champs restent modifiables : une demande peut concerner un autre
+     interlocuteur, ou l'entreprise a pu changer de nom depuis. */
+  const [donnees, setDonnees] = useState<Donnees>({
+    ...VIDE,
+    entreprise: profil?.entreprise || "",
+    secteur: profil?.secteur || "",
+    effectif: profil?.effectif || "",
+    contactNom: profil?.contactNom || "",
+    email: profil?.email || "",
+    telephone: profil?.telephone || "",
+  });
   const [envoye, setEnvoye] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [enCours, setEnCours] = useState(false);

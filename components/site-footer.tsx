@@ -59,7 +59,14 @@ export function SiteFooter() {
             <h2 className="na-eyebrow font-mono text-[11px] tracking-[0.16em]">
               {t("pied.colonneContact")}
             </h2>
-            <a href={whatsappLink(t("commun.messageWhatsAppDefaut"))} className="hover:text-gold-ink">
+            <a
+              href={whatsappLink(t("commun.messageWhatsAppDefaut"))}
+              /* Comme les autres liens WhatsApp du site : la discussion s'ouvre
+                 à côté, sans faire quitter la page au visiteur. */
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-gold-ink"
+            >
               {t("pied.whatsappBusiness")}
             </a>
             <a href={`mailto:${CONTACT.email}`} className="hover:text-gold-ink">

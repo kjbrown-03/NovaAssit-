@@ -26,7 +26,10 @@ export default async function Paiement({
   if (!choisie) redirect("/offres");
 
   return (
-    <>
+    /* La page arrive en glissant depuis la droite, comme les diapositives du
+       portfolio d'où vient l'anneau des formules : le geste de choisir une
+       formule et celui d'arriver au paiement appartiennent au même mouvement. */
+    <div className="na-pousse">
       <header className="bg-navy">
         <div className="mx-auto flex max-w-[1180px] items-center justify-between px-5 py-[18px] lg:px-14 lg:py-6">
           <Wordmark size={20} />
@@ -68,6 +71,6 @@ export default async function Paiement({
           nomFormule={choisie.nom}
         />
       </main>
-    </>
+    </div>
   );
 }

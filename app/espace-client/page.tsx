@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 
 import { Wordmark } from "@/components/wordmark";
-import { whatsappLink } from "@/lib/content";
+import { FORMULES, whatsappLink } from "@/lib/content";
 import { ShinyButton } from "@/components/ui/shiny-button";
 import { FormulaireTemoignage } from "@/components/espace-client/formulaire-temoignage";
 import { BoutonDeconnexion } from "@/components/espace-client/bouton-deconnexion";
@@ -47,7 +47,7 @@ const NAV = [
   { libelle: "Factures", href: "#documents", Icone: Receipt },
   { libelle: "Mon témoignage", href: "#temoignage", Icone: MessageSquareQuote },
   { libelle: "Mon profil", href: "#profil", Icone: UserRound },
-  { libelle: "Mon abonnement", href: "#contenu", Icone: Wallet },
+  { libelle: "Mon abonnement", href: "#abonnement", Icone: Wallet },
 ];
 
 /* Chaque statut porte son icône : la teinte seule ne doit pas porter le sens. */
@@ -399,6 +399,83 @@ export default async function EspaceClient() {
                   Pour modifier ces informations, écrivez-nous sur WhatsApp — nous les mettons à
                   jour depuis le back-office.
                 </p>
+              </section>
+
+              {/* ------------------------------------------------------- abonnement */}
+              {/* L'onglet « Mon abonnement » pointait sur une ancre morte : le
+                  client voyait le nom de sa formule dans l'en-tête sans jamais
+                  pouvoir la comparer ni en changer. */}
+              <section
+                id="abonnement"
+                className="na-carte na-monte flex flex-col gap-5 rounded-3xl p-6 shadow-sm lg:p-8"
+              >
+                <div className="flex flex-col gap-2">
+                  <span className="na-eyebrow">Votre abonnement</span>
+                  <h2 className="text-[20px] text-navy lg:text-[24px]">Les formules</h2>
+                  <p className="max-w-[62ch] text-[15px] leading-[1.6] text-slate-mid">
+                    {profil?.formule
+                      ? "Vous pouvez changer de formule à tout moment, avec un préavis de 30 jours. Les heures non consommées sont reportées d'un mois."
+                      : "Aucune formule n'est encore active sur votre compte. Choisissez celle qui correspond à votre volume."}
+                  </p>
+                </div>
+
+                <ul className="grid gap-3 lg:grid-cols-3">
+                  {FORMULES.map((formule) => {
+                    const active = profil?.formule === formule.id;
+                    return (
+                      <li
+                        key={formule.id}
+                        className={`flex flex-col gap-3 rounded-2xl p-5 ${
+                          active
+                            ? "border-2 border-gold bg-gold-soft"
+                            : "border border-line-soft"
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <span className="font-mono text-[10px] tracking-[0.18em] text-gold-ink uppercase">
+                            {formule.nom}
+                          </span>
+                          {active && (
+                            <span className="shrink-0 bg-gold px-[9px] py-1 font-mono text-[9px] tracking-[0.12em] text-navy uppercase">
+                              Votre formule
+                            </span>
+                          )}
+                        </div>
+
+                        <p className="font-serif text-[26px] leading-none text-navy">
+                          {formule.prixCourt}{" "}
+                          <span className="font-sans text-[13px] text-gray-mid">
+                            {formule.unite}
+                          </span>
+                        </p>
+
+                        <p className="text-[14px] leading-[1.5] text-slate-mid">
+                          {formule.pourCourt}
+                        </p>
+
+                        <ul className="flex flex-col gap-[6px] text-[13px] leading-[1.45] text-ink-700">
+                          {formule.inclus.slice(0, 3).map((ligne) => (
+                            <li key={ligne}>{ligne}</li>
+                          ))}
+                        </ul>
+
+                        {active ? (
+                          <p className="mt-auto pt-1 font-mono text-[11px] tracking-[0.12em] text-gold-ink uppercase">
+                            Formule en cours
+                          </p>
+                        ) : (
+                          <ShinyButton
+                            href={`/paiement?formule=${formule.id}`}
+                            variant={formule.miseEnAvant ? "primary" : "outline"}
+                            className="mt-auto !p-[11px] !text-[14px]"
+                          >
+                            {profil?.formule ? "Passer à cette formule" : "Passer au paiement"}
+                          </ShinyButton>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
               </section>
 
               {/* ------------------------------------------------------- témoignage */}
