@@ -7,7 +7,12 @@ import {
   emailConfigure,
   envoyerNotification,
 } from "@/lib/email";
-import { enregistrerDemandeDevis } from "@/lib/supabase/devis";
+import {
+  enregistrerDemandeDevis,
+  referenceDemande,
+  reporterDansLeSuivi,
+} from "@/lib/supabase/devis";
+import { creerClientServeur } from "@/lib/supabase/server";
 
 /**
  * Réception d'une demande de devis.
@@ -91,6 +96,26 @@ export async function POST(requete: Request) {
     precision_libre: texteOuNull(corps.precision),
     formule_suggeree: texteOuNull(corps.formuleSuggeree),
   });
+
+  /* Report dans le suivi du client, quand la demande vient d'un compte
+     connecté. Sans cette étape, « Mes demandes » restait désespérément vide :
+     la demande partait dans `demandes_devis`, que le client ne voit pas. */
+  if (enregistree) {
+    const supabase = await creerClientServeur();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (user) {
+      await reporterDansLeSuivi({
+        profilId: user.id,
+        reference: referenceDemande(String(enregistree.id)),
+        domaines: domaines.filter((d): d is string => typeof d === "string"),
+        precision: texteOuNull(corps.precision),
+        formuleSuggeree: texteOuNull(corps.formuleSuggeree),
+      });
+    }
+  }
 
   if (!emailConfigure()) {
     console.error(

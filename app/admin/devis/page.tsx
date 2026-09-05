@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { CheckCircle, Clock, Inbox, Mail, RefreshCw, XCircle } from "lucide-react";
 
 import { creerClientServeur } from "@/lib/supabase/server";
@@ -39,7 +40,12 @@ const dateLongue = (iso: string) =>
     minute: "2-digit",
   });
 
-export default async function SuiviDevis() {
+export default async function SuiviDevis({
+  searchParams,
+}: {
+  searchParams: Promise<{ statut?: string }>;
+}) {
+  const { statut: filtre } = await searchParams;
   const supabase = await creerClientServeur();
 
   const { data, error } = await supabase
@@ -69,12 +75,19 @@ export default async function SuiviDevis() {
   const demandes = (data ?? []) as DemandeDevis[];
   const parStatut = (s: StatutDevis) => demandes.filter((d) => d.statut === s).length;
 
+  /* Chaque carte filtre la liste : le compteur annonçait un chiffre sans
+     donner accès à ce qu'il comptait. `cle: null` remet tout. */
   const compteurs = [
-    { libelle: "Nouvelles", valeur: parStatut("nouveau"), ton: "attente", Icone: Clock },
-    { libelle: "En cours", valeur: parStatut("en_cours"), ton: "cours", Icone: RefreshCw },
-    { libelle: "Traitées", valeur: parStatut("traitee"), ton: "succes", Icone: CheckCircle },
-    { libelle: "Total reçues", valeur: demandes.length, ton: "neutre", Icone: Inbox },
+    { libelle: "Nouvelles", valeur: parStatut("nouveau"), ton: "attente", Icone: Clock, cle: "nouveau" },
+    { libelle: "En cours", valeur: parStatut("en_cours"), ton: "cours", Icone: RefreshCw, cle: "en_cours" },
+    { libelle: "Traitées", valeur: parStatut("traitee"), ton: "succes", Icone: CheckCircle, cle: "traitee" },
+    { libelle: "Total reçues", valeur: demandes.length, ton: "neutre", Icone: Inbox, cle: null },
   ] as const;
+
+  const cles = compteurs.map((c) => c.cle).filter(Boolean) as string[];
+  const actif = filtre && cles.includes(filtre) ? filtre : null;
+  const visibles = actif ? demandes.filter((d) => d.statut === actif) : demandes;
+  const libelleActif = compteurs.find((c) => c.cle === actif)?.libelle;
 
   return (
     <>
@@ -83,30 +96,41 @@ export default async function SuiviDevis() {
         <h1 className="text-[28px] text-navy lg:text-[34px]">Demandes de devis</h1>
       </div>
 
-      <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {compteurs.map(({ libelle, valeur, ton, Icone }, i) => (
-          <div
-            key={libelle}
-            style={{ "--na-delai": `${i * 70}ms` } as React.CSSProperties}
-            className="na-carte na-carte-actif na-monte flex flex-col gap-3 rounded-3xl p-5 shadow-sm"
-          >
-            <span className={`na-statut na-statut-${ton} self-start`}>
-              <Icone className="h-[14px] w-[14px]" aria-hidden />
-              {libelle}
-            </span>
-            <dd className="font-serif text-[34px] leading-none text-navy">{valeur}</dd>
-            <dt className="sr-only">{libelle}</dt>
-          </div>
-        ))}
-      </dl>
+      <nav aria-label="Filtrer les demandes" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {compteurs.map(({ libelle, valeur, ton, Icone, cle }, i) => {
+          const selectionne = cle === actif;
+          return (
+            <Link
+              key={libelle}
+              href={cle ? `/admin/devis?statut=${cle}` : "/admin/devis"}
+              aria-current={selectionne ? "true" : undefined}
+              style={{ "--na-delai": `${i * 70}ms` } as React.CSSProperties}
+              className={`na-carte na-carte-actif na-monte flex flex-col gap-3 rounded-3xl p-5 shadow-sm transition-shadow hover:shadow-md ${
+                selectionne ? "ring-2 ring-gold" : ""
+              }`}
+            >
+              <span className={`na-statut na-statut-${ton} self-start`}>
+                <Icone className="h-[14px] w-[14px]" aria-hidden />
+                {libelle}
+              </span>
+              <span className="font-serif text-[34px] leading-none text-navy">{valeur}</span>
+              <span className="sr-only">
+                {selectionne ? `Filtre actif : ${libelle}` : `Afficher : ${libelle}`}
+              </span>
+            </Link>
+          );
+        })}
+      </nav>
 
-      {demandes.length === 0 ? (
+      {visibles.length === 0 ? (
         <p className="na-carte rounded-3xl px-6 py-10 text-center text-[15px] text-gray-mid shadow-sm">
-          Aucune demande pour l&apos;instant. Celles reçues par le formulaire apparaîtront ici.
+          {libelleActif
+            ? `Aucune demande dans « ${libelleActif} ». Touchez « Total reçues » pour tout revoir.`
+            : "Aucune demande pour l'instant. Celles reçues par le formulaire apparaîtront ici."}
         </p>
       ) : (
         <ul className="flex flex-col gap-3">
-          {demandes.map((demande, i) => {
+          {visibles.map((demande, i) => {
             const Icone = ICONE_STATUT[demande.statut];
             return (
               <li

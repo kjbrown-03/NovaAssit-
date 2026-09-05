@@ -492,7 +492,12 @@ export default async function EspaceClient() {
                     {MAX_ACCUEIL} au maximum.
                   </p>
                 </div>
-                <FormulaireTemoignage />
+                <FormulaireTemoignage
+                  connu={{
+                    auteur: prenomOuNom ?? undefined,
+                    entreprise: profil?.entreprise ?? undefined,
+                  }}
+                />
               </section>
             </div>
           </div>

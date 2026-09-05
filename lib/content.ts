@@ -8,11 +8,11 @@ export const CONTACT = {
   /* Ligne WhatsApp Business de Nova Assist. Les deux champs ci-dessous doivent
      rester cohérents : c'est le même numéro, écrit pour l'affichage puis pour
      wa.me. */
-  telephone: "+237 679 13 45 64",
+  telephone: "+237 679 13 45 34",
   email: "contact@novaassist.cm",
   ville: "Douala, Cameroun",
   /* Format international sans « + » ni espaces, exigé par wa.me. */
-  whatsapp: "237679134564",
+  whatsapp: "237679134534",
 } as const;
 
 export const whatsappLink = (message = "Bonjour Nova Assist, je souhaite un devis.") =>

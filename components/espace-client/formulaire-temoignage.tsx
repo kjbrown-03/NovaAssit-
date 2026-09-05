@@ -18,7 +18,16 @@ const LABEL = "font-mono text-[10px] tracking-[0.14em] text-gold-ink uppercase";
  * Rien n'est publié directement : le témoignage part en attente et n'apparaît
  * à l'accueil qu'après validation par l'administration.
  */
-export function FormulaireTemoignage() {
+/**
+ * Ce que le compte a déjà renseigné. `fonction` et `ville` n'existent pas dans
+ * la fiche client : ces deux champs restent à saisir.
+ */
+export type CoordonneesConnues = {
+  auteur?: string;
+  entreprise?: string;
+};
+
+export function FormulaireTemoignage({ connu }: { connu?: CoordonneesConnues }) {
   const [etat, action, enCours] = useActionState(soumettreTemoignage, ETAT_INITIAL);
   const [format, setFormat] = useState<FormatTemoignage>("texte");
   const idBase = useId();
@@ -144,10 +153,10 @@ export function FormulaireTemoignage() {
       <div className="grid gap-4 sm:grid-cols-2">
         {(
           [
-            { nom: "auteur", libelle: "Nom et prénom", type: "text", auto: "name" },
-            { nom: "fonction", libelle: "Fonction", type: "text", auto: "organization-title" },
-            { nom: "entreprise", libelle: "Entreprise", type: "text", auto: "organization" },
-            { nom: "ville", libelle: "Ville", type: "text", auto: "address-level2" },
+            { nom: "auteur", libelle: "Nom et prénom", type: "text", auto: "name", valeur: connu?.auteur },
+            { nom: "fonction", libelle: "Fonction", type: "text", auto: "organization-title", valeur: undefined },
+            { nom: "entreprise", libelle: "Entreprise", type: "text", auto: "organization", valeur: connu?.entreprise },
+            { nom: "ville", libelle: "Ville", type: "text", auto: "address-level2", valeur: undefined },
           ] as const
         ).map((champ) => {
           const e = erreur(champ.nom);
@@ -161,6 +170,10 @@ export function FormulaireTemoignage() {
                 name={champ.nom}
                 type={champ.type}
                 autoComplete={champ.auto}
+                /* Rempli d'avance avec ce que le compte a déjà donné, et
+                   toujours modifiable : le témoignage peut être signé par une
+                   autre personne de l'entreprise. */
+                defaultValue={champ.valeur ?? ""}
                 required
                 className={CHAMP}
                 {...e.liaison}
