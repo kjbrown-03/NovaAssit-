@@ -176,7 +176,34 @@ export async function ajouter(entree: NouveauTemoignage): Promise<Temoignage | n
     return null;
   }
 
+  /* Ce que le client vient de saisir enrichit sa fiche : au témoignage
+     suivant, fonction et ville lui seront reproposées. Sans conséquence si la
+     migration 010 n'est pas jouée — l'échec est journalisé, le témoignage est
+     déjà enregistré. */
+  await memoriserIdentite(profilId, entree.fonction, entree.ville);
+
   return versTemoignage(data as LigneTemoignage);
+}
+
+/** Complète la fiche client avec ce qui n'y figurait pas encore. */
+async function memoriserIdentite(
+  profilId: string,
+  fonction: string,
+  ville: string,
+): Promise<void> {
+  if (!fonction && !ville) return;
+
+  try {
+    const supabase = await creerClientServeur();
+    const { error } = await supabase
+      .from("profils")
+      .update({ fonction: fonction || null, ville: ville || null })
+      .eq("id", profilId);
+
+    if (error) console.error("[temoignages] fiche non complétée :", error.message);
+  } catch (erreur) {
+    console.error("[temoignages] fiche non complétée :", erreur);
+  }
 }
 
 export async function changerStatut(

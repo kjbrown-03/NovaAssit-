@@ -26,7 +26,7 @@ const ENTREES = [
  * et « Se connecter ».
  * Mobile : logotype + menu déroulant, qui laisse la place aux libellés complets.
  */
-export function SiteHeader() {
+export function SiteHeader({ connecte = false }: { connecte?: boolean }) {
   const pathname = usePathname();
   const [ouvert, setOuvert] = useState(false);
   const t = useTranslations("nav");
@@ -50,8 +50,14 @@ export function SiteHeader() {
 
         <div className="hidden items-center gap-[14px] lg:flex">
           <SelecteurLangue />
-          <ButtonOutline href="/connexion" className="!px-[18px] !py-[9px] !text-[15px]">
-            {tc("seConnecter")}
+          {/* Connecté, « Se connecter » n'a plus de sens — et cliquer dessus
+              ferme la session en cours, puisque /connexion sert toujours le
+              formulaire. On mène donc à l'espace client. */}
+          <ButtonOutline
+            href={connecte ? "/espace-client" : "/connexion"}
+            className="!px-[18px] !py-[9px] !text-[15px]"
+          >
+            {connecte ? tc("espaceClient") : tc("seConnecter")}
           </ButtonOutline>
         </div>
 
@@ -99,8 +105,8 @@ export function SiteHeader() {
           </ul>
           <div className="mt-5 flex flex-col items-center gap-4">
             <SelecteurLangue />
-            <ButtonOutline href="/connexion" className="w-full">
-              {tc("seConnecter")}
+            <ButtonOutline href={connecte ? "/espace-client" : "/connexion"} className="w-full">
+              {connecte ? tc("espaceClient") : tc("seConnecter")}
             </ButtonOutline>
           </div>
         </nav>

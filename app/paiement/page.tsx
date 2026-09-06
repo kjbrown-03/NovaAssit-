@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowLeft, ShieldCheck } from "lucide-react";
 import { Wordmark } from "@/components/wordmark";
-import { FORMULES } from "@/lib/content";
+import { FORMULES, MOIS_FACTURES_A_L_ANNEE, formaterFcfa } from "@/lib/content";
 import { FormulairePaiement } from "./formulaire-paiement";
 import type { IdFormule } from "@/lib/supabase/commandes";
 
@@ -16,14 +16,21 @@ export const metadata: Metadata = {
 export default async function Paiement({
   searchParams,
 }: {
-  searchParams: Promise<{ formule?: string }>;
+  searchParams: Promise<{ formule?: string; periode?: string }>;
 }) {
-  const { formule } = await searchParams;
+  const { formule, periode } = await searchParams;
   const choisie = FORMULES.find((f) => f.id === formule);
 
   /* Sans formule valide, il n'y a rien à régler : on renvoie au catalogue
      plutôt que d'afficher un paiement vide. */
   if (!choisie) redirect("/offres");
+
+  /* « 2 mois offerts » : l'année se règle en dix mensualités. */
+  const annuel = periode === "annuel";
+  const prixAffiche = annuel
+    ? formaterFcfa(choisie.montantMensuel * MOIS_FACTURES_A_L_ANNEE)
+    : choisie.prix;
+  const uniteAffichee = annuel ? "FCFA / an" : choisie.unite;
 
   return (
     /* La page arrive en glissant depuis la droite, comme les diapositives du
@@ -49,8 +56,8 @@ export default async function Paiement({
             Formule {choisie.nom}
           </h1>
           <p className="text-[17px] text-slate-mid">
-            <span className="font-serif text-[24px] text-navy">{choisie.prix}</span>{" "}
-            {choisie.unite} — {choisie.pour}
+            <span className="font-serif text-[24px] text-navy">{prixAffiche}</span>{" "}
+            {uniteAffichee} — {choisie.pour}
           </p>
         </div>
 
@@ -65,6 +72,16 @@ export default async function Paiement({
             contacte ensuite pour le règlement.
           </p>
         </div>
+
+        {annuel && (
+          <p className="mx-auto mb-8 max-w-[1000px] text-[15px] text-slate-mid">
+            Règlement annuel : dix mensualités au lieu de douze, soit{" "}
+            <strong className="text-navy">
+              {formaterFcfa(choisie.montantMensuel * 2)} FCFA
+            </strong>{" "}
+            d&apos;économie sur l&apos;année.
+          </p>
+        )}
 
         <FormulairePaiement
           formule={choisie.id as IdFormule}

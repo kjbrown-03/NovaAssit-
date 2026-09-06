@@ -10,7 +10,8 @@
     "demanderDevis": "Demander un devis",
     "ecrireWhatsApp": "Écrire sur WhatsApp",
     "seConnecter": "Se connecter",
-    "messageWhatsAppDefaut": "Bonjour Nova Assist, je souhaite un devis."
+    "messageWhatsAppDefaut": "Bonjour Nova Assist, je souhaite un devis.",
+    "espaceClient": "Espace client"
   },
   "langue": {
     "choisir": "Choisir la langue",

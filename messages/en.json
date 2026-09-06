@@ -10,7 +10,8 @@
     "demanderDevis": "Request a quote",
     "ecrireWhatsApp": "Message us on WhatsApp",
     "seConnecter": "Sign in",
-    "messageWhatsAppDefaut": "Hello Nova Assist, I would like a quote."
+    "messageWhatsAppDefaut": "Hello Nova Assist, I would like a quote.",
+    "espaceClient": "Client area"
   },
   "langue": {
     "choisir": "Choose language",

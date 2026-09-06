@@ -130,7 +130,10 @@ export function FormulesOrbite({
               /* Ancre reprise des anciennes cartes de prix : le pied de page
                  pointe vers /offres#essentiel, #professionnel et #premium. */
               id={formule.id}
-              href={`/paiement?formule=${formule.id}`}
+              /* La périodicité choisie plus haut suit la formule : sans elle,
+                 quelqu'un qui a cliqué « Annuel » retombait sur un tarif
+                 mensuel à l'étape suivante. */
+              href={`/paiement?formule=${formule.id}&periode=${periode}`}
               onClick={filtrerClic}
               data-avant={formule.miseEnAvant}
               className="na-orbite-face"

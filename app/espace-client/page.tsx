@@ -458,6 +458,8 @@ export default async function EspaceClient() {
                   connu={{
                     auteur: prenomOuNom ?? undefined,
                     entreprise: profil?.entreprise ?? undefined,
+                    fonction: profil?.fonction ?? undefined,
+                    ville: profil?.ville ?? undefined,
                   }}
                 />
               </section>

@@ -25,6 +25,8 @@ const LABEL = "font-mono text-[10px] tracking-[0.14em] text-gold-ink uppercase";
 export type CoordonneesConnues = {
   auteur?: string;
   entreprise?: string;
+  fonction?: string;
+  ville?: string;
 };
 
 export function FormulaireTemoignage({ connu }: { connu?: CoordonneesConnues }) {
@@ -154,9 +156,9 @@ export function FormulaireTemoignage({ connu }: { connu?: CoordonneesConnues }) 
         {(
           [
             { nom: "auteur", libelle: "Nom et prénom", type: "text", auto: "name", valeur: connu?.auteur },
-            { nom: "fonction", libelle: "Fonction", type: "text", auto: "organization-title", valeur: undefined },
+            { nom: "fonction", libelle: "Fonction", type: "text", auto: "organization-title", valeur: connu?.fonction },
             { nom: "entreprise", libelle: "Entreprise", type: "text", auto: "organization", valeur: connu?.entreprise },
-            { nom: "ville", libelle: "Ville", type: "text", auto: "address-level2", valeur: undefined },
+            { nom: "ville", libelle: "Ville", type: "text", auto: "address-level2", valeur: connu?.ville },
           ] as const
         ).map((champ) => {
           const e = erreur(champ.nom);

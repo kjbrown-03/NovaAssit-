@@ -7,6 +7,10 @@ export type Profil = {
   id: string;
   entreprise: string;
   contact_nom: string;
+  /* Renseignées au premier témoignage, puis reproposées. Absentes tant que la
+     migration 010 n'a pas été jouée. */
+  fonction?: string | null;
+  ville?: string | null;
   /* Sert à renvoyer l'administration vers son back-office plutôt que vers le
      tableau de bord client. Lu avec le profil pour éviter une requête dédiée.
      Absent tant que la migration 003 n'a pas été jouée. */
@@ -62,8 +66,8 @@ export type DonneesTableauDeBord = {
    entière si une colonne demandée est absente : sans repli, un projet dont la
    migration n'a pas encore été jouée verrait le tableau de bord de tous ses
    clients se vider d'un coup. */
-const COLONNES_PROFIL = "id, entreprise, contact_nom, role, formule, heures_incluses, heures_consommees";
-const COLONNES_PROFIL_SANS_ROLE = "id, entreprise, contact_nom, formule, heures_incluses, heures_consommees";
+const COLONNES_PROFIL = "id, entreprise, contact_nom, fonction, ville, role, formule, heures_incluses, heures_consommees";
+const COLONNES_PROFIL_SANS_ROLE = "id, entreprise, contact_nom, fonction, ville, formule, heures_incluses, heures_consommees";
 
 export async function chargerTableauDeBord(): Promise<DonneesTableauDeBord> {
   const supabase = await creerClientServeur();
