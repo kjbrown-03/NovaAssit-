@@ -73,20 +73,29 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             N doit être mesurée dans la police réellement disponible, Georgia
             n'existant pas sur Android.
 
-            `?lancement=1` force l'affichage : c'est le seul moyen de le
-            revoir depuis un navigateur ordinaire. */}
+            Qui l'obtient : l'application installée, sur n'importe quelle
+            page ; un visiteur ordinaire, sur l'accueil seulement. Une page
+            trouvée par Google ne doit pas être retardée par un voile — c'est
+            la mesure du LCP, donc le classement, qui en pâtirait.
+
+            Une fois par session dans les deux cas, et `?lancement=1` force
+            l'affichage pour pouvoir le revoir à volonté. */}
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{
+var d=document.documentElement;
 var f=location.search.indexOf('lancement=1')>-1;
+if(!f){
 var i=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;
-if(!f&&!i)return;
-if(!f){if(sessionStorage.getItem('na-lancement')==='vu')return;sessionStorage.setItem('na-lancement','vu');}
+if(!i&&location.pathname!=='/')return;
+if(sessionStorage.getItem('na-lancement')==='vu')return;
+sessionStorage.setItem('na-lancement','vu');}
 var c=document.createElement('canvas').getContext('2d');
 c.font='100px Georgia, "Times New Roman", serif';
 var r=c.measureText('N').width/100;
-if(r>0.3&&r<1.6)document.documentElement.style.setProperty('--na-retrait',r+'em');
-document.documentElement.classList.add('na-lance');
+if(r>0.3&&r<1.6)d.style.setProperty('--na-retrait',r+'em');
+d.classList.add('na-lance');
+addEventListener('pointerdown',function(){d.classList.add('na-lance-fin');},{once:true});
 }catch(e){}})()`,
           }}
         />

@@ -1104,7 +1104,7 @@ html.na-lance .na-lancement {
   /* Le logotype est dimensionné en `cqw` : une part de la largeur de l'écran,
      donc juste du plus petit téléphone à la tablette, sans palier. */
   container-type: inline-size;
-  animation: na-lancement-voile 2600ms linear forwards;
+  animation: na-lancement-voile 2200ms linear forwards;
 }
 
 .na-lancement-bloc {
@@ -1172,12 +1172,15 @@ html.na-lance .na-lancement-assist {
   }
 }
 
-/* Le voile tient jusqu'à 80 % — le logotype est en place à 1,55 s — puis
-   s'efface. `visibility` en fin d'animation le retire des clics et du parcours
-   au clavier, ce que `opacity: 0` seul ne ferait pas. */
+/* Le voile tient jusqu'à 76 % — le logotype est en place à 1,55 s, il reste
+   posé un huitième de seconde — puis s'efface. Le total tient sous 2,2 s : au
+   delà, le LCP d'une première visite passerait dans le rouge.
+
+   `visibility` en fin d'animation retire le voile des clics et du parcours au
+   clavier, ce que `opacity: 0` seul ne ferait pas. */
 @keyframes na-lancement-voile {
   0%,
-  80% {
+  76% {
     opacity: 1;
     visibility: visible;
   }
@@ -1185,6 +1188,19 @@ html.na-lance .na-lancement-assist {
     opacity: 0;
     visibility: hidden;
   }
+}
+
+/* Sortie immédiate au premier toucher : un visiteur pressé ne doit jamais
+   attendre la fin d'une animation pour atteindre le contenu. */
+@keyframes na-lancement-sortie {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+html.na-lance-fin .na-lancement {
+  animation: na-lancement-sortie 220ms linear forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
