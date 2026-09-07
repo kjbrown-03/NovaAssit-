@@ -79,7 +79,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             la mesure du LCP, donc le classement, qui en pâtirait.
 
             Une fois par session dans les deux cas, et `?lancement=1` force
-            l'affichage pour pouvoir le revoir à volonté. */}
+            l'affichage pour pouvoir le revoir à volonté.
+
+            Le premier appui abrège le voile — mais SEULEMENT tant qu'il est
+            encore opaque. Poser la classe après sa disparition relançait
+            l'animation depuis `opacity: 1` : le voile réapparaissait 220 ms,
+            se retrouvait sous le curseur au relâchement, et avalait le clic.
+            Le premier lien touché sur l'accueil ne menait alors nulle part. */}
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{
@@ -95,7 +101,7 @@ c.font='100px Georgia, "Times New Roman", serif';
 var r=c.measureText('N').width/100;
 if(r>0.3&&r<1.6)d.style.setProperty('--na-retrait',r+'em');
 d.classList.add('na-lance');
-addEventListener('pointerdown',function(){d.classList.add('na-lance-fin');},{once:true});
+addEventListener('pointerdown',function(){var v=document.querySelector('.na-lancement');var a=v&&v.getAnimations&&v.getAnimations()[0];if(a&&a.playState==='running'&&a.currentTime<1600)d.classList.add('na-lance-fin');},{once:true});
 }catch(e){}})()`,
           }}
         />
