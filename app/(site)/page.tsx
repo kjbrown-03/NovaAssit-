@@ -1,9 +1,10 @@
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { Compteur } from "@/components/compteur";
 import { ServicesEventail } from "@/components/services-eventail";
 import { TemoignagesAccueil } from "@/components/temoignages-accueil";
 import { ButtonOutline, ButtonPrimary, Eyebrow, GoldUnderlineLink, PhotoSlot } from "@/components/ui";
-import { CHIFFRES, FORMULES, SERVICES, whatsappLink } from "@/lib/content";
+import { CHIFFRES, SERVICES, whatsappLink } from "@/lib/content";
+import { chargerFormules } from "@/lib/tarifs";
 import { revealDelay } from "@/lib/utils";
 import { EXEMPLES } from "@/lib/exemples-photos";
 
@@ -13,12 +14,16 @@ const CLES_CHIFFRES = ["reponse", "disponibilite", "confidentialite", "formules"
 /* Les trois arguments de la section « confiance », dans l'ordre d'affichage. */
 const CLES_CONFIANCE = ["confidentialite", "reactivite", "ancrage"] as const;
 
-export default function Accueil() {
-  const t = useTranslations("accueil");
-  const tc = useTranslations("commun");
-  const ts = useTranslations("services");
-  const tf = useTranslations("formules");
-  const tch = useTranslations("chiffres");
+export default async function Accueil() {
+  const t = await getTranslations("accueil");
+  const tc = await getTranslations("commun");
+  const ts = await getTranslations("services");
+  const tf = await getTranslations("formules");
+  const tch = await getTranslations("chiffres");
+
+  /* Tarifs lus en base : ils se modifient depuis le back-office,
+     sans passer par une modification de code. */
+  const formules = await chargerFormules();
 
   return (
     <>
@@ -139,7 +144,7 @@ export default function Accueil() {
         </div>
 
         <ul className="grid items-stretch gap-[14px] lg:grid-cols-3 lg:gap-[22px]">
-          {FORMULES.map((formule, i) => (
+          {formules.map((formule, i) => (
             <li
               key={formule.id}
               data-reveal

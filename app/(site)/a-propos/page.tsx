@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { ButtonPrimary, Eyebrow, PhotoSlot } from "@/components/ui";
 import { EXEMPLES } from "@/lib/exemples-photos";
+import { listerEquipeEnCache, urlPortrait } from "@/lib/equipe";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("pageAPropos");
@@ -15,12 +15,20 @@ export async function generateMetadata(): Promise<Metadata> {
 type Valeur = { titre: string; texte: string };
 type Membre = { nom: string; role: string };
 
-export default function APropos() {
-  const t = useTranslations("pageAPropos");
-  const tc = useTranslations("commun");
+export default async function APropos() {
+  const t = await getTranslations("pageAPropos");
+  const tc = await getTranslations("commun");
 
   const valeurs = t.raw("valeurs") as Valeur[];
-  const equipe = t.raw("equipe") as Membre[];
+  /* L'équipe vient de la base, gérée depuis le back-office. Tant qu'aucun
+     membre n'y est enregistré, on retombe sur les fiches des traductions et
+     leurs portraits d'exemple : la page ne doit pas se vider pendant la
+     transition. */
+  const membresBase = await listerEquipeEnCache();
+  const equipe =
+    membresBase.length > 0
+      ? membresBase.map((m) => ({ nom: m.nom, role: m.role, photo: urlPortrait(m.photo) }))
+      : (t.raw("equipe") as Membre[]).map((m) => ({ ...m, photo: null }));
 
   return (
     <>
@@ -78,20 +86,29 @@ export default function APropos() {
             {equipe.map((membre, i) => (
               <li key={i} className="flex flex-col gap-[14px]">
                 <div className="relative flex h-[250px] items-center justify-center overflow-hidden border border-line bg-stone-200">
+                  {/* Une vraie photo se montre telle quelle ; l'exemple garde son
+                      traitement gris et son bandeau, pour qu'on ne le confonde
+                      jamais avec un portrait définitif. */}
                   <img
-                    src={EXEMPLES.portraitsEquipe[i]}
-                    alt=""
-                    aria-hidden
+                    src={membre.photo ?? EXEMPLES.portraitsEquipe[i]}
+                    alt={membre.photo ? `${membre.nom}, ${membre.role}` : ""}
+                    aria-hidden={membre.photo ? undefined : true}
                     loading="lazy"
-                    className="absolute inset-0 h-full w-full object-cover grayscale"
+                    className={`absolute inset-0 h-full w-full object-cover ${
+                      membre.photo ? "" : "grayscale"
+                    }`}
                   />
-                  <span aria-hidden className="absolute inset-0 bg-navy/25" />
-                  <span className="absolute top-3 left-3 bg-paper/90 px-2 py-[3px] font-mono text-[10px] tracking-[0.14em] text-gold-ink uppercase">
-                    {t("portraitRatio")}
-                  </span>
-                  <span className="absolute top-3 right-3 bg-gold px-[8px] py-[3px] font-mono text-[9px] tracking-[0.16em] text-navy uppercase">
-                    {t("badgeExemple")}
-                  </span>
+                  {!membre.photo && (
+                    <>
+                      <span aria-hidden className="absolute inset-0 bg-navy/25" />
+                      <span className="absolute top-3 left-3 bg-paper/90 px-2 py-[3px] font-mono text-[10px] tracking-[0.14em] text-gold-ink uppercase">
+                        {t("portraitRatio")}
+                      </span>
+                      <span className="absolute top-3 right-3 bg-gold px-[8px] py-[3px] font-mono text-[9px] tracking-[0.16em] text-navy uppercase">
+                        {t("badgeExemple")}
+                      </span>
+                    </>
+                  )}
                 </div>
                 <div className="flex flex-col gap-[3px]">
                   <p className="font-serif text-[21px] text-navy">{membre.nom}</p>

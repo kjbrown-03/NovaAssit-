@@ -1,6 +1,8 @@
 import { creerClientServeur } from "./server";
 
 export type IdentiteAdmin = {
+  /** Identifiant du compte, pour tracer qui a modifié quoi. */
+  id: string;
   email: string;
   nom: string;
   entreprise: string;
@@ -44,6 +46,7 @@ export async function identiteAdmin(): Promise<IdentiteAdmin | null> {
   if (!data || data.role !== "admin") return null;
 
   return {
+    id: user.id,
     email: user.email ?? "",
     nom: (data.contact_nom as string) ?? "",
     entreprise: (data.entreprise as string) ?? "",

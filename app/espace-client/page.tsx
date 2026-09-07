@@ -17,7 +17,8 @@ import {
 } from "lucide-react";
 
 import { Wordmark } from "@/components/wordmark";
-import { FORMULES, whatsappLink } from "@/lib/content";
+import { whatsappLink } from "@/lib/content";
+import { chargerFormules } from "@/lib/tarifs";
 import { ShinyButton } from "@/components/ui/shiny-button";
 import { FormulaireTemoignage } from "@/components/espace-client/formulaire-temoignage";
 import { BoutonDeconnexion } from "@/components/espace-client/bouton-deconnexion";
@@ -65,6 +66,7 @@ export default async function EspaceClient() {
   const t = await getTranslations("pageEspace");
   const tf = await getTranslations("formules");
   const tc = await getTranslations("commun");
+  const formules = await chargerFormules();
   const locale = await getLocale();
 
   const libNav = t.raw("nav") as string[];
@@ -382,7 +384,7 @@ export default async function EspaceClient() {
                 </div>
 
                 <ul className="grid gap-3 lg:grid-cols-3">
-                  {FORMULES.map((formule) => {
+                  {formules.map((formule) => {
                     const active = profil?.formule === formule.id;
                     return (
                       <li

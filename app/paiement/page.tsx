@@ -3,7 +3,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowLeft, ShieldCheck } from "lucide-react";
 import { Wordmark } from "@/components/wordmark";
-import { FORMULES, MOIS_FACTURES_A_L_ANNEE, formaterFcfa } from "@/lib/content";
+import { MOIS_FACTURES_A_L_ANNEE, formaterFcfa } from "@/lib/content";
+import { chargerFormules } from "@/lib/tarifs";
 import { FormulairePaiement } from "./formulaire-paiement";
 import type { IdFormule } from "@/lib/supabase/commandes";
 
@@ -19,7 +20,8 @@ export default async function Paiement({
   searchParams: Promise<{ formule?: string; periode?: string }>;
 }) {
   const { formule, periode } = await searchParams;
-  const choisie = FORMULES.find((f) => f.id === formule);
+  /* Tarif lu en base : régler un prix périmé serait pire que tout. */
+  const choisie = (await chargerFormules()).find((f) => f.id === formule);
 
   /* Sans formule valide, il n'y a rien à régler : on renvoie au catalogue
      plutôt que d'afficher un paiement vide. */

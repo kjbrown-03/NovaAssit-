@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { ButtonPrimary, Eyebrow } from "@/components/ui";
 import { OffresTarifs } from "@/components/offres-tarifs";
-import { FORMULES } from "@/lib/content";
+import { chargerFormules } from "@/lib/tarifs";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("pageOffres");
@@ -16,10 +15,14 @@ export async function generateMetadata(): Promise<Metadata> {
 type LigneComparatif = { prestation: string; valeurs: [string, string, string] };
 type Question = { question: string; reponse: string };
 
-export default function Offres() {
-  const t = useTranslations("pageOffres");
-  const tf = useTranslations("formules");
-  const tc = useTranslations("commun");
+export default async function Offres() {
+  const t = await getTranslations("pageOffres");
+  const tf = await getTranslations("formules");
+  const tc = await getTranslations("commun");
+
+  /* Tarifs lus en base : ils se modifient depuis le back-office,
+     sans passer par une modification de code. */
+  const formules = await chargerFormules();
 
   const comparatif = t.raw("comparatif") as LigneComparatif[];
   const faq = t.raw("faq") as Question[];
@@ -46,7 +49,7 @@ export default function Offres() {
           composant commun. L'orbite porte à elle seule la présentation des
           trois formules : prix, cible et lien vers le devis. Le détail des
           prestations est dans le tableau comparatif juste en dessous. */}
-      <OffresTarifs formules={FORMULES} />
+      <OffresTarifs formules={formules} />
 
       {/* ----------------------------------------------------------- comparatif */}
       <section data-reveal className="mx-auto max-w-[1180px] px-5 pb-12 lg:px-14 lg:pb-[70px]">
@@ -59,7 +62,7 @@ export default function Offres() {
                 <th scope="col" className="px-[26px] py-4 font-normal">
                   {t("colPrestation")}
                 </th>
-                {FORMULES.map((f) => (
+                {formules.map((f) => (
                   <th key={f.id} scope="col" className="px-[26px] py-4 font-normal">
                     {tf(`${f.id}.nom`)}
                   </th>

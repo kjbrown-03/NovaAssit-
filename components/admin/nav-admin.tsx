@@ -2,7 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, Inbox, MessageSquareQuote, Newspaper, UserPlus, Users } from "lucide-react";
+import {
+  BarChart3,
+  Inbox,
+  MessageSquareQuote,
+  Newspaper,
+  Settings,
+  Tag,
+  UserPlus,
+  Users,
+  UsersRound,
+} from "lucide-react";
 
 const SECTIONS = [
   { libelle: "Demandes de devis", href: "/admin/devis", Icone: Inbox },
@@ -13,6 +23,11 @@ const SECTIONS = [
      contenu, vu de l'autre côté. */
   { libelle: "Articles du blog", href: "/admin/articles", Icone: Newspaper },
   { libelle: "Statistiques", href: "/admin/statistiques", Icone: BarChart3 },
+  { libelle: "Tarifs", href: "/admin/tarifs", Icone: Tag },
+  { libelle: "Équipe", href: "/admin/equipe", Icone: UsersRound },
+  /* Dernier de la liste : on y va rarement, et c'est là qu'on cherche
+     les réglages dans toute interface. */
+  { libelle: "Paramètres", href: "/admin/parametres", Icone: Settings },
 ];
 
 /**
