@@ -1,8 +1,16 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { MesureConversions } from "@/components/mesure-conversions";
 import { getLocale, getTranslations } from "next-intl/server";
 import "./globals.css";
+
+/* La barre système prend le bleu nuit : installée, l'application n'a plus de
+   barre d'adresse, et la teinte doit prolonger l'écran plutôt que le couper. */
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#0b1f3a",
+};
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("meta");
@@ -14,6 +22,13 @@ export async function generateMetadata(): Promise<Metadata> {
       template: `%s · Nova Assist`,
     },
     description: t("description"),
+    /* Sur iOS, c'est ce bloc qui autorise le mode plein écran une fois
+       l'application ajoutée à l'écran d'accueil. */
+    appleWebApp: {
+      capable: true,
+      title: "Nova Assist",
+      statusBarStyle: "black-translucent",
+    },
     openGraph: {
       type: "website",
       locale: (await getLocale()) === "en" ? "en_US" : "fr_CM",
@@ -49,8 +64,44 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             __html: `document.documentElement.classList.add('js')`,
           }}
         />
+        {/* Décide de l'écran de lancement AVANT le premier rendu.
+
+            Trois raisons de le faire ici et non dans un composant React :
+            l'affichage doit précéder la peinture, sinon la page apparaît une
+            fraction de seconde avant d'être recouverte ; la décision dépend du
+            mode d'affichage, que le serveur ne connaît pas ; et la largeur du
+            N doit être mesurée dans la police réellement disponible, Georgia
+            n'existant pas sur Android.
+
+            `?lancement=1` force l'affichage : c'est le seul moyen de le
+            revoir depuis un navigateur ordinaire. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{
+var f=location.search.indexOf('lancement=1')>-1;
+var i=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;
+if(!f&&!i)return;
+if(!f){if(sessionStorage.getItem('na-lancement')==='vu')return;sessionStorage.setItem('na-lancement','vu');}
+var c=document.createElement('canvas').getContext('2d');
+c.font='100px Georgia, "Times New Roman", serif';
+var r=c.measureText('N').width/100;
+if(r>0.3&&r<1.6)document.documentElement.style.setProperty('--na-retrait',r+'em');
+document.documentElement.classList.add('na-lance');
+}catch(e){}})()`,
+          }}
+        />
       </head>
       <body>
+        {/* Masqué par défaut : seul `html.na-lance`, posé par le script
+            ci-dessus, le fait apparaître. Décoratif, donc retiré du parcours
+            des lecteurs d'écran — le contenu qu'il recouvre reste la page. */}
+        <div className="na-lancement" aria-hidden="true">
+          <div className="na-lancement-bloc">
+            <span className="na-lancement-mot na-lancement-nova">NOVA</span>
+            <span className="na-lancement-mot na-lancement-assist">ASSIST</span>
+          </div>
+        </div>
+
         <NextIntlClientProvider>
           <a
             href="#contenu"

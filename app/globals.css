@@ -1073,3 +1073,128 @@ html {
     animation: none;
   }
 }
+
+/* ===========================================================================
+   Écran de lancement
+
+   NOVA entre par la gauche, ASSIST par la droite et s'arrête sous le O.
+
+   Ne s'affiche QUE si le site tourne installé sur l'écran d'accueil : sur une
+   visite ordinaire au navigateur, un voile plein écran retarderait le contenu
+   et pénaliserait le référencement. Le script de `layout.tsx` pose
+   `html.na-lance` avant le premier rendu — d'où l'absence de scintillement, et
+   d'où le fait que rien ici ne dépend de l'hydratation de React.
+   =========================================================================== */
+
+.na-lancement {
+  display: none;
+}
+
+html.na-lance .na-lancement {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-navy);
+  /* Une marge franche sur les côtés : le logotype ne doit jamais toucher le
+     bord, ni sur un écran étroit ni en très grand. */
+  padding: 0 7vw;
+  /* Le logotype est dimensionné en `cqw` : une part de la largeur de l'écran,
+     donc juste du plus petit téléphone à la tablette, sans palier. */
+  container-type: inline-size;
+  animation: na-lancement-voile 2600ms linear forwards;
+}
+
+.na-lancement-bloc {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  /* `max-content` : sans largeur explicite, le retrait d'ASSIST n'entrait pas
+     dans le calcul du bloc, qui se retrouvait décentré et débordait à droite. */
+  width: max-content;
+  max-width: 100%;
+  font-family: var(--font-serif);
+  font-size: clamp(26px, 15cqw, 84px);
+  line-height: 1.1;
+}
+
+.na-lancement-mot {
+  display: block;
+  white-space: nowrap;
+}
+
+.na-lancement-nova {
+  color: #ffffff;
+}
+
+.na-lancement-assist {
+  color: var(--color-gold);
+  letter-spacing: 0.16em;
+  /* La chasse ajoute un blanc après la dernière lettre : on le retire. */
+  margin-right: -0.16em;
+  /* Le retrait place ASSIST sous le O. Il vaut la chasse du N, mesurée par le
+     script d'amorçage ; la valeur de repli correspond à Georgia.
+
+     `padding` et non `margin` : la marge d'un élément flex est ignorée par
+     certains calculs de largeur intrinsèque, ce qui décalait le bloc. */
+  padding-left: var(--na-retrait, 0.72em);
+}
+
+html.na-lance .na-lancement-nova {
+  animation: na-lancement-gauche 1400ms cubic-bezier(0.25, 1, 0.4, 1) both;
+}
+
+html.na-lance .na-lancement-assist {
+  animation: na-lancement-droite 1400ms cubic-bezier(0.25, 1, 0.4, 1) 150ms both;
+}
+
+@keyframes na-lancement-gauche {
+  from {
+    opacity: 0;
+    transform: translateX(-115cqw);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes na-lancement-droite {
+  from {
+    opacity: 0;
+    transform: translateX(115cqw);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Le voile tient jusqu'à 80 % — le logotype est en place à 1,55 s — puis
+   s'efface. `visibility` en fin d'animation le retire des clics et du parcours
+   au clavier, ce que `opacity: 0` seul ne ferait pas. */
+@keyframes na-lancement-voile {
+  0%,
+  80% {
+    opacity: 1;
+    visibility: visible;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.na-lance .na-lancement-nova,
+  html.na-lance .na-lancement-assist {
+    animation: none;
+  }
+  /* Le logotype reste posé un instant, puis le voile s'efface : la marque est
+     vue, sans qu'aucun mouvement ne traverse l'écran. */
+  html.na-lance .na-lancement {
+    animation: na-lancement-voile 900ms linear forwards;
+  }
+}
