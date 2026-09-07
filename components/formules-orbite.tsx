@@ -46,7 +46,16 @@ export function FormulesOrbite({
 
   const rotation = useRef(0);
   const auto = useRef(true);
-  const glisse = useRef({ actif: false, departX: 0, departRotation: 0, parcouru: 0 });
+  const glisse = useRef({
+    actif: false,
+    departX: 0,
+    departRotation: 0,
+    parcouru: 0,
+    /* Le pointeur n'est capturé qu'une fois le glissement avéré — voir
+       `commencer` pour la raison. */
+    capture: false,
+    pointeur: -1,
+  });
 
   useEffect(() => {
     const element = anneau.current;
@@ -77,22 +86,41 @@ export function FormulesOrbite({
     if (minuteur.current) clearTimeout(minuteur.current);
   }, []);
 
+  /* Pas de `setPointerCapture` ici, et c'est essentiel.
+
+     Capturer le pointeur dès l'appui dirige toute la séquence vers la scène :
+     le `click` final est alors émis sur elle, jamais sur le lien survolé, et
+     la navigation par défaut de l'ancre n'a jamais lieu. Autrement dit, une
+     simple tape sur une formule ne menait nulle part.
+
+     La capture est donc repoussée dans `deplacer`, au moment où le geste
+     devient un vrai glissement. Une tape n'en déclenche aucune et atteint
+     normalement le lien. */
   function commencer(evenement: React.PointerEvent<HTMLDivElement>) {
     glisse.current = {
       actif: true,
       departX: evenement.clientX,
       departRotation: rotation.current,
       parcouru: 0,
+      capture: false,
+      pointeur: evenement.pointerId,
     };
     auto.current = false;
     if (minuteur.current) clearTimeout(minuteur.current);
-    scene.current?.setPointerCapture(evenement.pointerId);
   }
 
   function deplacer(evenement: React.PointerEvent<HTMLDivElement>) {
     if (!glisse.current.actif || !anneau.current) return;
     const dx = evenement.clientX - glisse.current.departX;
     glisse.current.parcouru = Math.max(glisse.current.parcouru, Math.abs(dx));
+
+    /* Le geste est devenu un glissement : on prend la main sur le pointeur,
+       pour que la rotation se poursuive même si le doigt sort de la scène. */
+    if (!glisse.current.capture && glisse.current.parcouru > SEUIL_CLIC) {
+      glisse.current.capture = true;
+      scene.current?.setPointerCapture(glisse.current.pointeur);
+    }
+
     rotation.current = glisse.current.departRotation + dx * SENSIBILITE;
     anneau.current.style.transform = `rotateY(${rotation.current.toFixed(3)}deg)`;
   }
@@ -100,6 +128,7 @@ export function FormulesOrbite({
   function terminer() {
     if (!glisse.current.actif) return;
     glisse.current.actif = false;
+    glisse.current.capture = false;
     minuteur.current = setTimeout(() => {
       auto.current = true;
     }, REPRISE);
