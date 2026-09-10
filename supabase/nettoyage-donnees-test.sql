@@ -71,10 +71,20 @@ where email = 'hylariekaldjob6@gmail.com';
 -- commandes, ses factures et ses documents : `profils.id` référence
 -- `auth.users` avec `on delete cascade`, et le reste suit.
 --
--- À ne faire que si vous n'avez plus besoin de ce compte pour tester.
--- Passe plutôt par Supabase → Authentication → Users → supprimer, qui
--- s'occupe aussi des jetons et des sessions.
+-- LE PLUS SIMPLE reste Supabase → Authentication → Users → chercher
+-- l'adresse → Delete user. Un clic, et les sessions ouvertes sont fermées
+-- avec le compte.
+--
+-- Par SQL, si vous préférez. D'abord regarder :
 -- ---------------------------------------------------------------------------
+select id, email, created_at, email_confirmed_at, last_sign_in_at
+  from auth.users
+ where email = 'hylariekaldjob6@gmail.com';
+
+-- Puis supprimer. La cascade emporte le profil, les demandes, les commandes,
+-- les factures, les documents et les témoignages de ce compte.
+delete from auth.users
+ where email = 'hylariekaldjob6@gmail.com';
 
 
 -- ===========================================================================

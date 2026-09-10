@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AlertTriangle, Building2, Folder, Receipt, ShieldCheck, Users } from "lucide-react";
+import { AlertTriangle, Building2, Folder, Receipt, Users } from "lucide-react";
 
 import { BoutonRelaisWhatsApp } from "@/components/admin/bouton-relais-whatsapp";
 import { listerClients } from "@/lib/supabase/clients-admin";
@@ -34,6 +34,9 @@ export default async function ComptesClients() {
     );
   }
 
+  /* Les comptes d'administration sortent de la liste comme ils sortaient déjà
+     des compteurs : cette page s'intitule « Comptes clients », et Nova Assist
+     n'est pas sa propre cliente. */
   const vraisClients = clients.filter((c) => c.role !== "admin");
   const impayes = vraisClients.filter((c) => c.nb_factures_impayees > 0).length;
   const sansFormule = vraisClients.filter((c) => !c.formule).length;
@@ -68,13 +71,13 @@ export default async function ComptesClients() {
         ))}
       </dl>
 
-      {clients.length === 0 ? (
+      {vraisClients.length === 0 ? (
         <p className="na-carte rounded-3xl px-6 py-10 text-center text-[15px] text-gray-mid shadow-sm">
           Aucun compte pour l&apos;instant. Les inscriptions depuis le site apparaîtront ici.
         </p>
       ) : (
         <ul className="flex flex-col gap-3">
-          {clients.map((client, i) => (
+          {vraisClients.map((client, i) => (
             <li
               key={client.id}
               style={{ "--na-delai": `${Math.min(i, 8) * 55}ms` } as React.CSSProperties}
@@ -87,12 +90,6 @@ export default async function ComptesClients() {
                   <p className="text-[13px] text-muted">Inscrit le {dateCourte(client.cree_le)}</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  {client.role === "admin" && (
-                    <span className="na-statut na-statut-succes">
-                      <ShieldCheck className="h-[14px] w-[14px]" aria-hidden />
-                      Administration
-                    </span>
-                  )}
                   <span
                     className={`na-statut ${client.formule ? "na-statut-cours" : "na-statut-neutre"}`}
                   >
