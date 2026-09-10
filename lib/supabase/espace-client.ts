@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { creerClientServeur } from "./server";
 
 export type Formule = "essentiel" | "professionnel" | "premium";
@@ -69,7 +70,13 @@ export type DonneesTableauDeBord = {
 const COLONNES_PROFIL = "id, entreprise, contact_nom, fonction, ville, role, formule, heures_incluses, heures_consommees";
 const COLONNES_PROFIL_SANS_ROLE = "id, entreprise, contact_nom, fonction, ville, formule, heures_incluses, heures_consommees";
 
-export async function chargerTableauDeBord(): Promise<DonneesTableauDeBord> {
+/* `cache` de React : le gabarit et la page qu'il enveloppe demandent les
+   mêmes données, et sans mémorisation chacun paierait ses propres allers-
+   retours. Un seul appel réel par requête, quel que soit le nombre
+   d'appelants. C'est ce qui a permis de découper le tableau de bord en pages
+   sans multiplier les requêtes. */
+export const chargerTableauDeBord = cache(
+  async function chargerTableauDeBord(): Promise<DonneesTableauDeBord> {
   const supabase = await creerClientServeur();
 
   /* Filtrer explicitement sur le compte connecté, au lieu de laisser RLS le
@@ -137,7 +144,7 @@ export async function chargerTableauDeBord(): Promise<DonneesTableauDeBord> {
     enCours: demandes.filter((d) => d.statut !== "terminee").length,
     prioritaires: demandes.filter((d) => d.prioritaire && d.statut !== "terminee").length,
   };
-}
+});
 
 /* ---------------------------------------------------------------- affichage */
 

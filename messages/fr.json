@@ -526,11 +526,10 @@
     "nav": [
       "Tableau de bord",
       "Mes demandes",
-      "Documents",
-      "Factures",
+      "Documents et factures",
+      "Mon abonnement",
       "Mon témoignage",
-      "Mon profil",
-      "Mon abonnement"
+      "Mon profil"
     ],
     "navAria": "Espace client",
     "bonjour": "Bonjour",

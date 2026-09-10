@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 
 import { BoutonDeconnexion } from "@/components/espace-client/bouton-deconnexion";
 import { NavAdmin, TitreSection } from "@/components/admin/nav-admin";
@@ -71,12 +69,6 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               </p>
               <p className="truncate text-[13px] text-gray-mid">{admin.email}</p>
             </div>
-            <Link
-              href="/"
-              className="flex items-center gap-2 border border-navy px-4 py-2 text-[14px] text-navy transition-colors hover:bg-navy hover:text-white"
-            >
-              <ArrowLeft aria-hidden size={15} /> Retour au site
-            </Link>
           </header>
 
           <div className="flex-1 px-4 py-6 sm:px-6 md:px-8 md:py-8">

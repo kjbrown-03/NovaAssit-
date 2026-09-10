@@ -526,11 +526,10 @@
     "nav": [
       "Dashboard",
       "My requests",
-      "Documents",
-      "Invoices",
+      "Documents and invoices",
+      "My plan",
       "My testimonial",
-      "My profile",
-      "My plan"
+      "My profile"
     ],
     "navAria": "Client area",
     "bonjour": "Hello",
