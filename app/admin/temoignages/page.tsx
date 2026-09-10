@@ -82,7 +82,7 @@ export default async function ModerationTemoignages() {
       </div>
 
         {/* ---------------------------------------------------------- compteurs */}
-        <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <dl className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 lg:grid-cols-4">
           {compteurs.map(({ libelle, valeur, Icone, ton }, i) => (
             <div
               key={libelle}

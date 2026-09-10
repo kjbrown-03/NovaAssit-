@@ -96,7 +96,7 @@ export default async function SuiviDevis({
         <h1 className="text-[28px] text-navy lg:text-[34px]">Demandes de devis</h1>
       </div>
 
-      <nav aria-label="Filtrer les demandes" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <nav aria-label="Filtrer les demandes" className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 lg:grid-cols-4">
         {compteurs.map(({ libelle, valeur, ton, Icone, cle }, i) => {
           const selectionne = cle === actif;
           return (

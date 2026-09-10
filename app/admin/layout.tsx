@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
-import { Wordmark } from "@/components/wordmark";
 import { BoutonDeconnexion } from "@/components/espace-client/bouton-deconnexion";
 import { NavAdmin, TitreSection } from "@/components/admin/nav-admin";
+import { RailAdmin } from "@/components/admin/rail-admin";
 import { BlocAdmin } from "@/components/admin/bloc-admin";
 import { identiteAdmin } from "@/lib/supabase/admin";
 
@@ -48,40 +48,20 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="na-console min-h-svh md:flex">
       {/* ------------------------------------------------------------ latérale */}
-      <aside
-        className={
-          /* Rail rétractable : replié sur ses icônes, il se déploie au survol
-             et au focus clavier, sans quoi on ne pourrait pas le parcourir à la
-             tabulation. */
-          "group/rail flex flex-col gap-6 bg-navy py-[26px] transition-[width] duration-200 ease-linear " +
-          "md:sticky md:top-0 md:h-svh md:w-[76px] md:shrink-0 md:overflow-x-hidden md:overflow-y-auto " +
-          "md:hover:w-[252px] md:focus-within:w-[252px] lg:gap-8"
-        }
-      >
-        <div className="relative h-[26px] px-5">
-          {/* Replié, seule l'initiale tient dans la largeur du rail. */}
-          <span
-            aria-hidden
-            className="absolute inset-y-0 left-5 hidden items-center font-serif text-[21px] text-gold transition-opacity duration-200 md:flex md:group-hover/rail:opacity-0 md:group-focus-within/rail:opacity-0"
-          >
-            N
-          </span>
-          <span className="absolute inset-y-0 left-5 flex items-center transition-opacity duration-200 md:opacity-0 md:group-hover/rail:opacity-100 md:group-focus-within/rail:opacity-100">
-            <Wordmark size={19} />
-          </span>
-        </div>
-
+      <RailAdmin>
         <NavAdmin />
 
-        <div className="mt-auto flex flex-col gap-1 border-t border-gold/20 px-5 pt-4 md:px-3">
+        <div className="mt-auto flex flex-col gap-1 border-t border-gold/20 px-2 pt-4 md:px-3">
           <BlocAdmin nom={admin.nom} email={admin.email} />
           <BoutonDeconnexion />
         </div>
-      </aside>
+      </RailAdmin>
 
       {/* Le contenu flotte dans une carte blanche arrondie, posée sur le fond
           sablé — même signature que l'espace client. */}
-      <div className="flex min-w-0 flex-1 md:p-2">
+      {/* Le rail est hors du flux sur téléphone : le contenu lui laisse sa
+          largeur par une marge, et la reprend dès `md` où il redevient collant. */}
+      <div className="flex min-w-0 flex-1 pl-[62px] md:p-2">
         <main
           id="contenu"
           className="na-carte flex min-w-0 flex-1 flex-col shadow-sm md:rounded-2xl"

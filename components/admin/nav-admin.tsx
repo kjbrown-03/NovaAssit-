@@ -43,8 +43,7 @@ export function NavAdmin() {
 
   return (
     <nav aria-label="Back-office" className="md:px-3">
-      {/* Sur mobile la latérale devient une barre d'onglets défilante. */}
-      <ul className="na-scroll flex gap-1 overflow-x-auto px-3 md:flex-col md:overflow-visible md:px-0">
+      <ul className="flex flex-col gap-1 px-2 md:px-0">
         {SECTIONS.map(({ libelle, href, Icone }) => {
           const actif = pathname === href || pathname.startsWith(`${href}/`);
           return (
@@ -59,7 +58,9 @@ export function NavAdmin() {
                 }`}
               >
                 <Icone className="h-[18px] w-[18px] shrink-0" aria-hidden />
-                <span className="transition-opacity duration-200 md:opacity-0 md:group-hover/rail:opacity-100 md:group-focus-within/rail:opacity-100">
+                {/* Masqué tant que le rail est replié — au survol sur écran
+                    large, au bouton sur téléphone. */}
+                <span className="hidden group-data-[ouvert=true]/rail:inline md:group-hover/rail:inline md:group-focus-within/rail:inline">
                   {libelle}
                 </span>
               </Link>

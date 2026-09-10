@@ -25,7 +25,7 @@ export function BlocAdmin({ nom, email }: { nom: string; email: string }) {
       >
         {initiales(affiche)}
       </span>
-      <span className="flex min-w-0 flex-col transition-opacity duration-200 md:opacity-0 md:group-hover/rail:opacity-100 md:group-focus-within/rail:opacity-100">
+      <span className="hidden min-w-0 flex-col group-data-[ouvert=true]/rail:flex md:group-hover/rail:flex md:group-focus-within/rail:flex">
         <span className="truncate text-[14px] text-white">{nom || "Administration"}</span>
         <span className="truncate text-[12px] text-gold/80">Administration</span>
       </span>
