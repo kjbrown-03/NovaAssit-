@@ -59,9 +59,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
       {/* Le contenu flotte dans une carte blanche arrondie, posée sur le fond
           sablé — même signature que l'espace client. */}
-      {/* Le rail est hors du flux sur téléphone : le contenu lui laisse sa
-          largeur par une marge, et la reprend dès `md` où il redevient collant. */}
-      <div className="flex min-w-0 flex-1 pl-[62px] md:p-2">
+      <div className="flex min-w-0 flex-1 md:p-2">
         <main
           id="contenu"
           className="na-carte flex min-w-0 flex-1 flex-col shadow-sm md:rounded-2xl"

@@ -54,7 +54,7 @@ export default async function ComptesClients() {
         <h1 className="text-[28px] text-navy lg:text-[34px]">Comptes clients</h1>
       </div>
 
-      <dl className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 lg:grid-cols-3">
+      <dl className="grid grid-cols-2 gap-3 lg:grid-cols-3">
         {compteurs.map(({ libelle, valeur, ton, Icone }, i) => (
           <div
             key={libelle}
