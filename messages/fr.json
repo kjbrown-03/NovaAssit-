@@ -575,6 +575,8 @@
     "passerAuPaiement": "Passer au paiement",
     "temoignageEyebrow": "Votre retour",
     "temoignageTitre": "Partager un témoignage",
-    "temoignageTexte": "Écrit ou filmé, votre retour aide les entreprises qui hésitent encore. Il est relu par notre équipe avant publication, et la page d'accueil en présente {max} au maximum."
+    "temoignageTexte": "Écrit ou filmé, votre retour aide les entreprises qui hésitent encore. Il est relu par notre équipe avant publication, et la page d'accueil en présente {max} au maximum.",
+    "ouvrirMenu": "Ouvrir le menu",
+    "fermerMenu": "Fermer le menu"
   }
 }

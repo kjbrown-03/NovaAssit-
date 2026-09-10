@@ -16,7 +16,7 @@ import {
   Wallet,
 } from "lucide-react";
 
-import { Wordmark } from "@/components/wordmark";
+import { RailConsole } from "@/components/console/rail-console";
 import { whatsappLink } from "@/lib/content";
 import { chargerFormules } from "@/lib/tarifs";
 import { ShinyButton } from "@/components/ui/shiny-button";
@@ -94,36 +94,13 @@ export default async function EspaceClient() {
   return (
     <div className="na-console min-h-svh md:flex">
       {/* ------------------------------------------------------------ latérale */}
-      <aside
-        className={
-          /* Rail rétractable, repris d'IMSOP : replié sur ses icônes, il se
-             déploie au survol — et au focus clavier, sans quoi on ne pourrait
-             pas le parcourir à la tabulation. Le contenu s'élargit d'autant. */
-          "group/rail flex flex-col gap-6 bg-navy py-[26px] transition-[width] duration-200 ease-linear " +
-          /* Collée en haut et haute d'un écran : sans ça, la latérale s'étire
-             sur toute la hauteur du contenu et `mt-auto` renvoie la
-             déconnexion tout en bas d'une page très longue — invisible sans
-             faire défiler jusqu'au pied. */
-          "md:sticky md:top-0 md:h-svh md:w-[76px] md:shrink-0 md:overflow-x-hidden md:overflow-y-auto " +
-          "md:hover:w-[252px] md:focus-within:w-[252px] lg:gap-8"
-        }
+      <RailConsole
+        id="menu-espace-client"
+        ouvrirLabel={t("ouvrirMenu")}
+        fermerLabel={t("fermerMenu")}
       >
-        <div className="relative h-[26px] px-5">
-          {/* Replié, seule l'initiale tient dans la largeur du rail. */}
-          <span
-            aria-hidden
-            className="absolute inset-y-0 left-5 hidden items-center font-serif text-[21px] text-gold transition-opacity duration-200 md:flex md:group-hover/rail:opacity-0 md:group-focus-within/rail:opacity-0"
-          >
-            N
-          </span>
-          <span className="absolute inset-y-0 left-5 flex items-center transition-opacity duration-200 md:opacity-0 md:group-hover/rail:opacity-100 md:group-focus-within/rail:opacity-100">
-            <Wordmark size={19} />
-          </span>
-        </div>
-
         <nav aria-label={t("navAria")} className="md:px-3">
-          {/* Sur mobile la latérale devient une barre d'onglets défilante. */}
-          <ul className="na-scroll flex gap-1 overflow-x-auto px-3 md:flex-col md:overflow-visible md:px-0">
+          <ul className="flex flex-col gap-1 px-2 md:px-0">
             {NAV.map(({ href, Icone }, i) => (
               <li key={i} className="shrink-0">
                 <Link
@@ -136,7 +113,9 @@ export default async function EspaceClient() {
                   }`}
                 >
                   <Icone className="h-[18px] w-[18px] shrink-0" aria-hidden />
-                  <span className="transition-opacity duration-200 md:opacity-0 md:group-hover/rail:opacity-100 md:group-focus-within/rail:opacity-100">
+                  {/* Masqué tant que le panneau est fermé — au survol sur
+                      écran large, au bouton sur téléphone. */}
+                  <span className="hidden group-data-[ouvert=true]/rail:inline md:group-hover/rail:inline md:group-focus-within/rail:inline">
                     {libNav[i]}
                   </span>
                 </Link>
@@ -145,7 +124,7 @@ export default async function EspaceClient() {
           </ul>
         </nav>
 
-        <div className="mt-auto flex flex-col gap-1 border-t border-gold/20 px-5 pt-4 md:px-3">
+        <div className="mt-auto flex flex-col gap-1 border-t border-gold/20 px-2 pt-4 md:px-3">
           <BlocProfil
             nom={prenomOuNom ?? null}
             entreprise={entreprise}
@@ -153,7 +132,7 @@ export default async function EspaceClient() {
           />
           <BoutonDeconnexion />
         </div>
-      </aside>
+      </RailConsole>
 
       {/* Le contenu flotte dans une carte blanche arrondie, posée sur le fond
           sablé — la signature de coque d'IMSOP. */}

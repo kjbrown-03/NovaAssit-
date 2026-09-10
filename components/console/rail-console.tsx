@@ -1,27 +1,39 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type MouseEvent, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
 import { Wordmark } from "@/components/wordmark";
 
 /**
- * La latérale du back-office.
+ * La latérale des deux consoles — back-office et espace client.
  *
  * Au bureau : le rail d'origine, replié sur ses icônes, déployé au survol.
  *
  * Sur téléphone : rien n'occupe l'écran en dehors d'une barre fine portant le
  * bouton de menu. Les onglets sortent en panneau par la gauche quand on y
- * appuie, et se referment dès qu'une section est choisie. Le contenu garde
- * donc toute la largeur, ce qui compte sur 390 px.
+ * appuie. Le contenu garde donc toute sa largeur, ce qui compte sur 390 px.
+ *
+ * Mutualisé parce que les deux consoles avaient la même latérale au pixel
+ * près : deux copies auraient fini par diverger sur un détail — la largeur du
+ * panneau, la couleur du voile, le comportement d'Échap.
  */
-export function RailAdmin({ children }: { children: ReactNode }) {
+export function RailConsole({
+  children,
+  ouvrirLabel = "Ouvrir le menu",
+  fermerLabel = "Fermer le menu",
+  id = "menu-console",
+}: {
+  children: ReactNode;
+  ouvrirLabel?: string;
+  fermerLabel?: string;
+  id?: string;
+}) {
   const [ouvert, setOuvert] = useState(false);
   const pathname = usePathname();
 
-  /* Changer de section referme le panneau : il recouvre le contenu, le laisser
-     ouvert masquerait la page qu'on vient d'ouvrir. */
+  /* Changer de page referme le panneau. */
   useEffect(() => setOuvert(false), [pathname]);
 
   /* Échap referme, comme tout panneau superposé. */
@@ -34,6 +46,14 @@ export function RailAdmin({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("keydown", surTouche);
   }, [ouvert]);
 
+  /* Le tableau de bord client navigue par ANCRES : l'adresse ne change pas,
+     et l'effet sur `pathname` ne se déclenche jamais. On referme donc sur le
+     clic d'un lien, ce qui couvre aussi bien les ancres que les vraies
+     routes du back-office. */
+  function surClic(evenement: MouseEvent<HTMLElement>) {
+    if ((evenement.target as HTMLElement).closest("a")) setOuvert(false);
+  }
+
   return (
     <>
       {/* ------------------------------------------------- barre du téléphone */}
@@ -42,11 +62,11 @@ export function RailAdmin({ children }: { children: ReactNode }) {
           type="button"
           onClick={() => setOuvert(true)}
           aria-expanded={ouvert}
-          aria-controls="menu-admin"
+          aria-controls={id}
           className="na-presse -ml-2 rounded-lg p-2 text-gold transition-colors hover:bg-white/10"
         >
           <Menu size={22} aria-hidden />
-          <span className="sr-only">Ouvrir le menu</span>
+          <span className="sr-only">{ouvrirLabel}</span>
         </button>
         <Wordmark size={18} />
       </header>
@@ -55,7 +75,7 @@ export function RailAdmin({ children }: { children: ReactNode }) {
       {ouvert && (
         <button
           type="button"
-          aria-label="Fermer le menu"
+          aria-label={fermerLabel}
           onClick={() => setOuvert(false)}
           className="fixed inset-0 z-40 bg-navy/60 md:hidden"
         />
@@ -63,9 +83,10 @@ export function RailAdmin({ children }: { children: ReactNode }) {
 
       {/* ------------------------------------------------------------ panneau */}
       <aside
-        id="menu-admin"
+        id={id}
         data-ouvert={ouvert ? "true" : undefined}
         aria-hidden={!ouvert || undefined}
+        onClick={surClic}
         className={
           /* Téléphone : rangé hors de l'écran, il entre par la gauche.
              À partir de `md` il reprend sa place de rail, toujours visible. */
@@ -95,7 +116,7 @@ export function RailAdmin({ children }: { children: ReactNode }) {
             className="na-presse -mr-2 rounded-lg p-2 text-gold transition-colors hover:bg-white/10 md:hidden"
           >
             <X size={20} aria-hidden />
-            <span className="sr-only">Fermer le menu</span>
+            <span className="sr-only">{fermerLabel}</span>
           </button>
         </div>
 

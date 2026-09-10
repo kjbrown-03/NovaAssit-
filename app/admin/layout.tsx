@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 
 import { BoutonDeconnexion } from "@/components/espace-client/bouton-deconnexion";
 import { NavAdmin, TitreSection } from "@/components/admin/nav-admin";
-import { RailAdmin } from "@/components/admin/rail-admin";
+import { RailConsole } from "@/components/console/rail-console";
 import { BlocAdmin } from "@/components/admin/bloc-admin";
 import { identiteAdmin } from "@/lib/supabase/admin";
 
@@ -48,14 +48,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="na-console min-h-svh md:flex">
       {/* ------------------------------------------------------------ latérale */}
-      <RailAdmin>
+      <RailConsole id="menu-admin">
         <NavAdmin />
 
         <div className="mt-auto flex flex-col gap-1 border-t border-gold/20 px-2 pt-4 md:px-3">
           <BlocAdmin nom={admin.nom} email={admin.email} />
           <BoutonDeconnexion />
         </div>
-      </RailAdmin>
+      </RailConsole>
 
       {/* Le contenu flotte dans une carte blanche arrondie, posée sur le fond
           sablé — même signature que l'espace client. */}

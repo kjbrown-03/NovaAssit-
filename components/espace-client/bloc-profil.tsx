@@ -39,7 +39,7 @@ export function BlocProfil({
       >
         {initiales(affiche)}
       </span>
-      <span className="flex min-w-0 flex-col whitespace-nowrap transition-opacity duration-200 md:opacity-0 md:group-hover/rail:opacity-100 md:group-focus-within/rail:opacity-100">
+      <span className="hidden min-w-0 flex-col whitespace-nowrap group-data-[ouvert=true]/rail:flex md:group-hover/rail:flex md:group-focus-within/rail:flex">
         <span className="truncate text-[15px] text-white">{affiche}</span>
         <span className="truncate text-[13px] text-white/50">
           {nom?.trim() ? entreprise : formule}

@@ -575,6 +575,8 @@
     "passerAuPaiement": "Go to payment",
     "temoignageEyebrow": "Your feedback",
     "temoignageTitre": "Share a testimonial",
-    "temoignageTexte": "Written or filmed, your feedback helps businesses that are still hesitating. Our team reviews it before publication, and the home page shows at most {max}."
+    "temoignageTexte": "Written or filmed, your feedback helps businesses that are still hesitating. Our team reviews it before publication, and the home page shows at most {max}.",
+    "ouvrirMenu": "Open the menu",
+    "fermerMenu": "Close the menu"
   }
 }
