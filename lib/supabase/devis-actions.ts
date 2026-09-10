@@ -44,3 +44,50 @@ export async function changerStatutDevis(donnees: FormData): Promise<void> {
   revalidatePath("/admin/devis");
   revalidatePath("/espace-client");
 }
+
+/**
+ * Pose un prix sur une demande, ce qui la transforme en proposition.
+ *
+ * Une demande de devis arrive quand aucune formule toute faite ne convient :
+ * le montant ne peut donc pas se déduire, il se décide. Cette action est le
+ * seul endroit où il s'écrit.
+ *
+ * Même raison qu'au-dessus de passer par le client authentifié : c'est RLS qui
+ * vérifie le rôle, pas ce code.
+ */
+export async function etablirDevis(donnees: FormData): Promise<void> {
+  const id = Number(donnees.get("id"));
+  /* La saisie autorise les espaces des milliers — « 245 000 » est ce qu'on
+     tape naturellement — et les retire avant conversion. */
+  const brut = String(donnees.get("montant") ?? "").replace(/[\s\u00A0]/g, "");
+  const montant = Number(brut);
+  const prestation = String(donnees.get("prestation") ?? "").trim();
+  const validite = Number(donnees.get("validite") ?? 30);
+
+  if (!Number.isFinite(id) || !Number.isInteger(montant) || montant <= 0) return;
+
+  const supabase = await creerClientServeur();
+
+  const { error } = await supabase
+    .from("demandes_devis")
+    .update({
+      montant_fcfa: montant,
+      prestation: prestation || null,
+      validite_jours: Number.isInteger(validite) && validite > 0 && validite <= 365 ? validite : 30,
+      devis_etabli_le: new Date().toISOString(),
+      /* Chiffrer une demande, c'est la prendre en charge : le statut suit,
+         sans obliger à un second clic. */
+      statut: "en_cours",
+      traitee_le: null,
+    })
+    .eq("id", id);
+
+  if (error) {
+    console.error("[devis] chiffrage refusé :", error.message);
+    return;
+  }
+
+  await repercuterStatutAuClient(id, "en_cours");
+  revalidatePath("/admin/devis");
+  revalidatePath("/espace-client");
+}

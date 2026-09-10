@@ -19,6 +19,16 @@ export type DemandeDevis = {
   note_interne: string | null;
   recue_le: string;
   traitee_le: string | null;
+
+  /* Ajoutés par la migration 012 : le devis chiffré. Nuls tant que
+     l'administration n'a pas posé de prix. */
+  telephone: string | null;
+  montant_fcfa: number | null;
+  prestation: string | null;
+  devis_etabli_le: string | null;
+  validite_jours: number;
+  /* Secret du lien public. À ne jamais afficher dans une liste. */
+  jeton: string;
 };
 
 /** Ce que la route publique transmet, une fois validé. */
@@ -26,6 +36,7 @@ export type NouvelleDemandeDevis = {
   entreprise: string;
   contact_nom: string;
   email: string;
+  telephone?: string | null;
   secteur?: string | null;
   effectif?: string | null;
   domaines: string[];

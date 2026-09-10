@@ -85,6 +85,9 @@ export async function POST(requete: Request) {
     entreprise,
     contact_nom: contactNom,
     email,
+    /* Le formulaire le collectait sans qu'on l'écrive nulle part. C'est
+       pourtant par là que part la proposition, sur WhatsApp. */
+    telephone: texteOuNull(corps.telephone),
     secteur: texteOuNull(corps.secteur),
     effectif: texteOuNull(corps.effectif),
     domaines: domaines.filter((d): d is string => typeof d === "string"),

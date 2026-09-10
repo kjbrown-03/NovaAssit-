@@ -4,6 +4,8 @@ import { CheckCircle, Clock, Inbox, Mail, RefreshCw, XCircle } from "lucide-reac
 
 import { creerClientServeur } from "@/lib/supabase/server";
 import { changerStatutDevis } from "@/lib/supabase/devis-actions";
+import { ChiffrerDevis } from "@/components/admin/chiffrer-devis";
+import { urlDuSite } from "@/lib/site-url";
 import {
   LIBELLE_STATUT_DEVIS,
   STYLE_STATUT_DEVIS,
@@ -47,6 +49,9 @@ export default async function SuiviDevis({
 }) {
   const { statut: filtre } = await searchParams;
   const supabase = await creerClientServeur();
+  /* Le lien envoyé au prospect doit être absolu : il part sur WhatsApp, où
+     rien ne sait résoudre une adresse relative. */
+  const origine = urlDuSite();
 
   const { data, error } = await supabase
     .from("demandes_devis")
@@ -218,6 +223,11 @@ export default async function SuiviDevis({
                     </form>
                   ))}
                 </div>
+
+                {/* Chiffrer, puis envoyer. C'est le cœur du traitement d'une
+                    demande : les formules toutes faites n'ayant pas convenu,
+                    il faut poser un prix à la main. */}
+                <ChiffrerDevis devis={demande} origine={origine} />
               </li>
             );
           })}
