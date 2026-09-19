@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { FormulaireAuth } from "@/components/auth/formulaire-auth";
 import type { AuthMode } from "@/components/ui/auth-switch";
+import { cheminInterne } from "@/lib/chemin-interne";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("auth");
@@ -27,9 +28,7 @@ export default async function ConnexionPage({
   /* `suite` est posé par le middleware quand il intercepte une page protégée.
      On n'accepte qu'un chemin interne : une URL absolue permettrait de
      rediriger vers un site tiers après connexion. */
-  const destination = suite && suite.startsWith("/") && !suite.startsWith("//")
-    ? suite
-    : "/espace-client";
+  const destination = cheminInterne(suite);
 
   /* La page entière est la bascule : ni en-tête ni pied de page, rien qui
      détourne du seul geste attendu ici. */

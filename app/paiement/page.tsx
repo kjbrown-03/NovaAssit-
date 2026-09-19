@@ -5,6 +5,7 @@ import { ArrowLeft, ShieldCheck } from "lucide-react";
 import { Wordmark } from "@/components/wordmark";
 import { MOIS_FACTURES_A_L_ANNEE, formaterFcfa } from "@/lib/content";
 import { chargerFormules } from "@/lib/tarifs";
+import { fapshiConfigure } from "@/lib/fapshi";
 import { FormulairePaiement } from "./formulaire-paiement";
 import type { IdFormule } from "@/lib/supabase/commandes";
 
@@ -33,6 +34,7 @@ export default async function Paiement({
     ? formaterFcfa(choisie.montantMensuel * MOIS_FACTURES_A_L_ANNEE)
     : choisie.prix;
   const uniteAffichee = annuel ? "FCFA / an" : choisie.unite;
+  const encaissementActif = fapshiConfigure();
 
   return (
     /* La page arrive en glissant depuis la droite, comme les diapositives du
@@ -63,17 +65,25 @@ export default async function Paiement({
           </p>
         </div>
 
-        {/* Bandeau d'honnêteté : afficher un formulaire de carte sans encaisser
-            serait trompeur si rien ne le disait. */}
-        <div className="mx-auto mb-8 flex max-w-[1000px] items-start gap-3 border border-gold-line bg-gold-soft px-5 py-4">
-          <ShieldCheck aria-hidden className="mt-[2px] h-5 w-5 shrink-0 text-gold-ink" />
-          <p className="text-[15px] leading-[1.6] text-navy">
-            <strong>L&apos;encaissement en ligne n&apos;est pas encore actif.</strong> Vos
-            coordonnées bancaires ne sont ni transmises ni conservées — elles ne quittent
-            pas votre navigateur. Valider enregistre votre souscription ; notre équipe vous
-            contacte ensuite pour le règlement.
-          </p>
-        </div>
+        {encaissementActif ? (
+          <div className="mx-auto mb-8 flex max-w-[1000px] items-start gap-3 border border-line bg-stone-50 px-5 py-4">
+            <ShieldCheck aria-hidden className="mt-[2px] h-5 w-5 shrink-0 text-gold-ink" />
+            <p className="text-[15px] leading-[1.6] text-navy">
+              Paiement par <strong>MTN Mobile Money</strong> ou <strong>Orange Money</strong>,
+              sécurisé par Fapshi. Nous ne voyons ni ne conservons votre numéro ni votre code.
+            </p>
+          </div>
+        ) : (
+          /* Variables FAPSHI_* absentes : le dire vaut mieux qu'un bouton qui
+             échoue. Ne doit jamais s'afficher en production. */
+          <div className="mx-auto mb-8 flex max-w-[1000px] items-start gap-3 border border-gold-line bg-gold-soft px-5 py-4">
+            <ShieldCheck aria-hidden className="mt-[2px] h-5 w-5 shrink-0 text-gold-ink" />
+            <p className="text-[15px] leading-[1.6] text-navy">
+              <strong>L&apos;encaissement en ligne n&apos;est pas encore actif.</strong> Notre
+              équipe vous contacte pour le règlement.
+            </p>
+          </div>
+        )}
 
         {annuel && (
           <p className="mx-auto mb-8 max-w-[1000px] text-[15px] text-slate-mid">
@@ -85,10 +95,13 @@ export default async function Paiement({
           </p>
         )}
 
-        <FormulairePaiement
-          formule={choisie.id as IdFormule}
-          nomFormule={choisie.nom}
-        />
+        {encaissementActif && (
+          <FormulairePaiement
+            formule={choisie.id as IdFormule}
+            periode={annuel ? "annuel" : "mensuel"}
+            montantAffiche={`${prixAffiche} FCFA`}
+          />
+        )}
       </main>
     </div>
   );

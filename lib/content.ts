@@ -187,7 +187,7 @@ export const FAQ = [
   },
   {
     question: "Comment se passe le paiement ?",
-    reponse: "En ligne depuis votre espace client via Tara, ou par virement sur facture.",
+    reponse: "En ligne depuis votre espace client, par MTN Mobile Money ou Orange Money, ou par virement sur facture.",
   },
   {
     question: "Mes données sont-elles protégées ?",

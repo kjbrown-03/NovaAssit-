@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { EmailOtpType } from "@supabase/supabase-js";
+import { cheminInterne } from "@/lib/chemin-interne";
 
 /**
  * Retour des liens envoyés par email : confirmation d'inscription,
@@ -20,13 +21,10 @@ export async function GET(requete: NextRequest) {
   const tokenHash = url.searchParams.get("token_hash");
   const type = url.searchParams.get("type") as EmailOtpType | null;
 
-  const suiteBrute = url.searchParams.get("next");
-  /* Même précaution que sur la page de connexion : uniquement un chemin
-     interne, jamais une URL absolue fournie de l'extérieur. */
-  const destination =
-    suiteBrute && suiteBrute.startsWith("/") && !suiteBrute.startsWith("//")
-      ? suiteBrute
-      : "/espace-client";
+  /* Uniquement un chemin interne — validé par le parseur d'URL, pas par un
+     simple test de préfixe : `/\evil.example` passait ce dernier et devenait
+     `https://evil.example/` à la redirection. Voir `lib/chemin-interne.ts`. */
+  const destination = cheminInterne(url.searchParams.get("next"));
 
   let reponse = NextResponse.redirect(new URL(destination, url.origin));
 

@@ -54,7 +54,7 @@
       "titre": "Stated prices, no surprises",
       "intro": "Three monthly levels of support, with no long-term commitment. Volume and channels can be adjusted at any time.",
       "lePlusChoisi": "Most chosen",
-      "tarifsIndicatifs": "Indicative prices, to be confirmed — online payment via Tara from the client area."
+      "tarifsIndicatifs": "Indicative prices, to be confirmed — online payment by MTN Mobile Money or Orange Money from the client area."
     },
     "confiance": {
       "eyebrow": "Why Nova Assist",
@@ -337,7 +337,7 @@
       },
       {
         "question": "How does payment work?",
-        "reponse": "Online from your client area via Tara, or by bank transfer against an invoice."
+        "reponse": "Online from your client area, by MTN Mobile Money or Orange Money, or by bank transfer against an invoice."
       },
       {
         "question": "Is my data protected?",

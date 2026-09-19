@@ -9,6 +9,9 @@ const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  /* L'en-tête `X-Powered-By: Next.js` annonce la pile à qui cherche une faille
+     connue dessus. Rien ne l'exige, on le retire. */
+  poweredByHeader: false,
   reactStrictMode: true,
   /* Pastille de développement de Next désactivée. Elle n'a jamais existé en
      production ; en développement elle se posait sur le bouton de déconnexion

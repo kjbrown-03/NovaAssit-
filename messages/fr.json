@@ -54,7 +54,7 @@
       "titre": "Des tarifs annoncés, sans surprise",
       "intro": "Trois niveaux d'accompagnement mensuels, sans engagement de longue durée. Volume et canaux ajustables à tout moment.",
       "lePlusChoisi": "Le plus choisi",
-      "tarifsIndicatifs": "Tarifs indicatifs à valider — paiement en ligne par Tara depuis l'espace client."
+      "tarifsIndicatifs": "Tarifs indicatifs à valider — paiement en ligne par MTN Mobile Money ou Orange Money depuis l'espace client."
     },
     "confiance": {
       "eyebrow": "Pourquoi Nova Assist",
@@ -337,7 +337,7 @@
       },
       {
         "question": "Comment se passe le paiement ?",
-        "reponse": "En ligne depuis votre espace client via Tara, ou par virement sur facture."
+        "reponse": "En ligne depuis votre espace client, par MTN Mobile Money ou Orange Money, ou par virement sur facture."
       },
       {
         "question": "Mes données sont-elles protégées ?",

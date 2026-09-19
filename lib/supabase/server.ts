@@ -76,7 +76,7 @@ export function creerClientPublic() {
  * Client d'administration — contourne TOUTES les politiques RLS.
  *
  * Réservé aux traitements serveur qui agissent pour le compte de Nova Assist :
- * retour de paiement Tara, changement de statut d'une demande, back-office.
+ * retour de paiement Fapshi, changement de statut d'une demande, back-office.
  * Ne jamais l'appeler depuis un composant client, ni le dériver d'une donnée
  * fournie par l'utilisateur.
  */
