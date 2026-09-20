@@ -11,7 +11,7 @@ export default function MotDePasseOublie() {
   return (
     <CadreAuth
       titre="Mot de passe oublié"
-      intro="Indiquez l'adresse de votre compte : nous vous envoyons un lien pour en choisir un nouveau."
+      intro="Indiquez l'adresse de votre compte : nous vous envoyons un code à six chiffres, puis vous choisissez votre nouveau mot de passe ici même."
     >
       <FormulaireOubli />
     </CadreAuth>

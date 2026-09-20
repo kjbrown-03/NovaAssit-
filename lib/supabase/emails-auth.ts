@@ -324,10 +324,25 @@ export async function envoyerLienInscription(params: {
   }
 }
 
-/** Envoie le lien de réinitialisation du mot de passe. */
-export async function envoyerLienReinitialisation(params: {
+/**
+ * Envoie un code à six chiffres pour choisir un nouveau mot de passe.
+ *
+ * Un code plutôt qu'un lien : tant que Nova Assist expédie depuis Gmail sans
+ * domaine authentifié, ses messages tombent souvent en indésirables — où Gmail
+ * désactive les liens. Un code se recopie, indésirable ou non.
+ *
+ * `generateLink` produit ce code (`email_otp`) sans rien envoyer : c'est notre
+ * SMTP qui l'expédie. Le client le saisit sur le site, `verifyOtp` ouvre alors
+ * une session de récupération, et le mot de passe se change dans la foulée.
+ * Le code vaut une heure et un seul usage ; Supabase limite les tentatives de
+ * vérification par adresse IP, ce qui rend l'énumération des 10⁶ codes
+ * impraticable dans ce délai.
+ *
+ * Ne dit pas si l'adresse existe : l'appelant répond la même chose dans tous
+ * les cas.
+ */
+export async function envoyerCodeReinitialisation(params: {
   email: string;
-  origine: string;
 }): Promise<ResultatLien> {
   try {
     const supabase = clientAdmin();
@@ -335,31 +350,38 @@ export async function envoyerLienReinitialisation(params: {
     const { data, error } = await supabase.auth.admin.generateLink({
       type: "recovery",
       email: params.email,
-      options: { redirectTo: `${params.origine}/auth/confirm?next=/mot-de-passe-nouveau` },
     });
 
     if (error) return { ok: false, erreur: error.message };
 
-    const lien = lienVersConfirmation(params.origine, data.properties, "/mot-de-passe-nouveau");
-    if (!lien) return { ok: false, erreur: "Lien de réinitialisation introuvable." };
+    const code = data.properties?.email_otp;
+    if (!code) return { ok: false, erreur: "Code de réinitialisation introuvable." };
 
-    const titre = "Réinitialisation de votre mot de passe";
+    const titre = "Votre code de réinitialisation";
     const lignes: [string, string][] = [
       ["Compte", echapperHtml(params.email)],
-      ["Validité", "1 heure"],
+      ["Validité", "1 heure, un seul usage"],
     ];
 
     const envoye = await envoyerNotification({
       destinataire: params.email,
-      sujet: "Nova Assist — réinitialiser votre mot de passe",
-      texte: `${corpsTexte(titre, lignes)}\n\nOuvrez ce lien pour choisir un nouveau mot de passe :\n${lien}\n\nSi vous n'êtes pas à l'origine de cette demande, ignorez ce message.`,
-      html: `${corpsHtml(titre, lignes)}${bouton(lien, "Choisir un nouveau mot de passe")}
+      sujet: `Nova Assist — votre code : ${code}`,
+      texte: `${corpsTexte(titre, lignes)}
+
+Saisissez ce code sur le site pour choisir un nouveau mot de passe :
+
+    ${code}
+
+Si vous n'êtes pas à l'origine de cette demande, ignorez ce message : votre mot de passe reste inchangé.`,
+      html: `${corpsHtml(titre, lignes)}
+        <p style="margin:26px 0;font-family:monospace;font-size:34px;letter-spacing:0.3em;color:#0b1f3a;">${echapperHtml(code)}</p>
+        <p style="font-family:sans-serif;font-size:14px;color:#0b1f3a;">Saisissez ce code sur le site pour choisir un nouveau mot de passe.</p>
         <p style="font-family:sans-serif;font-size:13px;color:#8a8474;">Si vous n'êtes pas à l'origine de cette demande, ignorez ce message : votre mot de passe reste inchangé.</p>`,
     });
 
     return envoye ? { ok: true } : { ok: false, erreur: "L'email n'a pas pu être envoyé." };
   } catch (erreur) {
-    console.error("[auth] réinitialisation :", erreur);
+    console.error("[auth] code de réinitialisation :", erreur);
     return { ok: false, erreur: "Service indisponible." };
   }
 }

@@ -20,9 +20,6 @@ const ROUTES_PROTEGEES = [
      ligne des packages, via API Tara, dès formule choisie et compte client
      créé ». */
   "/paiement",
-  /* Accessible seulement par le lien de réinitialisation, qui ouvre une
-     session en passant par /auth/confirm. */
-  "/mot-de-passe-nouveau",
 ];
 
 /**
@@ -170,7 +167,6 @@ export const config = {
     "/admin/:path*",
     "/devis/:path*",
     "/paiement/:path*",
-    "/mot-de-passe-nouveau/:path*",
     "/connexion",
   ],
 };

@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { cheminInterne } from "@/lib/chemin-interne";
+import { COOKIE_EPHEMERE } from "@/lib/session-navigateur";
 
 /**
  * Retour des liens envoyés par email : confirmation d'inscription,
@@ -27,6 +28,13 @@ export async function GET(requete: NextRequest) {
   const destination = cheminInterne(url.searchParams.get("next"));
 
   let reponse = NextResponse.redirect(new URL(destination, url.origin));
+
+  /* Une connexion précédente sans « se souvenir de moi » laisse un témoin
+     persistant. Le lien ouvre une session neuve : sans effacer ce témoin, le
+     middleware la prendrait pour une session périmée et renverrait à la
+     connexion dès la page suivante — c'est ce qui rendait les liens reçus par
+     email inopérants. */
+  reponse.cookies.delete(COOKIE_EPHEMERE);
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

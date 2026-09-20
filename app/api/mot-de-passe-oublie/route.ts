@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
 
 import { emailConfigure } from "@/lib/email";
-import { urlDuSite } from "@/lib/site-url";
-import { envoyerLienReinitialisation } from "@/lib/supabase/emails-auth";
+import { envoyerCodeReinitialisation } from "@/lib/supabase/emails-auth";
 
 /**
- * Mot de passe oublié — le lien part par notre SMTP, pas par celui de Supabase,
- * dont le quota de deux emails par heure bloquait la fonction dès le troisième
- * essai.
+ * Mot de passe oublié — envoie un code à six chiffres par notre SMTP, pas par
+ * celui de Supabase, dont le quota de deux emails par heure bloquait la
+ * fonction dès le troisième essai.
  *
  * La réponse est toujours la même, que l'adresse existe ou non : répondre
  * différemment reviendrait à confirmer qu'une personne est cliente de Nova
@@ -28,12 +27,11 @@ export async function POST(requete: Request) {
   }
 
   if (!emailConfigure()) {
-    console.error("[mot-de-passe] SMTP non configuré — aucun lien envoyable.");
+    console.error("[mot-de-passe] SMTP non configuré — aucun code envoyable.");
     return NextResponse.json({ erreur: "Service indisponible." }, { status: 503 });
   }
 
-  const origine = urlDuSite(requete);
-  const resultat = await envoyerLienReinitialisation({ email, origine });
+  const resultat = await envoyerCodeReinitialisation({ email });
 
   if (!resultat.ok) {
     console.error("[mot-de-passe] échec :", resultat.erreur, "pour", email);
