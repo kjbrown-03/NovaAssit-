@@ -44,7 +44,9 @@ export function FormulaireOubli() {
   }
 
   return (
-    <form onSubmit={soumettre} className="flex flex-col gap-[18px]">
+    /* POST explicite : avant l'hydratation, une soumission native serait un GET
+       et mettrait l'adresse email dans l'URL. */
+    <form method="post" onSubmit={soumettre} className="flex flex-col gap-[18px]">
       <div className="flex flex-col gap-[7px]">
         <label htmlFor="email-oubli" className="text-[14px] font-semibold text-white">
           Email

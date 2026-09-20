@@ -222,7 +222,15 @@ export function AuthSwitch({
 
       {/* ------------------------------------------------------ formulaires */}
       <div className="na-auth-pile">
+        {/* `method="post"` sur les deux formulaires : sans lui, une soumission
+            faite avant que React ait pris la main (réseau lent, Entrée trop
+            tôt) suit le comportement natif du navigateur — GET —, et l'email
+            et le mot de passe partent dans l'URL, donc dans l'historique, les
+            journaux du serveur et le `Referer`. Avec POST, le pire cas est
+            une requête refusée dont le corps n'est écrit nulle part. */}
         <form
+          method="post"
+          action="/connexion"
           onSubmit={soumettre}
           data-actif={connexion}
           inert={!connexion}
@@ -277,6 +285,8 @@ export function AuthSwitch({
         </form>
 
         <form
+          method="post"
+          action="/connexion"
           onSubmit={soumettre}
           data-actif={!connexion}
           inert={connexion}

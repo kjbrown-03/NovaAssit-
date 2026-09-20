@@ -40,7 +40,9 @@ export function FormulaireNouveauMotDePasse() {
   }
 
   return (
-    <form onSubmit={soumettre} className="flex flex-col gap-[18px]">
+    /* POST explicite : avant l'hydratation, une soumission native serait un GET
+       et mettrait le nouveau mot de passe dans l'URL. */
+    <form method="post" onSubmit={soumettre} className="flex flex-col gap-[18px]">
       <Champ
         id="mdp-nouveau"
         label="Nouveau mot de passe"

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
 import { FormulaireAuth } from "@/components/auth/formulaire-auth";
 import type { AuthMode } from "@/components/ui/auth-switch";
 import { cheminInterne } from "@/lib/chemin-interne";
@@ -16,9 +17,29 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function ConnexionPage({
   searchParams,
 }: {
-  searchParams: Promise<{ mode?: string; suite?: string; erreur?: string; motif?: string }>;
+  searchParams: Promise<{
+    mode?: string;
+    suite?: string;
+    erreur?: string;
+    motif?: string;
+    email?: string;
+    motdepasse?: string;
+  }>;
 }) {
-  const { mode, suite, erreur, motif } = await searchParams;
+  const { mode, suite, erreur, motif, email, motdepasse } = await searchParams;
+
+  /* Des identifiants dans l'URL ne doivent jamais s'afficher, ni rester dans
+     l'historique. Le formulaire soumet en POST, mais un lien forgé ou un
+     ancien favori peut encore les apporter : on renvoie sur l'adresse propre
+     avant de rendre quoi que ce soit. */
+  if (email !== undefined || motdepasse !== undefined) {
+    const propre = new URLSearchParams();
+    if (mode) propre.set("mode", mode);
+    if (suite) propre.set("suite", suite);
+    const requete = propre.toString();
+    redirect(requete ? `/connexion?${requete}` : "/connexion");
+  }
+
   const t = await getTranslations("auth");
 
   /* `/connexion?mode=inscription` ouvre directement le formulaire de création

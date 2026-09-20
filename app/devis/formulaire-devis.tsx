@@ -208,7 +208,10 @@ export function FormulaireDevis({ profil }: { profil?: ProfilConnu | null }) {
 
       <div className="mx-auto grid max-w-[1180px] items-start gap-8 px-5 pb-16 lg:grid-cols-[1.5fr_0.85fr] lg:gap-11 lg:px-14 lg:pb-[60px]">
         {/* ------------------------------------------------------------ colonne */}
+        {/* POST explicite : avant l'hydratation, une soumission native serait
+            un GET et mettrait les coordonnées du prospect dans l'URL. */}
         <form
+          method="post"
           onSubmit={(e) => {
             e.preventDefault();
             if (etape < 3) setEtape((n) => n + 1);
