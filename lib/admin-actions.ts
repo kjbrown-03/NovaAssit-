@@ -31,16 +31,6 @@ function texte(donnees: FormData, champ: string): string {
 const MONTANT_MIN = 1000;
 const MONTANT_MAX = 100_000_000;
 
-/* TEMPORAIRE — test du paiement réel Fapshi (20 septembre 2026).
-   Essentiel descend au minimum Fapshi (100 FCFA) le temps d'un vrai paiement.
-   À RETIRER une fois le test fait : remettre `MONTANT_MIN` pour toutes les
-   formules et supprimer cette constante. */
-const MONTANT_MIN_ESSENTIEL_TEST = 100;
-
-function montantMinimum(formule: string): number {
-  return formule === "essentiel" ? MONTANT_MIN_ESSENTIEL_TEST : MONTANT_MIN;
-}
-
 export async function enregistrerTarifs(
   _precedent: EtatAction,
   donnees: FormData,
@@ -59,11 +49,10 @@ export async function enregistrerTarifs(
        et l'exiger sans espaces serait une chausse-trape. */
     const montant = Number(brut.replace(/[^\d]/g, ""));
 
-    const minimum = montantMinimum(formule);
-    if (!Number.isFinite(montant) || montant < minimum || montant > MONTANT_MAX) {
+    if (!Number.isFinite(montant) || montant < MONTANT_MIN || montant > MONTANT_MAX) {
       return {
         ok: false,
-        message: `Montant invalide pour ${formule} : attendu entre ${minimum} et ${MONTANT_MAX} FCFA.`,
+        message: `Montant invalide pour ${formule} : attendu entre ${MONTANT_MIN} et ${MONTANT_MAX} FCFA.`,
       };
     }
 
